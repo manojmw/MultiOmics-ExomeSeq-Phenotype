@@ -35,6 +35,7 @@ try:
         ###Matching and retrieving the Ensemble transcript and Genes
         ENS_match1 = re.search(r'^DR\s+Ensembl;\s+(ENST\d+);\sENSP\d+;\s+(ENSG\d+)\.', line)
         ENS_exists1 = re.search(r'^DR\s+Ensembl;\s+ENST\d+', line) ##If any DR line with ENSTs/ENSGs of the above pattern is missed, we will use this to break the loop
+
         ###Some records contain only ENSGs with the below regex pattern
         ####We will Match and retrieve lines that contain only Ensembl Genes
         ENS_match2 = re.search(r'^DR\s+Ensembl;\s+(ENSG.*)\.', line)
