@@ -67,6 +67,7 @@ try:
         elif GeneID_exists:
             print("###Oops....Missed the GeneIDs", GeneID_exists)
             break
+
         ###Processing the matched records of the protein
         elif (line == '//'):
             try:
