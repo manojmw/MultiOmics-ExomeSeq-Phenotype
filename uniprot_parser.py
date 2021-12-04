@@ -13,7 +13,7 @@ try:
         csv_writer.writerow(header)
 
     ###Opening the file in the read mode
-    uniprotfile = open('/Users/macbookpro/Desktop/MBHE/Internship/Data/uniprot_50000.dat', 'r')
+    uniprotfile = open('/path-to-the-file/', 'r')
 
     ###Initializing variables
     ACs = ''
