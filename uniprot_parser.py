@@ -60,7 +60,7 @@ try:
             if ENSG2 not in ENSGs:
                 ENSGs.append(ENSG2)
         elif ENS_exists1 or ENS_exists2:
-            print("###Oops....Failed to get all the Ensembl Identifiers", ENS_exists)
+            print("###Oops....Failed to get all the Ensembl Identifiers", ENS_exists1, ENS_exists2)
             break
         elif GeneID_match:
             GeneIDs.append(GeneID_match.group(1))
