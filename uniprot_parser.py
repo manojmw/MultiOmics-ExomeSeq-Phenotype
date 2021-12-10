@@ -9,7 +9,7 @@ outputFile2 = open("uniprot_results_secondary.tsv", "w")
 try:
     with open("uniprot_results.tsv", 'w', newline = '') as tsv_out:
         csv_writer = csv.writer(tsv_out, delimiter = '\t')
-        header = ['AC', 'ENSG', 'GeneID']
+        header = ['AC', 'Organism', 'ENST', 'ENSG', 'GeneID']
         csv_writer.writerow(header)
 
     ###Opening the file in the read mode
@@ -72,11 +72,9 @@ try:
         elif (line == '//'):
             try:
                 primary_AC = re.search(r'^(^;\s)+').group(1)
-                print(primary_AC)
             except:
                 print('###Oops...Failed to get Primary Accession')
                 break
-
 
 
 except IOError as e:
