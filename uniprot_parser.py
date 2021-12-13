@@ -90,7 +90,6 @@ try:
                 ENSGs_split = [i.split(', |; ') for i in ENSGs]
                 primary_ENSG = str(ENSGs_split[:1])
                 alternate_ENSG = str(ENSGs_split[1:-1])
-                print(primary_ENSG)
                 ENSTs = []
                 ENSGs = []
             except:
