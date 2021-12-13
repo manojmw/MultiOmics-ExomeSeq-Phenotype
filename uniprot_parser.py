@@ -84,14 +84,23 @@ try:
                 print('###Oops...Failed to get the Organism name')
                 break
             try:
-                ENSTs_split = ENSTs.split(',')
+                ENSTs_split = [i.split(', |; ') for i in ENSTs]
                 primary_ENST = str(ENSTs_split[:1])
                 alternate_ENST = str(ENSTs_split[1:-1])
-                ENSGs_split = ENSGs.split(',')
+                ENSGs_split = [i.split(', |; ') for i in ENSGs]
                 primary_ENSG = str(ENSGs_split[:1])
-                alternate_ENST = str(ENSGs_split[1:-1])
+                alternate_ENSG = str(ENSGs_split[1:-1])
+                print(primary_ENSG)
                 ENSTs = []
                 ENSGs = []
+            except:
+                print('###Oops...Failed to get Ensembl Identifiers')
+                break
+            try:
+                GeneIDs_split = [i.split(', |; ') for i in GeneIDs]
+                primary_GeneIDs = str(GeneIDs_split[:1])
+                GeneIDs = []
+                continue
             except:
                 print('###Oops...Failed to get Ensembl Identifiers')
                 break
