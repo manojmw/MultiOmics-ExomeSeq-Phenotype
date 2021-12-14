@@ -3,7 +3,7 @@
 import re
 import csv
 
-###Creating output files and opening it for reading
+###Creating output files and opening it for writing
 outputFile1 = open("uniprot_main.tsv", "w")
 outputFile2 = open("uniprot_secondary.tsv", "w")
 
