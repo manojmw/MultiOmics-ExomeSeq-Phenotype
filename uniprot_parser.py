@@ -108,7 +108,9 @@ try:
                 GeneIDs = []
                 continue
 
+    ###Closing the written files
+    tsv1_out.close()
+    tsv2_out.close()
+
 except IOError as e:
     print("Error: Unable to open the file for writing")
-tsv1_out.close() ###Closing the written file
-tsv2_out.close()
