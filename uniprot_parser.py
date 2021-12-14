@@ -19,7 +19,7 @@ try:
 
     ###Initializing variables
     ACs = ''
-    OS = ''
+    OX = 0
     ENSTs = []
     ENSGs = []
     GeneIDs = []
@@ -28,13 +28,11 @@ try:
 
     ### Accession Numbers (AC), strip last ';'
     re_AC = re.compile('^AC\s+(\S.*);$')
-    ###Compliling Regex for the Organism from the OS line
-    re_OS = re.compile('^OS\s+(.*)')
+    ###Organism from the OX line : some lines violate the spec, still grab TAXIDs
+    ### even if crap comes after the taxid eg NCBI_TaxID=32201 {ECO:0000312|EMBL:ABW86978.1};
+    re_OX = re.compile('^OX\s+NCBI_TaxID=(\d+)[; ]')
     ###DR -> Ensembl transcripts and Genes
-    re_ENS1 = re.compile('^DR\s+Ensembl;\s+(ENST\d+);\sENSP\d+;\s+(ENSG\d+)\.')
-    ###Some records contain only ENSGs with the below regex pattern
-    ####We will Compile Regex for the lines that contain only Ensembl Genes from the DR line
-    re_ENS2 = re.compile('^DR\s+Ensembl;\s+(ENSG.*)\.')
+    re_ENS = re.compile('^DR\s+Ensembl; (\w+); \w+; (\w+)\.')
     ###Compliling Regex for the the Gene IDs from the DR line
     re_GID = re.compile('^DR\s+GeneID;\s+(\d+);')
 
@@ -50,20 +48,19 @@ try:
         elif (re.match(r'^AC\s', line)): ##If any AC line is missed, we will use this to break the loop
             print("###Oops....Missed the AC line %s\n", line)
             break
-        elif (re_OS.match(line)):
-            OS += re_OS.match(line).group(1) + '; '
-        elif (re.match(r'^OS\s+', line)):
-            print("###Oops....Missed the OS line %s\n", line)
+        elif (re_OX.match(line)):
+            if (OX != 0):
+                print("Error: Several OX lines for protein\t", ACs)
+                break
+            OX = re_OX.match(line).group(1)
+        elif (re.match(r'^OX\s', line)):
+            print("Error: Missed the OX line %s\n", line)
             break
-        elif (re_ENS1.match(line)):
-            ENSTs.append(re_ENS1.match(line).group(1))
-            ENSGs.append(re_ENS1.match(line).group(2))
-        elif (re_ENS2.match(line)):
-            ENSG2 = re_ENS2.match(line).group(1)
-            if ENSG2 not in ENSGs:
-                ENSGs.append(ENSG2)
-        elif (re.match(r'^DR\s+Ensembl;\s+(ENSG.*)\.', line) or re.match(r'^DR\s+Ensembl;\sENSG.*', line)): ##If any DR line with ENSTs/ENSGs is missed, we will use this to break the loop
-            print("###Oops....Failed to get all the Ensembl Identifiers %s\n", ENS_exists1, ENS_exists2)
+        elif (re_ENS.match(line)):
+            ENSTs.append(re_ENS.match(line).group(1))
+            ENSGs.append(re_ENS.match(line).group(2))
+        elif (re.match(r'^DR\s+Ensembl;', line)): ##If we missed DR->Ensembl lines: die
+            print("###Oops....Failed to get all the Ensembl Identifiers\n", ACs, line)
             break
         elif (re_GID.match(line)):
             GeneIDs.append(re_GID.match(line).group(1))
@@ -72,43 +69,42 @@ try:
             break
         ###Processing the matched records of the protein
         elif (line == '//'):
-            try:
-                ACs_split = ACs.split('; ')
-                primary_AC = ACs_split[0]
-                secondary_ACs = ACs_split[1:]
-                # print to files as needed
-                ACs = ''
-            except:
-                print('###Oops...Failed to get Accession IDs')
-                break
-            try:
-                OS_split = OS.split(';')
-                Organism = str(OS_split[:1])
-                OS = ''
-            except:
-                print('###Oops...Failed to get the Organism name')
-                break
-            try:
-                ENSTs_split = [i.split(', |; ') for i in ENSTs]
-                primary_ENST = str(ENSTs_split[:1])
-                alternate_ENST = str(ENSTs_split[1:-1])
-                ENSGs_split = [i.split(', |; ') for i in ENSGs]
-                primary_ENSG = str(ENSGs_split[:1])
-                alternate_ENSG = str(ENSGs_split[1:-1])
-                ENSTs = []
-                ENSGs = []
-            except:
-                print('###Oops...Failed to get Ensembl Identifiers')
-                break
-            try:
-                GeneIDs_split = [i.split(', |; ') for i in GeneIDs]
-                primary_GeneIDs = str(GeneIDs_split[:1])
-                GeneIDs = []
-                continue
-            except:
-                print('###Oops...Failed to get Ensembl Identifiers')
-                break
-
+            # ignore entry if bad species
+            if ((OX == 9606) or (OX == 9999)):
+                try:
+                    ACs_split = ACs.split('; ')
+                    primary_AC = ACs_split[0]
+                    secondary_ACs = ';'.join(ACs_split[1:])
+                    # print("primary:", primary_AC)
+                    #  print("secondary:", secondary_ACs)
+                    # print to files as needed
+                except:
+                    print('###Oops...Failed to get Accession IDs')
+                    break
+                try:
+                    # print OX info
+                    x=1
+                except:
+                    print('###Oops...Failed to get the Organism name')
+                    break
+                try:
+                    print(ENSGs)
+                except:
+                    print('###Oops...Failed to get Ensembl Identifiers')
+                    break
+                try:
+                    GeneIDs_split = [i.split(', |; ') for i in GeneIDs]
+                    primary_GeneIDs = str(GeneIDs_split[:1])
+                    continue
+                except:
+                    print('###Oops...Failed to get Ensembl Identifiers')
+                    break
+            # in any case, reset all accumulators
+            ACs = ''
+            OX = 0
+            ENSTs = []
+            ENSGs = []
+            GeneIDs = []
 
 
 
