@@ -17,7 +17,6 @@ try:
         csv_writer2.writerow(header2)
 
         ###Opening the file in the read mode
-        #uniprotfile = open('/Users/macbookpro/Desktop/MBHE/Internship/Data/uniprot_50000.dat', 'r')
         uniprotfile = open(input("Please enter the name of the UniProt file: "), 'r')
 
         ###Initializing variables/accumulators
