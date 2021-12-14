@@ -58,8 +58,8 @@ try:
             print("Error: Missed the OX line %s\n", line) ##If any OX line is missed -> break the loop
             break
         elif (re_ENS.match(line)):
-            ENSTs += re_ENS.match(line).group(1)
-            ENSGs += re_ENS.match(line).group(2)
+            ENSTs.append(re_ENS.match(line).group(1))
+            ENSGs.append(re_ENS.match(line).group(2))
         elif (re.match(r'^DR\s+Ensembl;', line)): ##If any DR line wtih Ensembl IDs is missed -> break the loop
             print("Error: Failed to get all the Ensembl Identifiers\n", ACs, line)
             break
@@ -80,27 +80,22 @@ try:
                     print('Error: Failed to store Accession IDs for the protein: \t', ACs)
                     break
                 try:
-                    ##Processing ENSTs
+                    ##Processing ENSTs and ENSGs
                     ENSTs = ','.join(ENSTs)
-                    print(ENSTs)
-                    primary_ENST = ENSTs[0] ##Grab only the first ENST
-                    alternate_ENST = ENSTs[1:] ##Grab the remaining ENSTs
-                    ##Processing ENSGs
-                    primary_ENSG = ENSGs[0] ##Grab only the first ENSG
-                    alternate_ENSG = ENSGs[1:]
+                    ENSGs = ','.join(ENSGs)
                 except:
                     print('Error: Failed to store Ensembl Identifiers for the protein: \t', ACs)
                     break
                 try:
-                    GeneIDs_split = [i.split(', |; ') for i in GeneIDs]
-                    primary_GeneIDs = str(GeneIDs_split[:1])
+                    GeneIDs = ','.join(GeneIDs)
+                    print(GeneIDs)
                 except:
                     print('Error: Failed to store GeneID for the protein: \t', ACs)
                     break
                 ###Writing to the file
-                #newline1 = [primary_AC, TaxID, primary_ENST, primary_ENSG, primary_GeneID]
-                #newline2 = [primary_AC, secondary_ACs, alternate_ENST, alternate_ENSG, alternate_GeneID]
-                #csv_writer.writerow(newline1)
+                newline1 = [primary_AC, TaxID, ENSTs, ENSGs, GeneIDs]
+                newline2 = [primary_AC, secondary_ACs]
+                csv_writer.writerow(newline1)
                 #csv_writer.writerow(newline2)
             #Reset all accumulators and move on to the next record
             ACs = ''
@@ -109,8 +104,6 @@ try:
             ENSGs = []
             GeneIDs = []
             continue
-
-
 
 except IOError as e:
     print("Error: Unable to open the file for writing")
