@@ -14,7 +14,8 @@ try:
         csv_writer.writerow(header)
 
     ###Opening the file in the read mode
-    uniprotfile = open('/Users/macbookpro/Desktop/MBHE/Internship/Data/uniprot_50000.dat', 'r')
+    #uniprotfile = open('/Users/macbookpro/Desktop/MBHE/Internship/Data/uniprot_50000.dat', 'r')
+    uniprotfile = open('sample_uniprotfile.dat', 'r')
 
     ###Initializing variables
     ACs = ''
@@ -25,11 +26,11 @@ try:
 
     ###Compiling all the regular expressions###
 
-    ###Compiling Regex for the Accession Number (AC) from the AC line
-    re_AC = re.compile('^AC\s+(\S.*)')
+    ### Accession Numbers (AC), strip last ';'
+    re_AC = re.compile('^AC\s+(\S.*);$')
     ###Compliling Regex for the Organism from the OS line
     re_OS = re.compile('^OS\s+(.*)')
-    ###Compliling Regex for the the Ensemble transcripts and Genes from the DR line
+    ###DR -> Ensembl transcripts and Genes
     re_ENS1 = re.compile('^DR\s+Ensembl;\s+(ENST\d+);\sENSP\d+;\s+(ENSG\d+)\.')
     ###Some records contain only ENSGs with the below regex pattern
     ####We will Compile Regex for the lines that contain only Ensembl Genes from the DR line
@@ -42,8 +43,11 @@ try:
 
         ###Matching and retrieving the records
         if (re_AC.match(line)):
-            ACs += re_AC.match(line).group(1) + ' '
-        elif (re.match(r'^AC\s+', line)): ##If any AC line is missed, we will use this to break the loop
+            if (ACs != ''):
+                # add trailing separator to previous entries
+                ACs += '; '
+            ACs += re_AC.match(line).group(1)
+        elif (re.match(r'^AC\s', line)): ##If any AC line is missed, we will use this to break the loop
             print("###Oops....Missed the AC line %s\n", line)
             break
         elif (re_OS.match(line)):
@@ -69,9 +73,10 @@ try:
         ###Processing the matched records of the protein
         elif (line == '//'):
             try:
-                AC_split = ACs.split('; ')
-                primary_AC = str(AC_split[:1])
-                secondary_AC = str(AC_split[1:-1])
+                ACs_split = ACs.split('; ')
+                primary_AC = ACs_split[0]
+                secondary_ACs = ACs_split[1:]
+                # print to files as needed
                 ACs = ''
             except:
                 print('###Oops...Failed to get Accession IDs')
