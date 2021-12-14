@@ -4,110 +4,114 @@ import re
 import csv
 
 ###Creating output file and opening it for reading ----- ****To be completed later**** --------
-outputFile1 = open("uniprot_results_main.tsv", "w")
-outputFile2 = open("uniprot_results_secondary.tsv", "w")
+outputFile1 = open("uniprot_main.tsv", "w")
+outputFile2 = open("uniprot_secondary.tsv", "w")
 
 try:
-    with open("uniprot_results.tsv", 'w', newline = '') as tsv_out:
-        csv_writer = csv.writer(tsv_out, delimiter = '\t')
-        header = ['AC', 'Organism', 'ENST', 'ENSG', 'GeneID']
+    with open("uniprot_main.tsv", 'w', newline = '') as tsv1_out:
+        csv_writer = csv.writer(tsv1_out, delimiter = '\t')
+        header = ['Primary_AC', 'TaxID', 'ENST', 'ENSG', 'GeneID']
         csv_writer.writerow(header)
 
     ###Opening the file in the read mode
     #uniprotfile = open('/Users/macbookpro/Desktop/MBHE/Internship/Data/uniprot_50000.dat', 'r')
-    uniprotfile = open('sample_uniprotfile.dat', 'r')
+    uniprotfile = open(input("Please enter the name of the UniProt file: "), 'r')
 
-    ###Initializing variables
+    ###Initializing variables/accumulators
     ACs = ''
-    OX = 0
-    ENSTs = []
-    ENSGs = []
+    TaxID = 0
+    ENSTs = ''
+    ENSGs = ''
     GeneIDs = []
 
     ###Compiling all the regular expressions###
 
-    ### Accession Numbers (AC), strip last ';'
+    ###Accession Numbers (AC), strip trailing ';'
     re_AC = re.compile('^AC\s+(\S.*);$')
-    ###Organism from the OX line : some lines violate the spec, still grab TAXIDs
-    ### even if crap comes after the taxid eg NCBI_TaxID=32201 {ECO:0000312|EMBL:ABW86978.1};
-    re_OX = re.compile('^OX\s+NCBI_TaxID=(\d+)[; ]')
-    ###DR -> Ensembl transcripts and Genes
+    ###Organism (TaxID) from the OX line; some lines violate the uniprot spec
+    ###Grab only TaxID even if additional info comes after the TaxID
+    ###eg NCBI_TaxID=32201 {ECO:0000312|EMBL:ABW86978.1};
+    re_TaxID = re.compile('^OX\s+NCBI_TaxID=(\d+)[; ]')
+    ###Ensembl transcripts and Genes from the DR line
     re_ENS = re.compile('^DR\s+Ensembl; (\w+); \w+; (\w+)\.')
-    ###Compliling Regex for the the Gene IDs from the DR line
+    ###GeneIDs from the DR line
     re_GID = re.compile('^DR\s+GeneID;\s+(\d+);')
 
     for line in uniprotfile:
-        line = line.rstrip('\r\n') ##removing new lines and carriage returns
+        line = line.rstrip('\r\n') ##removing trailing new lines and carriage returns
 
         ###Matching and retrieving the records
         if (re_AC.match(line)):
             if (ACs != ''):
-                # add trailing separator to previous entries
+                #Add trailing separator to the previous entries - distingushes each AC
                 ACs += '; '
             ACs += re_AC.match(line).group(1)
-        elif (re.match(r'^AC\s', line)): ##If any AC line is missed, we will use this to break the loop
-            print("###Oops....Missed the AC line %s\n", line)
+        elif (re.match(r'^AC\s', line)): ##If any AC line is missed -> break the loop
+            print("Error: Missed the AC line %s\n", line)
             break
-        elif (re_OX.match(line)):
-            if (OX != 0):
-                print("Error: Several OX lines for protein\t", ACs)
+        elif (re_TaxID.match(line)):
+            if (TaxID != 0):
+                print("Error: Several OX lines for the protein: \t", ACs)
                 break
-            OX = re_OX.match(line).group(1)
+            TaxID = re_TaxID.match(line).group(1)
         elif (re.match(r'^OX\s', line)):
-            print("Error: Missed the OX line %s\n", line)
+            print("Error: Missed the OX line %s\n", line) ##If any OX line is missed -> break the loop
             break
         elif (re_ENS.match(line)):
-            ENSTs.append(re_ENS.match(line).group(1))
-            ENSGs.append(re_ENS.match(line).group(2))
-        elif (re.match(r'^DR\s+Ensembl;', line)): ##If we missed DR->Ensembl lines: die
-            print("###Oops....Failed to get all the Ensembl Identifiers\n", ACs, line)
+            ENSTs += re_ENS.match(line).group(1)
+            ENSGs += re_ENS.match(line).group(2)
+        elif (re.match(r'^DR\s+Ensembl;', line)): ##If any DR line wtih Ensembl IDs is missed -> break the loop
+            print("Error: Failed to get all the Ensembl Identifiers\n", ACs, line)
             break
         elif (re_GID.match(line)):
             GeneIDs.append(re_GID.match(line).group(1))
-        elif (re.match(r'^DR\s+GeneID.*', line)): ##If any DR line with GeneIDs is missed, we will use this to break the loop
-            print("###Oops....Missed the GeneIDs %s\n", GeneID_exists)
+        elif (re.match(r'^DR\s+GeneID.*', line)): ##If any DR line wtih GeneIDs is missed -> break the loop
+            print("Error: Missed the GeneIDs \n", ACs, line)
             break
         ###Processing the matched records of the protein
         elif (line == '//'):
             # ignore entry if bad species
-            if ((OX == 9606) or (OX == 9999)):
+            if ((TaxID == '9606') or (TaxID == '10090')):
                 try:
                     ACs_split = ACs.split('; ')
-                    primary_AC = ACs_split[0]
-                    secondary_ACs = ';'.join(ACs_split[1:])
-                    # print("primary:", primary_AC)
-                    #  print("secondary:", secondary_ACs)
-                    # print to files as needed
+                    primary_AC = ACs_split[0] ##Grab only the first AC
+                    secondary_ACs = ';'.join(ACs_split[1:]) ##Grab the remaining ACs
                 except:
-                    print('###Oops...Failed to get Accession IDs')
+                    print('Error: Failed to store Accession IDs for the protein: \t', ACs)
                     break
                 try:
-                    # print OX info
-                    x=1
+                    ##Processing ENSTs
+                    ENSTs = ','.join(ENSTs)
+                    print(ENSTs)
+                    primary_ENST = ENSTs[0] ##Grab only the first ENST
+                    alternate_ENST = ENSTs[1:] ##Grab the remaining ENSTs
+                    ##Processing ENSGs
+                    primary_ENSG = ENSGs[0] ##Grab only the first ENSG
+                    alternate_ENSG = ENSGs[1:]
                 except:
-                    print('###Oops...Failed to get the Organism name')
-                    break
-                try:
-                    print(ENSGs)
-                except:
-                    print('###Oops...Failed to get Ensembl Identifiers')
+                    print('Error: Failed to store Ensembl Identifiers for the protein: \t', ACs)
                     break
                 try:
                     GeneIDs_split = [i.split(', |; ') for i in GeneIDs]
                     primary_GeneIDs = str(GeneIDs_split[:1])
-                    continue
                 except:
-                    print('###Oops...Failed to get Ensembl Identifiers')
+                    print('Error: Failed to store GeneID for the protein: \t', ACs)
                     break
-            # in any case, reset all accumulators
+                ###Writing to the file
+                #newline1 = [primary_AC, TaxID, primary_ENST, primary_ENSG, primary_GeneID]
+                #newline2 = [primary_AC, secondary_ACs, alternate_ENST, alternate_ENSG, alternate_GeneID]
+                #csv_writer.writerow(newline1)
+                #csv_writer.writerow(newline2)
+            #Reset all accumulators and move on to the next record
             ACs = ''
-            OX = 0
+            TaxID = 0
             ENSTs = []
             ENSGs = []
             GeneIDs = []
+            continue
 
 
 
 except IOError as e:
-    print("###Unable to open the file for writing###")
-tsv_out.close() ###Closing the written file
+    print("Error: Unable to open the file for writing")
+tsv1_out.close() ###Closing the written file
