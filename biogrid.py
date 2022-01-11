@@ -15,6 +15,10 @@ try:
         ###Opening the file in the read mode
         biogridfile = open(input("Please enter the name of the Biogrid interaction file: "), 'r')
 
+        for line in biogridfile:
+            line = line.rstrip('\n\r') ##removing trailing new lines and carriage returns
+            line = line.split()
+            print(line)
 
 
 
@@ -25,10 +29,8 @@ try:
 
 
 
-
-        ###Closing the written files
-        tsv1_out.close()
-        tsv2_out.close()
+    ###Closing the written files
+    tsv_out.close()
 
 except IOError as e:
     print("Error: Unable to open the file for writing")
