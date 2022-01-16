@@ -3,18 +3,17 @@
 import re
 import csv
 
-###Creating output files and opening it for writing
-outputFile1 = open("uniprot_main.tsv", "w")
-outputFile2 = open("uniprot_secondary.tsv", "w")
-
 try:
-    with open("uniprot_main.tsv", 'w', newline = '') as tsv1_out, open("uniprot_secondary.tsv", 'w', newline = '') as tsv2_out:
+    with open("uniprot_main.tsv", 'w', newline = '') as tsv1_out, open("uniprot_secondary.tsv", 'w', newline = '') as tsv2_out, open("secondary_GeneIDs.tsv", 'w', newline = '') as tsv3_out:
         csv_writer1 = csv.writer(tsv1_out, delimiter = '\t')
         csv_writer2 = csv.writer(tsv2_out, delimiter = '\t')
+        csv_writer3 = csv.writer(tsv3_out, delimiter = '\t')
         header1 = ['Primary_AC', 'TaxID', 'ENST', 'ENSG', 'GeneID']
         header2 = ['Primary_AC', 'Secondary_ACs']
+        header3 = ['Primary_AC', 'Secondary_GeneID']
         csv_writer1.writerow(header1)
         csv_writer2.writerow(header2)
+        csv_writer3.writerow(header3)
 
         ###Opening the file in the read mode
         uniprotfile = open(input("Please enter the name of the UniProt file: "), 'r')
@@ -24,7 +23,7 @@ try:
         TaxID = 0
         ENSTs = ''
         ENSGs = ''
-        GeneIDs = []
+        GeneIDs = ''
 
         ###Compiling all the regular expressions###
 
@@ -46,7 +45,7 @@ try:
             if (re_AC.match(line)):
                 if (ACs != ''):
                     #Add trailing separator to the previous entries - distingushes each AC
-                    ACs += ', '
+                    ACs += '; '
                 ACs += re_AC.match(line).group(1)
             elif (re.match(r'^AC\s', line)): ##If any AC line is missed -> break the loop
                 print("Error: Missed the AC line %s\n", line)
@@ -60,24 +59,30 @@ try:
                 print("Error: Missed the OX line %s\n", line) ##If any OX line is missed -> break the loop
                 break
             elif (re_ENS.match(line)):
-                ENSTs.append(re_ENS.match(line).group(1))
-                ENSGs.append(re_ENS.match(line).group(2))
+                ENS_match = re_ENS.match(line)
+                ENSTs.append(ENS_match.group(1))
+                ENSG = ENS_match.group(2)
+                if ENSG not in ENSGs:
+                    ENSGs.append(ENSG)
             elif (re.match(r'^DR\s+Ensembl;', line)): ##If any DR line wtih Ensembl IDs is missed -> break the loop
                 print("Error: Failed to get all the Ensembl Identifiers\n", ACs, line)
                 break
             elif (re_GID.match(line)):
-                GeneIDs.append(re_GID.match(line).group(1))
+                if (GeneIDs != ''):
+                    #Add trailing separator to the previous entries
+                    GeneIDs += '; '
+                GeneIDs += re_GID.match(line).group(1)
             elif (re.match(r'^DR\s+GeneID.*', line)): ##If any DR line wtih GeneIDs is missed -> break the loop
                 print("Error: Missed the GeneIDs \n", ACs, line)
                 break
             ###Processing the matched records of the protein
             elif (line == '//'):
-                # ignore entry if bad species
+                # ignore entry if bad species; Human = 9606, Mouse = 10090
                 if ((TaxID == '9606') or (TaxID == '10090')):
                     try:
                         ACs_split = ACs.split('; ')
                         primary_AC = ACs_split[0] ##Grab only the first AC
-                        secondary_ACs = ';'.join(ACs_split[1:]) ##Grab the remaining ACs
+                        secondary_ACs = ACs_split[1:] ##Grab the remaining ACs
                     except:
                         print('Error: Failed to store Accession IDs for the protein: \t', ACs)
                         break
@@ -87,18 +92,29 @@ try:
                         ENSGs = ','.join(ENSGs)
                     except:
                         print('Error: Failed to store Ensembl Identifiers for the protein: \t', ACs)
-                        break
+                        pass
                     try:
-                        GeneIDs = ','.join(GeneIDs)
+                        GeneIDs_split = GeneIDs.split('; ')
+                        primary_GeneID = GeneID_split[0] ##Grab only the first AC
+                        secondary_GeneIDs = GeneID_split[1:]
+                        #primary_GeneID = GeneIDs[0] ##Grab only the first GeneID (when multiple GeneIDs exist)
+                        #secondary_GeneIDs = GeneIDs[1:]
                     except:
                         print('Error: Failed to store GeneID for the protein: \t', ACs)
-                        break
+                        pass
+
                     ###Writing to the file
                     newline1 = [primary_AC, TaxID, ENSTs, ENSGs, GeneIDs]
-                    newline2 = [primary_AC, secondary_ACs]
                     csv_writer1.writerow(newline1)
-                    csv_writer2.writerow(newline2)
-                    #csv_writer.writerow(newline2)
+
+                    for secondary_AC in secondary_ACs:
+                        newline2 = [primary_AC, secondary_AC]
+                        csv_writer2.writerow(newline2)
+
+                    for secondary_GeneID in secondary_GeneIDs:
+                        newline3 = [primary_AC, secondary_GeneID]
+                        csv_writer3.writerow(newline3)
+
                 #Reset all accumulators and move on to the next record
                 ACs = ''
                 TaxID = 0
@@ -107,9 +123,10 @@ try:
                 GeneIDs = []
                 continue
 
-    ###Closing the written files
+    ###Closing the files
     tsv1_out.close()
     tsv2_out.close()
+    tsv3_out.close()
 
 except IOError as e:
     print("Error: Unable to open the file for writing")
