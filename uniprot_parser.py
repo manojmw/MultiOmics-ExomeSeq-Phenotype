@@ -93,8 +93,8 @@ try:
 
 
                     ###Writing to the file
-                    primary_line = [primary_AC, TaxID, ENSTs, ENSGs]
-                    csv_writer1.writerow(newline1)
+                    primaryfile_line = [primary_AC, TaxID, ENSTs, ENSGs]
+                    csv_writer1.writerow(primaryfile_line)
 
                     for secondary_AC in secondary_ACs:
                         secondaryAC_line = [primary_AC, secondary_AC]
