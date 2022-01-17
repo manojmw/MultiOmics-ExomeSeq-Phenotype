@@ -92,15 +92,6 @@ try:
                     break                
 
 
-            #try:
-            #    Protein_A = re.match('uniprot/swissprot:([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})', line[2]).group(1)
-
-            #except:
-            #    print("Failed to retrieve Accession ID for Protein_A")
-            #    break
-
-
-
 
 
 
