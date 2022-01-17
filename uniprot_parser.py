@@ -5,7 +5,7 @@ import csv
 import sys
 
 try:
-    with open("uniprot_main.tsv", 'w', newline = '') as tsv1_out, open("uniprot_secondary.tsv", 'w', newline = '') as tsv2_out, open("secondary_GeneIDs.tsv", 'w', newline = '') as tsv3_out:
+    with open("uniprot_main.tsv", 'w', newline = '') as tsv1_out, open("uniprot_secondary.tsv", 'w', newline = '') as tsv2_out, open("GeneIDs.tsv", 'w', newline = '') as tsv3_out:
         csv_writer1 = csv.writer(tsv1_out, delimiter = '\t')
         csv_writer2 = csv.writer(tsv2_out, delimiter = '\t')
         csv_writer3 = csv.writer(tsv3_out, delimiter = '\t')
