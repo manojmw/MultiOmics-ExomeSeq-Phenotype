@@ -47,11 +47,11 @@ try:
             (key,value) = (GeneID_fields[1], GeneID_fields[0]) ##Key -> GeneID
             GeneID_dict[key] = value
 
-        ###User input - Protein-protein Interaction file
-        biogridfile = open(input("Please enter the name of the interaction file: "))
+        ###User input -> Protein-protein Interaction file
+        interaction_file = open(input("Please enter the name of the interaction file: "))
 
         ###Skip header
-        biogridfile.readline()
+        interaction_file.readline()
 
         ###Initializing variables/accumulators
         Prots = ['','']
@@ -67,7 +67,7 @@ try:
         re_uniprot = re.compile('^uniprot(kb|/swiss-prot):([A-Z0-9]+)$')
         re_uniprot_missed = re.compile('^uniprot')
 
-        for line in biogridfile:
+        for line in interaction_file:
             line = line.rstrip('\n')
             line_fields = line.split('\t')
 
@@ -75,11 +75,23 @@ try:
                 if (re_uniprot.match(line_fields[protindex])):
                     ID = re_uniprot.match(line_fields[protindex]).group(2)
                     ##Check if it exists in the dictionary
-                    #if (primary_ACs{ID_A}):
-                        #Prots[protindex] = ID_A
+                    if ID in Primary_AC_dict:
+                        Prots[protindex] = ID
                 elif (re_uniprot_missed.match(line_fields[protindex])):
                     print("ID is a uniprot Accession but failed to grab it", line)
                     break
+                elif (Prots[0] == '' or Prots[1] == ''): ###If the protein is not found in the Primary_AC_dict
+                    for protindex in [2,3,4,5]:
+                        if (re_uniprot.match(line_fields[protindex])):
+                            ID = re_uniprot.match(line_fields[protindex]).group(2)
+                            ##Check if it exists in the dictionary
+                            if ID in Primary_AC_dict or Secondary_AC_dict:
+                                Prots[protindex] = ID
+                elif (re_uniprot_missed.match(line_fields[protindex])):
+                    print("ID is a uniprot Accession but failed to grab it", line)
+                    break                
+
+
             #try:
             #    Protein_A = re.match('uniprot/swissprot:([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})', line[2]).group(1)
 
