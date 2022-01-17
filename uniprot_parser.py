@@ -2,21 +2,19 @@
 
 import re
 import csv
+import sys
 
 try:
     with open("uniprot_main.tsv", 'w', newline = '') as tsv1_out, open("uniprot_secondary.tsv", 'w', newline = '') as tsv2_out, open("secondary_GeneIDs.tsv", 'w', newline = '') as tsv3_out:
         csv_writer1 = csv.writer(tsv1_out, delimiter = '\t')
         csv_writer2 = csv.writer(tsv2_out, delimiter = '\t')
         csv_writer3 = csv.writer(tsv3_out, delimiter = '\t')
-        header1 = ['Primary_AC', 'TaxID', 'ENST', 'ENSG', 'GeneID']
+        header1 = ['Primary_AC', 'TaxID', 'ENST', 'ENSG']
         header2 = ['Primary_AC', 'Secondary_ACs']
         header3 = ['Primary_AC', 'Secondary_GeneID']
         csv_writer1.writerow(header1)
         csv_writer2.writerow(header2)
         csv_writer3.writerow(header3)
-
-        ###Opening the file in the read mode
-        uniprotfile = open(input("Please enter the name of the UniProt file: "), 'r')
 
         ###Initializing variables/accumulators
         ACs = ''
@@ -38,6 +36,8 @@ try:
         ###GeneIDs from the DR line
         re_GID = re.compile('^DR\s+GeneID;\s+(\d+);')
 
+        uniprotfile = open(input("Please enter the name of the file: "), 'r')
+
         for line in uniprotfile:
             line = line.rstrip('\r\n') ##removing trailing new lines and carriage returns
 
@@ -55,7 +55,7 @@ try:
                     print("Error: Several OX lines for the protein: \t", ACs)
                     break
                 TaxID = re_TaxID.match(line).group(1)
-            elif (re.match(r'^OX\s', line)):
+            elif (re.match(r'^OX\s',line)):
                 print("Error: Missed the OX line %s\n", line) ##If any OX line is missed -> break the loop
                 break
             elif (re_ENS.match(line)):
@@ -93,16 +93,16 @@ try:
 
 
                     ###Writing to the file
-                    newline1 = [primary_AC, TaxID, ENSTs, ENSGs]
+                    primary_line = [primary_AC, TaxID, ENSTs, ENSGs]
                     csv_writer1.writerow(newline1)
 
                     for secondary_AC in secondary_ACs:
-                        newline2 = [primary_AC, secondary_AC]
-                        csv_writer2.writerow(newline2)
+                        secondaryAC_line = [primary_AC, secondary_AC]
+                        csv_writer2.writerow(secondaryAC_line)
 
                     for GeneID in GeneIDs:
-                        newline3 = [primary_AC, GeneID]
-                        csv_writer3.writerow(newline3)
+                        GeneID_line = [primary_AC, GeneID]
+                        csv_writer3.writerow(GeneID_line)
 
                 #Reset all accumulators and move on to the next record
                 ACs = ''
