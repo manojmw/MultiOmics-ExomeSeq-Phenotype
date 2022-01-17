@@ -80,16 +80,59 @@ try:
                 elif (re_uniprot_missed.match(line_fields[protindex])):
                     print("ID is a uniprot Accession but failed to grab it", line)
                     break
-                elif (Prots[0] == '' or Prots[1] == ''): ###If the protein is not found in the Primary_AC_dict
-                    for protindex in [2,3,4,5]:
-                        if (re_uniprot.match(line_fields[protindex])):
-                            ID = re_uniprot.match(line_fields[protindex]).group(2)
-                            ##Check if it exists in the dictionary
-                            if ID in Primary_AC_dict or Secondary_AC_dict:
-                                Prots[protindex] = ID
-                elif (re_uniprot_missed.match(line_fields[protindex])):
+                elif (Prots[0] == ''): ###If the Protein_A Accession ID is not found
+                    line_fields_split = line_fields[2].split('|')
+                    if (re_uniprot.match(line_fields_split)):
+                        ID = re_uniprot.match(line_fields_split).group(2)
+                        ##Check if it exists in the dictionary
+                        if ID in Primary_AC_dict:
+                            Prots[0] = ID
+                        ###ElseIf the accession is found in the Secondary_AC_dict
+                        elif ID in Secondary_AC_dict:
+                            Prots[0] = Secondary_AC_dict.get(ID) ###Get the corresponding Primary Uniprot Accession ID
+                elif (re_uniprot_missed.match(line_fields_split])):
                     print("ID is a uniprot Accession but failed to grab it", line)
-                    break                
+                    break
+                elif (Prots[1] == ''): ###If the Protein_B Accession ID is not found
+                    line_fields_split = line_fields[3].split('|')
+                    if (re_uniprot.match(line_fields_split)):
+                        ID = re_uniprot.match(line_fields_split).group(2)
+                        ##Check if it exists in the dictionary
+                        if ID in Primary_AC_dict:
+                            Prots[1] = ID
+                        ###ElseIf the accession is found in the Secondary_AC_dict
+                        elif ID in Secondary_AC_dict:
+                            Prots[1] = Secondary_AC_dict.get(ID) ###Get the corresponding Primary Accession
+                elif (re_uniprot_missed.match(line_fields_split)):
+                    print("ID is a uniprot Accession but failed to grab it", line)
+                    break
+                elif (Prots[0] == ''): ###If the Protein_A Accession ID is not found
+                    line_fields_split = line_fields[4].split('|')
+                    if (re_uniprot.match(line_fields_split)):
+                        ID = re_uniprot.match(line_fields_split).group(2)
+                        ##Check if it exists in the dictionary
+                        if ID in Primary_AC_dict:
+                            Prots[0] = ID
+                        ###ElseIf the accession is found in the Secondary_AC_dict
+                        elif ID in Secondary_AC_dict:
+                            Prots[0] = Secondary_AC_dict.get(ID) ###Get the corresponding Primary Uniprot Accession ID
+                elif (re_uniprot_missed.match(line_fields_split])):
+                    print("ID is a uniprot Accession but failed to grab it", line)
+                    break
+                elif (Prots[1] == ''): ###If the Protein_B Accession ID is not found
+                    line_fields_split = line_fields[5].split('|')
+                    if (re_uniprot.match(line_fields_split)):
+                        ID = re_uniprot.match(line_fields_split).group(2)
+                        ##Check if it exists in the dictionary
+                        if ID in Primary_AC_dict:
+                            Prots[1] = ID
+                        ###ElseIf the accession is found in the Secondary_AC_dict
+                        elif ID in Secondary_AC_dict:
+                            Prots[1] = Secondary_AC_dict.get(ID) ###Get the corresponding Primary Accession
+                elif (re_uniprot_missed.match(line_fields_split)):
+                    print("ID is a uniprot Accession but failed to grab it", line)
+                    break
+                elif ()        
 
 
 
