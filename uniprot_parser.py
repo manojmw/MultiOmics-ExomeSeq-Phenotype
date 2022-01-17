@@ -21,9 +21,9 @@ try:
         ###Initializing variables/accumulators
         ACs = ''
         TaxID = 0
-        ENSTs = ''
-        ENSGs = ''
-        GeneIDs = ''
+        ENSTs = []
+        ENSGs = []
+        GeneIDs = []
 
         ###Compiling all the regular expressions###
 
@@ -68,10 +68,7 @@ try:
                 print("Error: Failed to get all the Ensembl Identifiers\n", ACs, line)
                 break
             elif (re_GID.match(line)):
-                if (GeneIDs != ''):
-                    #Add trailing separator to the previous entries
-                    GeneIDs += '; '
-                GeneIDs += re_GID.match(line).group(1)
+                GeneIDs.append(re_GID.match(line).group(1))
             elif (re.match(r'^DR\s+GeneID.*', line)): ##If any DR line wtih GeneIDs is missed -> break the loop
                 print("Error: Missed the GeneIDs \n", ACs, line)
                 break
@@ -92,27 +89,19 @@ try:
                         ENSGs = ','.join(ENSGs)
                     except:
                         print('Error: Failed to store Ensembl Identifiers for the protein: \t', ACs)
-                        pass
-                    try:
-                        GeneIDs_split = GeneIDs.split('; ')
-                        primary_GeneID = GeneID_split[0] ##Grab only the first AC
-                        secondary_GeneIDs = GeneID_split[1:]
-                        #primary_GeneID = GeneIDs[0] ##Grab only the first GeneID (when multiple GeneIDs exist)
-                        #secondary_GeneIDs = GeneIDs[1:]
-                    except:
-                        print('Error: Failed to store GeneID for the protein: \t', ACs)
-                        pass
+                        break
+
 
                     ###Writing to the file
-                    newline1 = [primary_AC, TaxID, ENSTs, ENSGs, GeneIDs]
+                    newline1 = [primary_AC, TaxID, ENSTs, ENSGs]
                     csv_writer1.writerow(newline1)
 
                     for secondary_AC in secondary_ACs:
                         newline2 = [primary_AC, secondary_AC]
                         csv_writer2.writerow(newline2)
 
-                    for secondary_GeneID in secondary_GeneIDs:
-                        newline3 = [primary_AC, secondary_GeneID]
+                    for GeneID in GeneIDs:
+                        newline3 = [primary_AC, GeneID]
                         csv_writer3.writerow(newline3)
 
                 #Reset all accumulators and move on to the next record
