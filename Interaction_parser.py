@@ -136,7 +136,7 @@ try:
                     break
                 elif (Prots[0] == ''): ###If the Protein_A Uniprot Accession ID is not found, search using GeneID
                     if (re_GeneID.match(line_fields[0])):
-                        ID = re_GeneID.match(line_fields[0]).group(2)
+                        ID = re_GeneID.match(line_fields[0]).group(1)
                         ##Check if it exists in the GeneID_dict
                         if ID in GeneID_dict:
                             Prots[0] = GeneID_dict.get(ID) ###Get the corresponding Primary Uniprot Accession ID
@@ -145,7 +145,7 @@ try:
                     break
                 elif (Prots[1] == ''): ###If the Protein_A Uniprot Accession ID is not found, search using GeneID
                     if (re_GeneID.match(line_fields[1])):
-                        ID = re_GeneID.match(line_fields[1]).group(2)
+                        ID = re_GeneID.match(line_fields[1]).group(1)
                         ##Check if it exists in the GeneID_dict
                         if ID in GeneID_dict:
                             Prots[1] = GeneID_dict.get(ID) ###Get the corresponding Primary Uniprot Accession ID
