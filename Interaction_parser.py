@@ -66,6 +66,8 @@ try:
         ###uniprot ids for protein
         re_uniprot = re.compile('^uniprot(kb|/swiss-prot):([A-Z0-9]+)$')
         re_uniprot_missed = re.compile('^uniprot')
+        re_GeneID = re.compile('^entrez gene/locuslink:(\d+)$')
+        re_GeneID_missed = re.compile('^entrez gene/locuslink')
 
         for line in interaction_file:
             line = line.rstrip('\n')
@@ -132,8 +134,24 @@ try:
                 elif (re_uniprot_missed.match(line_fields_split)):
                     print("ID is a uniprot Accession but failed to grab it", line)
                     break
-                elif ()        
-
+                elif (Prots[0] == ''): ###If the Protein_A Uniprot Accession ID is not found, search using GeneID
+                    if (re_GeneID.match(line_fields[0])):
+                        ID = re_GeneID.match(line_fields[0]).group(2)
+                        ##Check if it exists in the GeneID_dict
+                        if ID in GeneID_dict:
+                            Prots[0] = GeneID_dict.get(ID) ###Get the corresponding Primary Uniprot Accession ID
+                elif (re_GeneID_missed.match(line_fields[0])):
+                    print("Failed to grab GeneID for the line: ", line)
+                    break
+                elif (Prots[1] == ''): ###If the Protein_A Uniprot Accession ID is not found, search using GeneID
+                    if (re_GeneID.match(line_fields[1])):
+                        ID = re_GeneID.match(line_fields[1]).group(2)
+                        ##Check if it exists in the GeneID_dict
+                        if ID in GeneID_dict:
+                            Prots[1] = GeneID_dict.get(ID) ###Get the corresponding Primary Uniprot Accession ID
+                elif (re_GeneID_missed.match(line_fields[1])):
+                    print("Failed to grab GeneID for the line: ", line)
+                    break
 
 
 
