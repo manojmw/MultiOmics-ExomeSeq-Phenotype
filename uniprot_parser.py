@@ -4,7 +4,7 @@ import re
 import csv
 import argparse
 
-###UniProt Parser 
+###UniProt Parser
 def uniprot_parser(args):
     try:
         with open(args.output1, 'w', newline = '') as tsv1_out, open(args.output2, 'w', newline = '') as tsv2_out, open(args.output3, 'w', newline = '') as tsv3_out:
@@ -132,9 +132,9 @@ def main():
     optional = file_parser.add_argument_group('Optional arguments')
 
     required.add_argument('-i', '--input',  dest = "input", help = 'Input File Name (Uniprot File)', required = True)
-    required.add_argument('-o1', '--output1',  dest = "output1", help = 'Primary Accession File with ENSTs, ENSGs & TaxID', required = True)
-    required.add_argument('-o2', '--output2',  dest = "output2", help = 'Secondary Accession File', required = True)
-    required.add_argument('-o3', '--output3',  dest = "output3", help = 'GeneID File', required = True)
+    required.add_argument('-o1', '--outPrimaryAC',  dest = "output1", help = 'Primary Accession File with ENSTs, ENSGs & TaxID', required = True)
+    required.add_argument('-o2', '--outSecondaryAC',  dest = "output2", help = 'Secondary Accession File', required = True)
+    required.add_argument('-o3', '--outGeneID',  dest = "output3", help = 'GeneID File', required = True)
     file_parser.set_defaults(func=uniprot_parser)
     args = file_parser.parse_args()
     args.func(args)
