@@ -4,7 +4,7 @@ import re
 import csv
 import argparse
 
-###UniProt Parser
+###UniProt Parser 
 def uniprot_parser(args):
     try:
         with open(args.output1, 'w', newline = '') as tsv1_out, open(args.output2, 'w', newline = '') as tsv2_out, open(args.output3, 'w', newline = '') as tsv3_out:
