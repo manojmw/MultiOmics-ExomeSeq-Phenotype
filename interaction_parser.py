@@ -18,6 +18,7 @@ def PrimAC(args):
         Primary_AC_fields = line.split('\t')
         (PrimAC,TaxID) = (Primary_AC_fields[0], Primary_AC_fields[1]) ##Key -> primary accession
         Primary_AC_dict[PrimAC] = TaxID
+
     return Primary_AC_dict
 
 
@@ -68,6 +69,11 @@ def GeneID(args):
 ###Protein-Protein Interaction Parser
 def interaction_parser(args):
 
+    ###Calling dictionary functions
+    Primary_AC_dict = PrimAC(args)
+    Secondary_AC_dict = SecAC(args)
+    GeneID_dict = GeneID(args)
+
     ###User input -> Protein-protein Interaction file
     interaction_file = open(args.inInteraction)
 
@@ -107,7 +113,7 @@ def interaction_parser(args):
                     Prots[protindex] = ID
                     continue
             elif (re_uniprot_missed.match(line_fields[protindex])):
-                sys.exit("ID is a uniprot Accession but failed to grab it\n" + line)
+                sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
             elif (re_GeneID.match(line_fields[protindex])):
                 ID = re_GeneID.match(line_fields[protindex]).group(1)
                 ##Check if it exists in the dictionary
@@ -115,7 +121,7 @@ def interaction_parser(args):
                     Prots[protindex] = GeneID_dict[ID]
                     continue
             elif (re_GeneID_missed.match(line_fields[protindex])):
-                sys.exit("ID is a GeneID but failed to grab it\n" + line)
+                sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
 
             ###Uniprot AC not found/not primary_AC and GeneID not found,
             ###then, look in Alternate ID columns of the interaction_file
@@ -139,7 +145,7 @@ def interaction_parser(args):
                         else:
                             break
                 elif (re_uniprot_missed.match(altID)):
-                    sys.exit("ID is a uniprot Accession but failed to grab it\n" + line)
+                    sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
                 elif (re_GeneID.match(altID)):
                     ID = re_GeneID.match(altID).group(1)
                     ##Check if it exists in the dictionary
@@ -150,7 +156,7 @@ def interaction_parser(args):
                         else:
                             break
                 elif (re_GeneID_missed.match(altID)):
-                    sys.exit("ID is a GeneID but failed to grab it\n" + line)
+                    sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
             if (Prots[0] == '') or (Prots[1] == ''):
                 #break_flag = True
                 break
@@ -159,7 +165,7 @@ def interaction_parser(args):
             elif re_IntDetectMethod.match(line_fields[6]):
                 IntDetectMethod = re_IntDetectMethod.match(line_fields[6]).group(1)
             elif re_psimi_missed.match(line_fields[6]):
-                print("Failed to grab the Interaction Detection Method psi-mi ID for the line", line)
+                print("Failed to grab the Interaction Detection Method psi-mi ID for the line:", line)
                 break
             elif (re_PMID.match(line_fields[8])):
                 PMID = re_PMID.match(line_fields[8]).group(1)
@@ -169,18 +175,16 @@ def interaction_parser(args):
             elif (re_IntType.match(line_fields[11])):
                 Interaction_type = re_IntType.match(line_fields[11]).group(1)
             elif (re_psimi_missed.match(line_fields[11])):
-                print("Failed to grab the Interaction_type psi-mi Id for the line", line)
+                print("Failed to grab the Interaction_type psi-mi Id for the line:", line)
                 break
             #else: grabbed all the necessary data, wrtie to output file and move to next line
 
 
 
 
-
-
 ####Taking and handling command-line arguments
 def main():
-    file_parser = argparse.ArgumentParser(formatter_class=formatter, description =
+    file_parser = argparse.ArgumentParser(description =
     """
     Program: Parses a Protein-protein Interaction (PPI) file, maps to the uniprot file and produces an output file...
     """,
