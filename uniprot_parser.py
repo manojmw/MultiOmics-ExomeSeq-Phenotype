@@ -7,7 +7,7 @@ import argparse
 ###UniProt Parser
 def uniprot_parser(args):
     try:
-        with open(args.output1, 'w', newline = '') as tsv1_out, open(args.output2, 'w', newline = '') as tsv2_out, open(args.output3, 'w', newline = '') as tsv3_out:
+        with open(args.outPrimAC, 'w', newline = '') as tsv1_out, open(args.outSecAC, 'w', newline = '') as tsv2_out, open(args.outGeneID, 'w', newline = '') as tsv3_out:
             csv_writer1 = csv.writer(tsv1_out, delimiter = '\t')
             csv_writer2 = csv.writer(tsv2_out, delimiter = '\t')
             csv_writer3 = csv.writer(tsv3_out, delimiter = '\t')
@@ -40,7 +40,7 @@ def uniprot_parser(args):
 
             ###Open and parse the input file
 
-            for line in open(args.input):
+            for line in open(args.inuniprot):
                 line = line.rstrip('\r\n') ##removing trailing new lines and carriage returns
 
                 ###Matching and retrieving the records
@@ -124,17 +124,36 @@ def uniprot_parser(args):
 
 ####Taking and handling command-line arguments
 def main():
-    file_parser = argparse.ArgumentParser(description = "Program: Parses a uniprot file, processes it and produces the necessary output files")
-    formatter = lambda prog: argparse.HelpFormatter(prog, max_help_position=70)
-    file_parser = argparse.ArgumentParser(formatter_class=formatter)
+
+    file_parser = argparse.ArgumentParser(description =
+    """
+-------------------------------------------------------------------------------------
+Program: Parses a uniprot file, processes it and produces the following output files:
+-------------------------------------------------------------------------------------
+Output File 1:  A tab-seperated file (.tsv) with four columns
+                 -> UniProt Primary Accession
+                 -> Taxonomy Identifier
+                 -> Comma seperated list of ENSTs
+                 -> ENSG
+
+Output File 2:  A tab-seperated file (.tsv) with two columns
+                 -> UniProt Secondary Accession
+                 -> Corresponding UniProt Primary Accession
+
+Output File 3:  A tab-seperated file (.tsv) with two columns
+                 -> GeneID
+                 -> Corresponding UniProt Primary Accession
+-------------------------------------------------------------------------------------
+    """,
+    formatter_class = argparse.RawDescriptionHelpFormatter)
 
     required = file_parser.add_argument_group('Required arguments')
     optional = file_parser.add_argument_group('Optional arguments')
 
-    required.add_argument('-i', '--input',  dest = "input", help = 'Input File Name (Uniprot File)', required = True)
-    required.add_argument('-o1', '--outPrimaryAC',  dest = "output1", help = 'Primary Accession File with ENSTs, ENSGs & TaxID', required = True)
-    required.add_argument('-o2', '--outSecondaryAC',  dest = "output2", help = 'Secondary Accession File', required = True)
-    required.add_argument('-o3', '--outGeneID',  dest = "output3", help = 'GeneID File', required = True)
+    required.add_argument('--inuniprot',  metavar = "Input File", dest = "inuniprot", help = 'Input File Name (Uniprot File)', required = True)
+    required.add_argument('--outPrimaryAC',  metavar = "Output File", dest = "outPrimAC", help = 'Primary Accession File with ENSTs, ENSGs & TaxID', required = True)
+    required.add_argument('--outSecondaryAC', metavar = "Output File", dest = "outSecAC", help = 'Secondary Accession File', required = True)
+    required.add_argument('--outGeneID', metavar = "Output File", dest = "outGeneID", help = 'GeneID File', required = True)
     file_parser.set_defaults(func=uniprot_parser)
     args = file_parser.parse_args()
     args.func(args)
