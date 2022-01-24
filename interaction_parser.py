@@ -33,7 +33,10 @@ def SecAC(args):
         line = line.rstrip("\n") ##removing carriage returns
         Secondary_AC_fields = line.split('\t')
         (SecAC,PrimAC) = (Secondary_AC_fields[1], Secondary_AC_fields[0]) ##Key -> secondary accession
-        if Secondary_AC_dict.get(key, False):
+        ###If the Secondary_AC is associated with multiple Primary_AC, it is considered a bad Secondary_AC
+        ###No Uniprot Accession is of the type "-1"
+        ###So, we assign "-1" as the value to this bad Secondary_AC to prevent it from being added to the Secondary_AC_dict
+        if Secondary_AC_dict.get(SecAC, False):
             if Secondary_AC_dict[SecAC] != "-1":
                 Secondary_AC_dict[SecAC]  = "-1"
             #else: Secondary_AC is already bad => NOOP
@@ -52,7 +55,15 @@ def GeneID(args):
         line = line.rstrip("\n") ##removing carriage returns
         GeneID_fields = line.split('\t')
         (GeneID,PrimAC) = (GeneID_fields[1], GeneID_fields[0]) ##Key -> GeneID
-        GeneID_dict[GeneID] = PrimAC
+                ###If the GeneID is associated with multiple Primary_AC, it is considered a bad GeneID
+                ###No GeneID is of the type "-1"
+                ###So, we assign "-1" as the value to this bad GeneID to prevent it from being added to the GeneID_dict
+        if GeneID_dict.get(GeneID, False):
+            if GeneID_dict[GeneID] != "-1":
+                GeneID_dict[GeneID] = "-1"
+            #else: GeneID is already bad => NOOP
+        else:
+            GeneID_dict[GeneID] = PrimAC
     return GeneID_dict
 
 ###Protein-Protein Interaction Parser
