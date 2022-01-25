@@ -86,7 +86,7 @@ def interaction_parser(args):
     re_uniprot = re.compile('^uniprot(kb|/swiss-prot):([A-Z0-9]+)$')
     re_uniprot_missed = re.compile('^uniprot')
     re_GeneID = re.compile('^entrez gene/locuslink:(\d+)$')
-    re_GeneID_missed = re.compile('^entrez gene/locuslink')
+    re_GeneID_missed = re.compile('^entrez gene/locuslink:\d+')
     re_IntDetectMethod = re.compile('^psi-mi:"(MI:\d+)$"')
     re_psimi_missed = re.compile('^psi-mi:')
     re_PMID = re.compile('^pubmed:(\d+)$')
@@ -165,7 +165,7 @@ def interaction_parser(args):
             elif re_IntDetectMethod.match(line_fields[6]):
                 IntDetectMethod = re_IntDetectMethod.match(line_fields[6]).group(1)
             elif re_psimi_missed.match(line_fields[6]):
-                print("Failed to grab the Interaction Detection Method psi-mi ID for the line:", line)
+                print("Failed to grab the Interaction Detection Method for the line:", line)
                 break
             elif (re_PMID.match(line_fields[8])):
                 PMID = re_PMID.match(line_fields[8]).group(1)
@@ -175,7 +175,7 @@ def interaction_parser(args):
             elif (re_IntType.match(line_fields[11])):
                 Interaction_type = re_IntType.match(line_fields[11]).group(1)
             elif (re_psimi_missed.match(line_fields[11])):
-                print("Failed to grab the Interaction_type psi-mi Id for the line:", line)
+                print("Failed to grab the Interaction_type for the line:", line)
                 break
             #else: grabbed all the necessary data, wrtie to output file and move to next line
 
