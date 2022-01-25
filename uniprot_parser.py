@@ -133,8 +133,8 @@ Program: Parses a uniprot file, processes it and produces the following output f
 Output File 1:  A tab-seperated file (.tsv) with four columns
                  -> UniProt Primary Accession
                  -> Taxonomy Identifier
-                 -> Comma seperated list of ENSTs
-                 -> ENSG
+                 -> ENST (or Comma seperated list of ENSTs)
+                 -> ENSG (or Comma seperated list of ENSGs)
 
 Output File 2:  A tab-seperated file (.tsv) with two columns
                  -> UniProt Secondary Accession
