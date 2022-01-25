@@ -114,8 +114,6 @@ def interaction_parser(args):
                 PMID = 0
                 Interaction_type = ''
 
-                break_flag = False
-
                 for protindex in [0,1]:
                     if (re_uniprot.match(line_fields[protindex])):
                         ID = re_uniprot.match(line_fields[protindex]).group(2)
@@ -169,26 +167,19 @@ def interaction_parser(args):
                         elif (re_GeneID_missed.match(altID)):
                             sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
                     if (Prots[0] == '') or (Prots[1] == ''):
-                        #break_flag = True
                         break
-                #if break_flag:
-                    #break
                     elif re_IntDetectMethod.match(line_fields[6]):
                         IntDetectMethod = re_IntDetectMethod.match(line_fields[6]).group(1)
                     elif re_psimi_missed.match(line_fields[6]):
-                        print("Failed to grab the Interaction Detection Method for the line:", line)
-                        break
+                        sys.exit("Failed to grab the Interaction Detection Method for the line:" + line)
                     elif (re_PMID.match(line_fields[8])):
                         PMID = re_PMID.match(line_fields[8]).group(1)
-                        print(PMID)
                     elif (re_PMID_missed.match(line_fields[8])):
-                        print("Failed to grab the Pubmed Id for the line", line)
-                        break
+                        sys.exit("Failed to grab the Pubmed Id for the line" + line)
                     elif (re_IntType.match(line_fields[11])):
                         Interaction_type = re_IntType.match(line_fields[11]).group(1)
                     elif (re_psimi_missed.match(line_fields[11])):
-                        print("Failed to grab the Interaction_type for the line:", line)
-                        break
+                        sys.exit("Failed to grab the Interaction_type for the line:" + line)
                     #else: grabbed all the necessary data, write to output file and move to next line
 
                     ###Writing to output files
