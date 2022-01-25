@@ -134,7 +134,7 @@ Output File 1:  A tab-seperated file (.tsv) with four columns
                  -> UniProt Primary Accession
                  -> Taxonomy Identifier
                  -> Comma seperated list of ENSTs
-                 -> ENSG
+                 -> Comma seperated list of ENSGs
 
 Output File 2:  A tab-seperated file (.tsv) with two columns
                  -> UniProt Secondary Accession
