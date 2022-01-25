@@ -89,16 +89,21 @@ def interaction_parser(args):
             ###Compiling all the regular expressions###
 
             ###uniprot ids for protein
-            re_uniprot = re.compile('^uniprot(kb|/swiss-prot):([A-Z0-9]+)$')
+            re_uniprot = re.compile('^uniprot(kb|/swiss-prot):([A-Z0-9-_]+)$')
             re_uniprot_missed = re.compile('^uniprot')
+            ###if uniprot AC not found, using GeneID to get corresponding Primary_AC
             re_GeneID = re.compile('^entrez gene/locuslink:(\d+)$')
-            re_GeneID_missed = re.compile('^entrez gene/locuslink:\d')
-            re_IntDetectMethod = re.compile('^psi-mi:"(MI:\d+)$"')
+            re_GeneID_missed = re.compile('^entrez gene/locuslink:(\d+)$')
+            ###Interaction Detection Method
+            re_IntDetectMethod = re.compile('^psi-mi:"(MI:\d+)"')
             re_psimi_missed = re.compile('^psi-mi:')
-            re_PMID = re.compile('^pubmed:(\d+)$')
+            ###Pubmed Identifiers
+            re_PMID = re.compile('^pubmed:(\d+)')
             re_PMID_missed = re.compile('^pubmed:')
-            re_IntType = re.compile('^psi-mi:"(MI:\d+)$"')
+            ####Interaction type
+            re_IntType = re.compile('^psi-mi:"(MI:\d+)"')
 
+            ###Parsing the interaction file
             for line in interaction_file:
                 line = line.rstrip('\n')
                 line_fields = line.split('\t')
@@ -175,6 +180,7 @@ def interaction_parser(args):
                         break
                     elif (re_PMID.match(line_fields[8])):
                         PMID = re_PMID.match(line_fields[8]).group(1)
+                        print(PMID)
                     elif (re_PMID_missed.match(line_fields[8])):
                         print("Failed to grab the Pubmed Id for the line", line)
                         break
@@ -183,11 +189,11 @@ def interaction_parser(args):
                     elif (re_psimi_missed.match(line_fields[11])):
                         print("Failed to grab the Interaction_type for the line:", line)
                         break
-                    #else: grabbed all the necessary data, wrtie to output file and move to next line
+                    #else: grabbed all the necessary data, write to output file and move to next line
 
                     ###Writing to output files
-                    int_outfile_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
-                    csv_writer.writerow(int_outfile_line)
+                    interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
+                    csv_writer.writerow(interaction_out_line)
 
         ###Closing the file
         tsv_out.close()
