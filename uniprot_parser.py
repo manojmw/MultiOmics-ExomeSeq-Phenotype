@@ -1,22 +1,18 @@
 #!/usr/bin/python
 
 import re
-import csv
 import argparse
 
 ###UniProt Parser
 def uniprot_parser(args):
     try:
-        with open(args.outPrimAC, 'w', newline = '') as tsv1_out, open(args.outSecAC, 'w', newline = '') as tsv2_out, open(args.outGeneID, 'w', newline = '') as tsv3_out:
-            csv_writer1 = csv.writer(tsv1_out, delimiter = '\t')
-            csv_writer2 = csv.writer(tsv2_out, delimiter = '\t')
-            csv_writer3 = csv.writer(tsv3_out, delimiter = '\t')
-            header1 = ['Primary_AC', 'TaxID', 'ENST', 'ENSG']
-            header2 = ['Primary_AC', 'Secondary_ACs']
-            header3 = ['Primary_AC', 'Secondary_GeneID']
-            csv_writer1.writerow(header1)
-            csv_writer2.writerow(header2)
-            csv_writer3.writerow(header3)
+        with open(args.outPrimAC, 'w') as PrimAC_outfile, open(args.outSecAC, 'w') as SecAC_outfile, open(args.outGeneID, 'w') as GeneID_outfile:
+            PrimAC_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs']
+            SecAC_header = ['Primary_AC', 'Secondary_ACs']
+            GeneID_header = ['Primary_AC', 'Secondary_GeneID']
+            print('\t'.join(PrimAC_header), file = PrimAC_outfile)
+            print('\t'.join(SecAC_header), file = SecAC_outfile)
+            print('\t'.join(GeneID_header), file = GeneID_outfile)
 
             ###Initializing variables/accumulators
             ACs = ''
@@ -95,16 +91,16 @@ def uniprot_parser(args):
 
 
                         ###Writing to output files
-                        primaryfile_line = [primary_AC, TaxID, ENSTs, ENSGs]
-                        csv_writer1.writerow(primaryfile_line)
+                        primaryAC_line = [primary_AC, TaxID, ENSTs, ENSGs]
+                        print('\t'.join(primaryAC_line), file = PrimAC_outfile)
 
                         for secondary_AC in secondary_ACs:
                             secondaryAC_line = [primary_AC, secondary_AC]
-                            csv_writer2.writerow(secondaryAC_line)
+                            print('\t'.join(secondaryAC_line), file = SecAC_outfile)
 
                         for GeneID in GeneIDs:
                             GeneID_line = [primary_AC, GeneID]
-                            csv_writer3.writerow(GeneID_line)
+                            print('\t'.join(GeneID_line), file = GeneID_outfile)
 
                     #Reset all accumulators and move on to the next record
                     ACs = ''
@@ -115,12 +111,12 @@ def uniprot_parser(args):
                     continue
 
         ###Closing the files
-        tsv1_out.close()
-        tsv2_out.close()
-        tsv3_out.close()
+        PrimAC_outfile.close()
+        SecAC_outfile.close()
+        GeneID_outfile.close()
 
     except IOError as e:
-        print("Error: Unable to open the file for writing")
+        print("Error: Unable to open the files for writing")
 
 ####Taking and handling command-line arguments
 def main():
