@@ -126,19 +126,19 @@ def main():
 -------------------------------------------------------------------------------------
 Program: Parses a uniprot file, processes it and produces the following output files:
 -------------------------------------------------------------------------------------
-Output File 1:  A tab-seperated file (.tsv) with four columns
-                 -> UniProt Primary Accession
-                 -> Taxonomy Identifier
-                 -> ENST (or Comma seperated list of ENSTs)
-                 -> ENSG (or Comma seperated list of ENSGs)
+Output File 1 (--outPrimaryAC):   A tab-seperated file (.tsv) with four columns
+                                   -> UniProt Primary Accession
+                                   -> Taxonomy Identifier
+                                   -> ENST (or Comma seperated list of ENSTs)
+                                   -> ENSG (or Comma seperated list of ENSGs)
 
-Output File 2:  A tab-seperated file (.tsv) with two columns
-                 -> UniProt Secondary Accession
-                 -> Corresponding UniProt Primary Accession
+Output File 2 (--outSecondaryAC): A tab-seperated file (.tsv) with two columns
+                                   -> UniProt Secondary Accession
+                                   -> Corresponding UniProt Primary Accession
 
-Output File 3:  A tab-seperated file (.tsv) with two columns
-                 -> GeneID
-                 -> Corresponding UniProt Primary Accession
+Output File 3 (--outGeneID):      A tab-seperated file (.tsv) with two columns
+                                   -> GeneID
+                                   -> Corresponding UniProt Primary Accession
 -------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
