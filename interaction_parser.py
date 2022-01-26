@@ -68,14 +68,20 @@ def GeneID(args):
 ###Protein-Protein Interaction Parser
 def interaction_parser(args):
     try:
-        with open(args.output, 'w') as int_out_file:
-            header = ['Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Interaction_Detect_Method', 'PMID', 'Interaction_type']
-            print("\t".join(header), file = int_out_file)
+        with open(args.output_interaction, 'w') as int_out_file, open(args.output_debugcount, 'w') as debug_out_file:
+            header_interaction = ['Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Interaction_Detect_Method', 'PMID', 'Interaction_type']
+            print("\t".join(header_interaction), file = int_out_file)
 
             ###Calling dictionary functions
             Primary_AC_dict = PrimAC(args)
             Secondary_AC_dict = SecAC(args)
             GeneID_dict = GeneID(args)
+
+            ###Debug counters
+            ###To check how many times the ACs are found in the respective dictionaries
+            found_inPrimACFile = 0
+            found_inSecACFile = 0
+            found_inGeneIDFile = 0
 
             ###User input -> Protein-protein Interaction file
             interaction_file = open(args.inInteraction)
@@ -95,8 +101,9 @@ def interaction_parser(args):
             re_psimi = re.compile('^psi-mi:"(MI:\d+)"')
             re_psimi_missed = re.compile('^psi-mi:')
             ###Pubmed Identifiers
-            re_PMID = re.compile('^pubmed:(\d+)')
-            re_PMID_missed = re.compile('^pubmed:(\d+)')
+            re_PMID = re.compile('^pubmed:(\d+)$')
+            ###some pubmed identifiers are unassigned (pubmed:unassigned)
+            re_PMID_missed = re.compile('^pubmed:^(unassigned)')
 
             ###Parsing the interaction file
             for line in interaction_file:
@@ -115,6 +122,7 @@ def interaction_parser(args):
                         ##Check if it exists in the dictionary
                         if Primary_AC_dict.get(ID, False):
                             Prots[protindex] = ID
+                            found_inPrimACFile = found_inPrimACFile + 1
                             continue
                     elif (re_uniprot_missed.match(line_fields[protindex])):
                         sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
@@ -123,6 +131,7 @@ def interaction_parser(args):
                         ##Check if it exists in the dictionary
                         if GeneID_dict.get(ID, False):
                             Prots[protindex] = GeneID_dict[ID]
+                            found_inGeneIDFile = found_inGeneIDFile + 1
                             continue
                     elif (re_GeneID_missed.match(line_fields[protindex])):
                         sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
@@ -136,6 +145,7 @@ def interaction_parser(args):
                             ##Check if it exists in the dictionary
                             if Primary_AC_dict.get(ID, False):
                                 Prots[protindex] = ID
+                                found_inPrimACFile = found_inPrimACFile + 1
                                 # we want "next protindex" but python doesn't have this
                                 ##So we break and exit the loop
                                 break
@@ -143,6 +153,7 @@ def interaction_parser(args):
                             elif Secondary_AC_dict.get(ID, "-1") != "-1":
                                 ###Use the corresponding Primary AC
                                 Prots[protindex] = Secondary_AC_dict[ID]
+                                found_inSecACFile = found_inSecACFile + 1
                                 break
                         elif (re_uniprot_missed.match(altID)):
                             sys.exit("altID "+altID+" is Uniprot Accession but failed to grab it for line:\n" + line)
@@ -151,6 +162,7 @@ def interaction_parser(args):
                             ##Check if it exists in the dictionary
                             if GeneID_dict.get(ID, False):
                                 Prots[protindex] = GeneID_dict[ID]
+                                found_inGeneIDFile = found_inGeneIDFile + 1
                                 break
                         elif (re_GeneID_missed.match(altID)):
                             sys.exit("altID "+altID+" is a GeneID but failed to grab it for line:\n" + line)
@@ -168,10 +180,14 @@ def interaction_parser(args):
                     IntDetectMethod = re_psimi.match(line_fields[6]).group(1)
                 elif re_psimi_missed.match(line_fields[6]):
                     sys.exit("Failed to grab the Interaction Detection Method for line:\n" + line)
-                if (re_PMID.match(line_fields[8])):
-                    PMID = re_PMID.match(line_fields[8]).group(1)
-                elif (re_PMID_missed.match(line_fields[8])):
-                    sys.exit("Failed to grab the Pubmed Id for line:\n" + line)
+                ###Some Publication Identifier fields include additional fields such as MINT
+                ###Ex: pubmed:10542231|mint:MINT-5211933, so we split at '|'
+                PMID_fields = line_fields[8].split('|')
+                for PMIDs in PMID_fields:
+                    if (re_PMID.match(PMIDs)):
+                        PMID = re_PMID.match(PMIDs).group(1)
+                    elif (re_PMID_missed.match(PMIDs)):
+                        sys.exit("Failed to grab the Pubmed Id for line:\n" + line)
                 if (re_psimi.match(line_fields[11])):
                     Interaction_type = re_psimi.match(line_fields[11]).group(1)
                 elif (re_psimi_missed.match(line_fields[11])):
@@ -180,6 +196,11 @@ def interaction_parser(args):
                 #Here we grabbed all the necessary data, print to the file and move on to the next line
                 interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
                 print("\t".join(interaction_out_line) , file = int_out_file)
+
+            ###Debug counter
+            print("No. of times Uniprot Primary Accession found in the Uniprot Primary Accession File:", found_inPrimACFile, file = debug_out_file)
+            print("No. of times Uniprot Primary Accession found in the Uniprot Secondary Accession File:", found_inSecACFile, file = debug_out_file)
+            print("No. of times Uniprot Primary Accession found in the GeneID File:", found_inGeneIDFile, file = debug_out_file)
 
         int_out_file.close()
 
@@ -192,14 +213,20 @@ def main():
     file_parser = argparse.ArgumentParser(description =
     """
 ----------------------------------------------------------------------------------------------
-Program: Parses a MITAB 2.5 or 2.7 file, maps to the uniprot file and produces the output file
+Program: Parses a MITAB 2.5 or 2.7 file, maps to the uniprot file and produces 2 output files
 ----------------------------------------------------------------------------------------------
-Output File: A tab-seperated file (.tsv) with five columns
-              -> Protein A UniProt Primary Accession
-              -> Protein B UniProt Primary Accession
-              -> Interaction Detection Method
-              -> Pubmed Identifier
-              -> Interaction type
+Output File 1 (--outInteraction): A tab-seperated file (.tsv) with five columns
+                                   -> Protein A UniProt Primary Accession
+                                   -> Protein B UniProt Primary Accession
+                                   -> Interaction Detection Method
+                                   -> Pubmed Identifier
+                                   -> Interaction type
+
+Output File 2 (--outCount):       This file gives the count of how often the UniProt Primary
+                                  Accessions are found in input mapping files i.e.
+                                   -> Uniprot Primary Accession File or
+                                   -> Uniprot Secondary Accession File or
+                                   -> GeneID File
 ----------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
@@ -209,9 +236,10 @@ Output File: A tab-seperated file (.tsv) with five columns
 
     required.add_argument('--inInteraction', metavar = "Input File", dest = "inInteraction", help = 'Input File Name (Protein-protein Interaction file)', required = True)
     required.add_argument('--inPrimaryAC', metavar = "Input File", dest = "inPrimAC", help = 'Uniprot Primary Accession File generated by the uniprot parser', required = True)
-    required.add_argument('--inSecondaryAC', metavar = "Input File", dest = "inSecAC", help = 'Secondary Accession File generated by the uniprot parser', required = True)
+    required.add_argument('--inSecondaryAC', metavar = "Input File", dest = "inSecAC", help = 'Uniprot Secondary Accession File generated by the uniprot parser', required = True)
     required.add_argument('--inGeneID', metavar = "Input File", dest = "inGeneID", help = 'GeneID File generated by the uniprot parser', required = True)
-    required.add_argument('--output', metavar = "Output File", dest = "output", help = 'Output File Name', required = True)
+    required.add_argument('--outInteraction', metavar = "Output File", dest = "output_interaction", help = 'Output File containing the interactions mapped to Uniprot files', required = True)
+    required.add_argument('--outCount', metavar = "Output File", dest = "output_debugcount", help = 'Output File containing frequency of occurence of Uniprot Accession', required = True)
     file_parser.set_defaults(func=interaction_parser)
     args = file_parser.parse_args()
     args.func(args)
