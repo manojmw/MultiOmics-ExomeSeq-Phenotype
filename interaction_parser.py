@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import re
-import csv
 import argparse
 import sys
 
@@ -68,129 +67,119 @@ def GeneID(args):
 
 ###Protein-Protein Interaction Parser
 def interaction_parser(args):
+    header = ['Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Interaction_Detect_Method', 'PMID', 'Interaction_type']
+    print(join("\t",header)+"\n")
 
-    try:
-        with open(args.output, 'w', newline = '') as tsv_out:
-            csv_writer = csv.writer(tsv_out, delimiter = '\t')
-            header = ['Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Interaction_Detect_Method', 'PMID', 'Interaction_type']
-            csv_writer.writerow(header)
+    ###Calling dictionary functions
+    Primary_AC_dict = PrimAC(args)
+    Secondary_AC_dict = SecAC(args)
+    GeneID_dict = GeneID(args)
 
-            ###Calling dictionary functions
-            Primary_AC_dict = PrimAC(args)
-            Secondary_AC_dict = SecAC(args)
-            GeneID_dict = GeneID(args)
+    ###User input -> Protein-protein Interaction file
+    interaction_file = open(args.inInteraction)
 
-            ###User input -> Protein-protein Interaction file
-            interaction_file = open(args.inInteraction)
+    ###Skip header
+    interaction_file.readline()
 
-            ###Skip header
-            interaction_file.readline()
+    ###Compiling all the regular expressions###
 
-            ###Compiling all the regular expressions###
+    ###uniprot ids for protein
+    re_uniprot = re.compile('^uniprot(kb|/swiss-prot):([A-Z0-9-_]+)$')
+    re_uniprot_missed = re.compile('^uniprot')
+    ###if uniprot AC not found, using GeneID to get corresponding Primary_AC
+    re_GeneID = re.compile('^entrez gene/locuslink:(\d+)$')
+    re_GeneID_missed = re.compile('^entrez gene/locuslink:(\d+)$')
+    ###Interaction Detection Method
+    re_IntDetectMethod = re.compile('^psi-mi:"(MI:\d+)"')
+    re_psimi_missed = re.compile('^psi-mi:')
+    ###Pubmed Identifiers
+    re_PMID = re.compile('^pubmed:(\d+)')
+    re_PMID_missed = re.compile('^pubmed:')
+    ####Interaction type
+    re_IntType = re.compile('^psi-mi:"(MI:\d+)"')
 
-            ###uniprot ids for protein
-            re_uniprot = re.compile('^uniprot(kb|/swiss-prot):([A-Z0-9-_]+)$')
-            re_uniprot_missed = re.compile('^uniprot')
-            ###if uniprot AC not found, using GeneID to get corresponding Primary_AC
-            re_GeneID = re.compile('^entrez gene/locuslink:(\d+)$')
-            re_GeneID_missed = re.compile('^entrez gene/locuslink:(\d+)$')
-            ###Interaction Detection Method
-            re_IntDetectMethod = re.compile('^psi-mi:"(MI:\d+)"')
-            re_psimi_missed = re.compile('^psi-mi:')
-            ###Pubmed Identifiers
-            re_PMID = re.compile('^pubmed:(\d+)')
-            re_PMID_missed = re.compile('^pubmed:')
-            ####Interaction type
-            re_IntType = re.compile('^psi-mi:"(MI:\d+)"')
+    ###Parsing the interaction file
+    for line in interaction_file:
+        line = line.rstrip('\n')
+        line_fields = line.split('\t')
 
-            ###Parsing the interaction file
-            for line in interaction_file:
-                line = line.rstrip('\n')
-                line_fields = line.split('\t')
+        ###Initializing variables/accumulators
+        Prots = ['','']
+        IntDetectMethod = ''
+        PMID = 0
+        Interaction_type = ''
 
-                ###Initializing variables/accumulators
-                Prots = ['','']
-                IntDetectMethod = ''
-                PMID = 0
-                Interaction_type = ''
+        for protindex in [0,1]:
+            if (re_uniprot.match(line_fields[protindex])):
+                ID = re_uniprot.match(line_fields[protindex]).group(2)
+                ##Check if it exists in the dictionary
+                if Primary_AC_dict.get(ID, False):
+                    Prots[protindex] = ID
+                    continue
+            elif (re_uniprot_missed.match(line_fields[protindex])):
+                sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
+            elif (re_GeneID.match(line_fields[protindex])):
+                ID = re_GeneID.match(line_fields[protindex]).group(1)
+                ##Check if it exists in the dictionary
+                if GeneID_dict.get(ID, False):
+                    Prots[protindex] = GeneID_dict[ID]
+                    continue
+            elif (re_GeneID_missed.match(line_fields[protindex])):
+                sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
 
-                for protindex in [0,1]:
-                    if (re_uniprot.match(line_fields[protindex])):
-                        ID = re_uniprot.match(line_fields[protindex]).group(2)
-                        ##Check if it exists in the dictionary
-                        if Primary_AC_dict.get(ID, False):
+            ###Uniprot AC not found/not primary_AC and GeneID not found,
+            ###then, look in Alternate ID columns of the interaction_file
+            altIDs = line_fields[2+protindex].split('|')
+            for altID in altIDs:
+                if (re_uniprot.match(altID)):
+                    ID = re_uniprot.match(altID).group(2)
+                    ##Check if it exists in the dictionary
+                    if Primary_AC_dict.get(ID, False):
+                        if Prots[protindex] == '':
                             Prots[protindex] = ID
                             continue
-                    elif (re_uniprot_missed.match(line_fields[protindex])):
-                        sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
-                    elif (re_GeneID.match(line_fields[protindex])):
-                        ID = re_GeneID.match(line_fields[protindex]).group(1)
-                        ##Check if it exists in the dictionary
-                        if GeneID_dict.get(ID, False):
+                        else:
+                            break
+                    ###ElseIf the accession is found in the Secondary_AC_dict
+                    elif Secondary_AC_dict.get(ID, "-1") != "-1":
+                        if Prots[protindex] == '':
+                            ###Get the corresponding Primary Uniprot Accession ID
+                            Prots[protindex] = Secondary_AC_dict[ID]
+                            continue
+                        else:
+                            break
+                elif (re_uniprot_missed.match(altID)):
+                    sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
+                elif (re_GeneID.match(altID)):
+                    ID = re_GeneID.match(altID).group(1)
+                    ##Check if it exists in the dictionary
+                    if GeneID_dict.get(ID, False):
+                        if Prots[protindex] == '':
                             Prots[protindex] = GeneID_dict[ID]
                             continue
-                    elif (re_GeneID_missed.match(line_fields[protindex])):
-                        sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
+                        else:
+                            break
+                elif (re_GeneID_missed.match(altID)):
+                    sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
+            if (Prots[0] == '') or (Prots[1] == ''):
+                break
+            elif re_IntDetectMethod.match(line_fields[6]):
+                IntDetectMethod = re_IntDetectMethod.match(line_fields[6]).group(1)
+            elif re_psimi_missed.match(line_fields[6]):
+                sys.exit("Failed to grab the Interaction Detection Method for the line:" + line)
+            elif (re_PMID.match(line_fields[8])):
+                PMID = re_PMID.match(line_fields[8]).group(1)
+            elif (re_PMID_missed.match(line_fields[8])):
+                sys.exit("Failed to grab the Pubmed Id for the line" + line)
+            elif (re_IntType.match(line_fields[11])):
+                Interaction_type = re_IntType.match(line_fields[11]).group(1)
+            elif (re_psimi_missed.match(line_fields[11])):
+                sys.exit("Failed to grab the Interaction_type for the line:" + line)
+            #else: grabbed all the necessary data, write to output file and move to next line
 
-                    ###Uniprot AC not found/not primary_AC and GeneID not found,
-                    ###then, look in Alternate ID columns of the interaction_file
-                    altIDs = line_fields[2+protindex].split('|')
-                    for altID in altIDs:
-                        if (re_uniprot.match(altID)):
-                            ID = re_uniprot.match(altID).group(2)
-                            ##Check if it exists in the dictionary
-                            if Primary_AC_dict.get(ID, False):
-                                if Prots[protindex] == '':
-                                    Prots[protindex] = ID
-                                    continue
-                                else:
-                                    break
-                            ###ElseIf the accession is found in the Secondary_AC_dict
-                            elif Secondary_AC_dict.get(ID, "-1") != "-1":
-                                if Prots[protindex] == '':
-                                    ###Get the corresponding Primary Uniprot Accession ID
-                                    Prots[protindex] = Secondary_AC_dict[ID]
-                                    continue
-                                else:
-                                    break
-                        elif (re_uniprot_missed.match(altID)):
-                            sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
-                        elif (re_GeneID.match(altID)):
-                            ID = re_GeneID.match(altID).group(1)
-                            ##Check if it exists in the dictionary
-                            if GeneID_dict.get(ID, False):
-                                if Prots[protindex] == '':
-                                    Prots[protindex] = GeneID_dict[ID]
-                                    continue
-                                else:
-                                    break
-                        elif (re_GeneID_missed.match(altID)):
-                            sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
-                    if (Prots[0] == '') or (Prots[1] == ''):
-                        break
-                    elif re_IntDetectMethod.match(line_fields[6]):
-                        IntDetectMethod = re_IntDetectMethod.match(line_fields[6]).group(1)
-                    elif re_psimi_missed.match(line_fields[6]):
-                        sys.exit("Failed to grab the Interaction Detection Method for the line:" + line)
-                    elif (re_PMID.match(line_fields[8])):
-                        PMID = re_PMID.match(line_fields[8]).group(1)
-                    elif (re_PMID_missed.match(line_fields[8])):
-                        sys.exit("Failed to grab the Pubmed Id for the line" + line)
-                    elif (re_IntType.match(line_fields[11])):
-                        Interaction_type = re_IntType.match(line_fields[11]).group(1)
-                    elif (re_psimi_missed.match(line_fields[11])):
-                        sys.exit("Failed to grab the Interaction_type for the line:" + line)
-                    #else: grabbed all the necessary data, write to output file and move to next line
-
-                    ###Writing to output files
-                    interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
-                    csv_writer.writerow(interaction_out_line)
-
-        ###Closing the file
-        tsv_out.close()
-
-    except IOError as e:
-        print("Error: Unable to open the file for writing")
+            ###Writing to output files
+            interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
+            print(join("\t",interaction_out_line)+"\n")
 
 ####Taking and handling command-line arguments
 def main():
