@@ -89,14 +89,12 @@ def interaction_parser(args):
     ###if uniprot AC not found, using GeneID to get corresponding Primary_AC
     re_GeneID = re.compile('^entrez gene/locuslink:(\d+)$')
     re_GeneID_missed = re.compile('^entrez gene/locuslink:(\d+)$')
-    ###Interaction Detection Method
-    re_IntDetectMethod = re.compile('^psi-mi:"(MI:\d+)"')
+    ###PSI-MI term parser for Interaction Detection Method and Interaction type
+    re_psimi = re.compile('^psi-mi:"(MI:\d+)"')
     re_psimi_missed = re.compile('^psi-mi:')
     ###Pubmed Identifiers
-    re_PMID = re.compile('^pubmed:(\d+)')
+    re_PMID = re.compile('^pubmed:(\d+)$')
     re_PMID_missed = re.compile('^pubmed:')
-    ####Interaction type
-    re_IntType = re.compile('^psi-mi:"(MI:\d+)"')
 
     ###Parsing the interaction file
     for line in interaction_file:
@@ -135,51 +133,53 @@ def interaction_parser(args):
                     ID = re_uniprot.match(altID).group(2)
                     ##Check if it exists in the dictionary
                     if Primary_AC_dict.get(ID, False):
-                        if Prots[protindex] == '':
-                            Prots[protindex] = ID
-                            continue
-                        else:
-                            break
+                        Prots[protindex] = ID
+                        # we want "next protindex" but python doesn't have this...
+                        break
                     ###ElseIf the accession is found in the Secondary_AC_dict
                     elif Secondary_AC_dict.get(ID, "-1") != "-1":
-                        if Prots[protindex] == '':
-                            ###Get the corresponding Primary Uniprot Accession ID
-                            Prots[protindex] = Secondary_AC_dict[ID]
-                            continue
-                        else:
-                            break
+                        ### Use the corresponding Primary AC
+                        Prots[protindex] = Secondary_AC_dict[ID]
+                        break
                 elif (re_uniprot_missed.match(altID)):
-                    sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
+                    sys.exit("altID "+altID+" is uniprot but failed to grab it for line:\n" + line)
                 elif (re_GeneID.match(altID)):
                     ID = re_GeneID.match(altID).group(1)
                     ##Check if it exists in the dictionary
                     if GeneID_dict.get(ID, False):
-                        if Prots[protindex] == '':
-                            Prots[protindex] = GeneID_dict[ID]
-                            continue
-                        else:
-                            break
+                        Prots[protindex] = GeneID_dict[ID]
+                        break
                 elif (re_GeneID_missed.match(altID)):
-                    sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
-            if (Prots[0] == '') or (Prots[1] == ''):
+                    sys.exit("altID "+altID+" is a GeneID but failed to grab it for line:\n" + line)
+                # else: altID not recognized, look at next altID ie NOOP
+            # if protindex==0 and we didn't recognize the partner, no point in looking for second partner
+            # (we would actually want "next line" but...)
+            if Prots[protindex] == "":
                 break
-            elif re_IntDetectMethod.match(line_fields[6]):
-                IntDetectMethod = re_IntDetectMethod.match(line_fields[6]).group(1)
-            elif re_psimi_missed.match(line_fields[6]):
-                sys.exit("Failed to grab the Interaction Detection Method for the line:" + line)
-            elif (re_PMID.match(line_fields[8])):
-                PMID = re_PMID.match(line_fields[8]).group(1)
-            elif (re_PMID_missed.match(line_fields[8])):
-                sys.exit("Failed to grab the Pubmed Id for the line" + line)
-            elif (re_IntType.match(line_fields[11])):
-                Interaction_type = re_IntType.match(line_fields[11]).group(1)
-            elif (re_psimi_missed.match(line_fields[11])):
-                sys.exit("Failed to grab the Interaction_type for the line:" + line)
-            #else: grabbed all the necessary data, print to stdout and move to next line
+        # done looking for both partners, if we didn't find them both move to next line
+        if Prots[1] == "":
+            # testing Prots[1] is sufficient, because if Prots[0] not found we broke
+            continue # to next line
 
-            interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
-            print("\t".join(interaction_out_line)+"\n")
+        # if we get here both partners were found, grab remaining data
+        if re_psimi.match(line_fields[6]):
+            IntDetectMethod = re_psimi.match(line_fields[6]).group(1)
+        elif re_psimi_missed.match(line_fields[6]):
+            sys.exit("Failed to grab the Interaction Detection Method for line:" + line)
+        if (re_PMID.match(line_fields[8])):
+            PMID = re_PMID.match(line_fields[8]).group(1)
+        elif (re_PMID_missed.match(line_fields[8])):
+            sys.exit("Failed to grab the Pubmed Id for line" + line)
+        if (re_psimi.match(line_fields[11])):
+            Interaction_type = re_psimi.match(line_fields[11]).group(1)
+        elif (re_psimi_missed.match(line_fields[11])):
+            sys.exit("Failed to grab the Interaction_type for line:" + line)
 
+        # here we grabbed all the necessary data, print to stdout and move to next line
+        interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
+        print("\t".join(interaction_out_line)+"\n")
+
+        
 ####Taking and handling command-line arguments
 def main():
     file_parser = argparse.ArgumentParser(description =
