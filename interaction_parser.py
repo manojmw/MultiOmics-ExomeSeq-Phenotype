@@ -34,7 +34,7 @@ def SecAC(args):
         (SecAC,PrimAC) = (Secondary_AC_fields[1], Secondary_AC_fields[0]) ##Key -> secondary accession
         ###If the Secondary_AC is associated with multiple Primary_AC, it is considered a bad Secondary_AC
         ###No Uniprot Accession is of the type "-1"
-        ###So, we assign "-1" as the value to this bad Secondary_AC to prevent it from being added to the Secondary_AC_dict
+        ###So, we assign "-1" as the value to this bad Secondary_AC to avoid using it later
         if Secondary_AC_dict.get(SecAC, False):
             if Secondary_AC_dict[SecAC] != "-1":
                 Secondary_AC_dict[SecAC]  = "-1"
@@ -56,7 +56,7 @@ def GeneID(args):
         (GeneID,PrimAC) = (GeneID_fields[1], GeneID_fields[0]) ##Key -> GeneID
                 ###If the GeneID is associated with multiple Primary_AC, it is considered a bad GeneID
                 ###No GeneID is of the type "-1"
-                ###So, we assign "-1" as the value to this bad GeneID to prevent it from being added to the GeneID_dict
+                ###So, we assign "-1" as the value to this bad GeneID to avoid using it later
         if GeneID_dict.get(GeneID, False):
             if GeneID_dict[GeneID] != "-1":
                 GeneID_dict[GeneID] = "-1"
@@ -129,8 +129,8 @@ def interaction_parser(args):
                         sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
                     elif (re_GeneID.match(line_fields[protindex])):
                         ID = re_GeneID.match(line_fields[protindex]).group(1)
-                        ##Check if it exists in the dictionary
-                        if GeneID_dict.get(ID, False):
+                        ##Check if it exists in the dictionary and isn't bad ie "-1"
+                        if GeneID_dict.get(ID, "-1") != "-1":
                             Prots[protindex] = GeneID_dict[ID]
                             found_inGeneIDFile += 1
                             continue
@@ -161,8 +161,8 @@ def interaction_parser(args):
                             sys.exit("altID "+altID+" is Uniprot Accession but failed to grab it for line:\n" + line)
                         elif (re_GeneID.match(altID)):
                             ID = re_GeneID.match(altID).group(1)
-                            ##Check if it exists in the dictionary
-                            if GeneID_dict.get(ID, False):
+                            ##Check if it exists in the dictionary and isn't bad ie "-1"
+                            if GeneID_dict.get(ID, "-1") != "-1":
                                 Prots[protindex] = GeneID_dict[ID]
                                 found_inGeneIDFile += 1
                                 break
