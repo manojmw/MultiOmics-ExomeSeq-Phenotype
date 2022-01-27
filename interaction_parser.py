@@ -102,8 +102,9 @@ def interaction_parser(args):
             re_psimi_missed = re.compile('^psi-mi:')
             ###Pubmed Identifiers
             re_PMID = re.compile('^pubmed:(\d+)$')
-            ###some pubmed identifiers are unassigned (pubmed:unassigned)
-            re_PMID_missed = re.compile('^pubmed:^(unassigned)')
+            ###some pubmed identifiers are unassigned in Intact (pubmed:unassigned)
+            re_PMID_unassigned = re.compile('^pubmed:unassigned')
+            re_PMID_missed = re.compile('^pubmed:')
 
             ###Parsing the interaction file
             for line in interaction_file:
@@ -183,15 +184,20 @@ def interaction_parser(args):
                 ###Some Publication Identifier fields include additional fields such as MINT
                 ###Ex: pubmed:10542231|mint:MINT-5211933, so we split at '|'
                 PMID_fields = line_fields[8].split('|')
-                for PMIDs in PMID_fields:
-                    if (re_PMID.match(PMIDs)):
-                        PMID = re_PMID.match(PMIDs).group(1)
-                    elif (re_PMID_missed.match(PMIDs)):
+                for PMID_entry in PMID_fields:
+                    if (re_PMID.match(PMID_entry)):
+                        PMID = re_PMID.match(PMID_entry).group(1)
+                    elif (re_PMID_unassigned.match(PMID_entry)):
+                        continue
+                    elif (re_PMID_missed.match(PMID_entry)):
                         sys.exit("Failed to grab the Pubmed Id for line:\n" + line)
                 if (re_psimi.match(line_fields[11])):
                     Interaction_type = re_psimi.match(line_fields[11]).group(1)
                 elif (re_psimi_missed.match(line_fields[11])):
                     sys.exit("Failed to grab the Interaction_type for line:\n" + line)
+                ###If no PMID, skip line
+                if (PMID == ''):
+                    continue    
 
                 #Here we grabbed all the necessary data, print to the file and move on to the next line
                 interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
