@@ -123,7 +123,7 @@ def interaction_parser(args):
                         ##Check if it exists in the dictionary
                         if Primary_AC_dict.get(ID, False):
                             Prots[protindex] = ID
-                            found_inPrimACFile = found_inPrimACFile + 1
+                            found_inPrimACFile += 1
                             continue
                     elif (re_uniprot_missed.match(line_fields[protindex])):
                         sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
@@ -132,13 +132,14 @@ def interaction_parser(args):
                         ##Check if it exists in the dictionary
                         if GeneID_dict.get(ID, False):
                             Prots[protindex] = GeneID_dict[ID]
-                            found_inGeneIDFile = found_inGeneIDFile + 1
+                            found_inGeneIDFile += 1
                             continue
                     elif (re_GeneID_missed.match(line_fields[protindex])):
                         sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
 
                     ###Uniprot AC not found/not primary_AC and GeneID not found,
                     ###then, look in Alternate ID columns of the interaction_file
+                    ##Stop when the first AltID is recognized (Careful, if multiple altIDs would be found)
                     altIDs = line_fields[2+protindex].split('|')
                     for altID in altIDs:
                         if (re_uniprot.match(altID)):
@@ -146,7 +147,7 @@ def interaction_parser(args):
                             ##Check if it exists in the dictionary
                             if Primary_AC_dict.get(ID, False):
                                 Prots[protindex] = ID
-                                found_inPrimACFile = found_inPrimACFile + 1
+                                found_inPrimACFile += 1
                                 # we want "next protindex" but python doesn't have this
                                 ##So we break and exit the loop
                                 break
@@ -154,7 +155,7 @@ def interaction_parser(args):
                             elif Secondary_AC_dict.get(ID, "-1") != "-1":
                                 ###Use the corresponding Primary AC
                                 Prots[protindex] = Secondary_AC_dict[ID]
-                                found_inSecACFile = found_inSecACFile + 1
+                                found_inSecACFile += 1
                                 break
                         elif (re_uniprot_missed.match(altID)):
                             sys.exit("altID "+altID+" is Uniprot Accession but failed to grab it for line:\n" + line)
@@ -163,7 +164,7 @@ def interaction_parser(args):
                             ##Check if it exists in the dictionary
                             if GeneID_dict.get(ID, False):
                                 Prots[protindex] = GeneID_dict[ID]
-                                found_inGeneIDFile = found_inGeneIDFile + 1
+                                found_inGeneIDFile += 1
                                 break
                         elif (re_GeneID_missed.match(altID)):
                             sys.exit("altID "+altID+" is a GeneID but failed to grab it for line:\n" + line)
@@ -197,7 +198,10 @@ def interaction_parser(args):
                     sys.exit("Failed to grab the Interaction_type for line:\n" + line)
                 ###If no PMID, skip line
                 if (PMID == ''):
-                    continue    
+                    continue
+                ###We want only Human-Human Interactions
+                if (Primary_AC_dict[Prots[0]] != '9606') or (Primary_AC_dict[Prots[1]] != '9606'):
+                    continue
 
                 #Here we grabbed all the necessary data, print to the file and move on to the next line
                 interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
