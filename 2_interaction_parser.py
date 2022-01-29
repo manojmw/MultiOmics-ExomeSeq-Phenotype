@@ -17,7 +17,8 @@ def PrimAC(args):
         Primary_AC_fields = line.split('\t')
         (PrimAC,TaxID) = (Primary_AC_fields[0], Primary_AC_fields[1]) ##Key -> primary accession
         Primary_AC_dict[PrimAC] = TaxID
-
+    ###Closing the file
+    Primary_AC_file.close()
     return Primary_AC_dict
 
 
@@ -41,6 +42,8 @@ def SecAC(args):
             #else: Secondary_AC is already bad => NOOP
         else:
             Secondary_AC_dict[SecAC] = PrimAC
+    ###Closing the file
+    Secondary_AC_file.close()
     return  Secondary_AC_dict
 
 ###GeneID dictionary
@@ -63,6 +66,8 @@ def GeneID(args):
             #else: GeneID is already bad => NOOP
         else:
             GeneID_dict[GeneID] = PrimAC
+    ###Closing the file
+    GeneID_file.close()
     return GeneID_dict
 
 ###Protein-Protein Interaction Parser
@@ -209,6 +214,9 @@ def interaction_parser(args):
     print("No. of times Uniprot Primary Accession found in the Uniprot Primary Accession File:", found_inPrimACFile, file = sys.stderr)
     print("No. of times Uniprot Primary Accession found in the Uniprot Secondary Accession File:", found_inSecACFile, file = sys.stderr)
     print("No. of times Uniprot Primary Accession found in the GeneID File:", found_inGeneIDFile, file = sys.stderr)
+
+    ###Closing the file 
+    interaction_file.close()
 
 ####Taking and handling command-line arguments
 def main():
