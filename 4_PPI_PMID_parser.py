@@ -38,8 +38,10 @@ def IntPMID(args):
         PMID_count = str(len(PPI_PMID_dict[Int_key]))
         interaction_out_line = (Protein_A, Protein_B, PMID_count)
         print('\t'.join(interaction_out_line))
+    ###Closing the file
+    curatedPPI_file.close()    
     return
-    curatedPPI_file.close()
+
 
 ####Taking and handling command-line arguments
 def main():
