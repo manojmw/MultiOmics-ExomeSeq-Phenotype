@@ -37,7 +37,10 @@ def checkHumanPPI(args):
         if (TaxIDs[0] == '9606') and (TaxIDs[1] == '9606'):
             HumanInt_Count += 1
             continue
-    print("\nTotal Number of Human-Human Protein Interactions: ", HumanInt_Count, "\n")        
+    print("\nTotal Number of Human-Human Protein Interactions: ", HumanInt_Count, "\n")
+
+    ###Closing the file
+    interaction_file.close()   
 
 ####Taking and handling command-line arguments
 def main():
