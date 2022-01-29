@@ -5,7 +5,7 @@ import argparse
 ##Creating dictionary from the interaction_parser output file
 
 def IntPMID(args):
-    header = ('Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Publication Count')
+    header = ('Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Publication Count', 'Publication_Identifier(s)')
     print('\t'.join(header))
 
     PPI_PMID_dict = {} ##Initializing an empty dictionary
@@ -30,16 +30,18 @@ def IntPMID(args):
         else:
             PPI_PMID_dict[Int_key] = [PMID]
     for Int_key in PPI_PMID_dict:
-        #Pubmed_Identifier = ', '.join(PPI_PMID_dict[PPI])
+
         Proteins = Int_key.split('_')
         Protein_A = Proteins[0]
         Protein_B = Proteins[1]
 
+        Pubmed_Identifier = ', '.join(PPI_PMID_dict[Int_key])
         PMID_count = str(len(PPI_PMID_dict[Int_key]))
-        interaction_out_line = (Protein_A, Protein_B, PMID_count)
+
+        interaction_out_line = (Protein_A, Protein_B, PMID_count, Pubmed_Identifier)
         print('\t'.join(interaction_out_line))
     ###Closing the file
-    curatedPPI_file.close()    
+    curatedPPI_file.close()
     return
 
 
