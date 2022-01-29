@@ -2,7 +2,7 @@
 
 import argparse
 
-##Creating dictionary from the interaction_parser output file
+##Creating dictionary from the interaction_parser.py output file
 
 def IntPMID(args):
     header = ('Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Publication Count', 'Publication_Identifier(s)')
@@ -52,10 +52,12 @@ def main():
 --------------------------------------------------------------------------------------------------------
 Program: Parses the output file produced by the interaction_parser.py, processes it and prints to STDOUT
 --------------------------------------------------------------------------------------------------------
-The output consists of three columns in .tsv format:
+The output consists of four columns in .tsv format:
   -> UniProt Primary Accession of Protein A
   -> UniProt Primary Accession of Protein B
   -> Number of Publications associated with the interaction of the above 2 proteins
+  -> PMIDs (or comma seperated list of PMIDs)
+--------------------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
