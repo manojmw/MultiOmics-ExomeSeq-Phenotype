@@ -39,7 +39,7 @@ def IntPMID(args):
         interaction_out_line = (Protein_A, Protein_B, PMID_count)
         print('\t'.join(interaction_out_line))
     return
-
+    curatedPPI_file.close()
 
 ####Taking and handling command-line arguments
 def main():
