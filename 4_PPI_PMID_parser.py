@@ -13,13 +13,14 @@ def IntPMID(args):
 
     curatedPPI_file.readline() #Skip header
 
+    ###Parsing the curated interaction file
     for line in curatedPPI_file:
         curatedPPI_fields = line.split('\t')
 
         #curatedPPI_fields[0] -> Protein_A_UniprotPrimAC
         #curatedPPI_fields[1] -> Protein_B_UniprotPrimAC
         Interactors = curatedPPI_fields[0] + '_' + curatedPPI_fields[1]
-        ##Key -> UniProt PrimAC of Protein A&B seperated by an '_'
+        ##Key -> UniProt PrimAC of Protein A & B joined together by an '_'
         ##Value -> Pubmed Identifier (PMID)
         (Int_key, PMID) = (Interactors, curatedPPI_fields[3])
         ##Check if the Key exists in PPI_PMID_dict
