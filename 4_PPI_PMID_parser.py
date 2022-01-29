@@ -5,6 +5,9 @@ import argparse
 ##Creating dictionary from the interaction_parser output file
 
 def IntPMID(args):
+    header = ('Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Publication Count')
+    print('\t'.join(header))
+
     PPI_PMID_dict = {} ##Initializing an empty dictionary
     curatedPPI_file = open(args.incuratedPPI)
 
@@ -18,21 +21,23 @@ def IntPMID(args):
         Interactors = curatedPPI_fields[0] + '_' + curatedPPI_fields[1]
         ##Key -> UniProt PrimAC of Protein A&B seperated by an '_'
         ##Value -> Pubmed Identifier (PMID)
-        (PPI, PMID) = (Interactors, curatedPPI_fields[3])
+        (Int_key, PMID) = (Interactors, curatedPPI_fields[3])
         ##Check if the Key exists in PPI_PMID_dict
         ##If yes, then store the values as a list
-        if PPI_PMID_dict.get(PPI, False):
-            PPI_PMID_dict[PPI].append(PMID)
+        if PPI_PMID_dict.get(Int_key, False):
+            PPI_PMID_dict[Int_key].append(PMID)
         else:
-            PPI_PMID_dict[PPI] = [PMID]
-    for PPI in PPI_PMID_dict:
+            PPI_PMID_dict[Int_key] = [PMID]
+    for Int_key in PPI_PMID_dict:
         #Pubmed_Identifier = ', '.join(PPI_PMID_dict[PPI])
-        PMID_count = str(len(PPI_PMID_dict[PPI]))
-        interaction_out_line = (PPI, PMID_count)
+        Proteins = Int_key.split('_')
+        Protein_A = Proteins[0]
+        Protein_B = Proteins[1]
+
+        PMID_count = str(len(PPI_PMID_dict[Int_key]))
+        interaction_out_line = (Protein_A, Protein_B, PMID_count)
         print('\t'.join(interaction_out_line))
     return
-
-
 
 
 ####Taking and handling command-line arguments
@@ -42,9 +47,10 @@ def main():
 --------------------------------------------------------------------------------------------------------
 Program: Parses the output file produced by the interaction_parser.py, processes it and prints to STDOUT
 --------------------------------------------------------------------------------------------------------
-The output consists of two columns in .tsv format:
-  -> Protein-Protein Interaction
-  -> Number of Pubmed Identifier(s)
+The output consists of three columns in .tsv format:
+  -> UniProt Primary Accession of Protein A
+  -> UniProt Primary Accession of Protein B
+  -> Number of Publications associated with the interaction of the above 2 proteins
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
