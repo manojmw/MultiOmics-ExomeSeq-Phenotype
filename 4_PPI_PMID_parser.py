@@ -17,7 +17,7 @@ def IntPMID(args):
     for line in curatedPPI_file:
         curatedPPI_fields = line.split('\t')
 
-        ###Filtering of the Interactions based on Interaction Detection Method
+        ###Filtering out Interactions based on Interaction Detection Method
         IntDetMethod = curatedPPI_fields[2]
         ##MI:0004 -> affinity chromatography technology
         ##MI:0096 -> pull down
@@ -29,9 +29,11 @@ def IntPMID(args):
             #curatedPPI_fields[0] -> Protein_A_UniprotPrimAC
             #curatedPPI_fields[1] -> Protein_B_UniprotPrimAC
             Interactors = curatedPPI_fields[0] + '_' + curatedPPI_fields[1]
+
             ##Key -> UniProt PrimAC of Protein A & B joined together by an '_'
             ##Value -> Pubmed Identifier (PMID)
             (Int_key, PMID) = (Interactors, curatedPPI_fields[3])
+
             ##Check if the Key exists in PPI_PMID_dict
             ##If yes, then store the values (PMIDs) as a list
             if PPI_PMID_dict.get(Int_key, False):
@@ -52,6 +54,7 @@ def IntPMID(args):
 
         interaction_out_line = (Protein_A, Protein_B, PMID_count, Pubmed_Identifier)
         print('\t'.join(interaction_out_line))
+
     ###Closing the file
     curatedPPI_file.close()
     return
@@ -68,7 +71,7 @@ The output consists of four columns in .tsv format:
   -> UniProt Primary Accession of Protein A
   -> UniProt Primary Accession of Protein B
   -> Number of Publications associated with the interaction of the above 2 proteins
-  -> PMIDs (or comma seperated list of PMIDs)
+  -> PMID (or comma seperated list of PMIDs)
 --------------------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
