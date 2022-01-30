@@ -17,19 +17,30 @@ def IntPMID(args):
     for line in curatedPPI_file:
         curatedPPI_fields = line.split('\t')
 
-        #curatedPPI_fields[0] -> Protein_A_UniprotPrimAC
-        #curatedPPI_fields[1] -> Protein_B_UniprotPrimAC
-        Interactors = curatedPPI_fields[0] + '_' + curatedPPI_fields[1]
-        ##Key -> UniProt PrimAC of Protein A & B joined together by an '_'
-        ##Value -> Pubmed Identifier (PMID)
-        (Int_key, PMID) = (Interactors, curatedPPI_fields[3])
-        ##Check if the Key exists in PPI_PMID_dict
-        ##If yes, then store the values as a list
-        if PPI_PMID_dict.get(Int_key, False):
-            if PMID not in PPI_PMID_dict[Int_key]: ###Avoiding duplicate PMIDs
-                PPI_PMID_dict[Int_key].append(PMID)
-        else:
-            PPI_PMID_dict[Int_key] = [PMID]
+        ###Filtering of the Interactions based on Interaction Detection Method
+        IntDetMethod = curatedPPI_fields[2]
+        ##MI:0004 -> affinity chromatography technology
+        ##MI:0096 -> pull down
+        ##MI:0019 -> coimmunoprecipitation
+        ##MI:0006 -> anti bait coimmunoprecipitation
+        ##MI:0007 -> anti tag coimmunoprecipitation
+
+        if IntDetMethod not in ['MI:0004', 'MI:0096', 'MI:0019', 'MI:0006', 'MI:0007']:
+            #curatedPPI_fields[0] -> Protein_A_UniprotPrimAC
+            #curatedPPI_fields[1] -> Protein_B_UniprotPrimAC
+            Interactors = curatedPPI_fields[0] + '_' + curatedPPI_fields[1]
+            ##Key -> UniProt PrimAC of Protein A & B joined together by an '_'
+            ##Value -> Pubmed Identifier (PMID)
+            (Int_key, PMID) = (Interactors, curatedPPI_fields[3])
+            ##Check if the Key exists in PPI_PMID_dict
+            ##If yes, then store the values (PMIDs) as a list
+            if PPI_PMID_dict.get(Int_key, False):
+                if PMID not in PPI_PMID_dict[Int_key]: ###Avoiding duplicate PMIDs
+                    PPI_PMID_dict[Int_key].append(PMID)
+            else:
+                PPI_PMID_dict[Int_key] = [PMID]
+
+    ###Processing the dictionary and printing to STDOUT
     for Int_key in PPI_PMID_dict:
 
         Proteins = Int_key.split('_')
