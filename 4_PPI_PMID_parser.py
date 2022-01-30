@@ -26,7 +26,8 @@ def IntPMID(args):
         ##Check if the Key exists in PPI_PMID_dict
         ##If yes, then store the values as a list
         if PPI_PMID_dict.get(Int_key, False):
-            PPI_PMID_dict[Int_key].append(PMID)
+            if PMID not in PPI_PMID_dict[Int_key]: ###Avoiding duplicate PMIDs
+                PPI_PMID_dict[Int_key].append(PMID)
         else:
             PPI_PMID_dict[Int_key] = [PMID]
     for Int_key in PPI_PMID_dict:
