@@ -9,7 +9,7 @@ def uniprot_parser(args):
         with open(args.outPrimAC, 'w') as PrimAC_outfile, open(args.outSecAC, 'w') as SecAC_outfile, open(args.outGeneID, 'w') as GeneID_outfile:
             PrimAC_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs']
             SecAC_header = ['Primary_AC', 'Secondary_ACs']
-            GeneID_header = ['Primary_AC', 'Secondary_GeneID']
+            GeneID_header = ['Primary_AC', 'GeneID']
             print('\t'.join(PrimAC_header), file = PrimAC_outfile)
             print('\t'.join(SecAC_header), file = SecAC_outfile)
             print('\t'.join(GeneID_header), file = GeneID_outfile)
