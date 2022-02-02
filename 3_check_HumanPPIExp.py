@@ -3,7 +3,7 @@
 import re
 import argparse
 
-###Program to check the number of Human-Human Protein Interactions
+###Program to check the number of Human-Human Protein Interaction experiments
 
 def checkHumanPPI(args):
 
