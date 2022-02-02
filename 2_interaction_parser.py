@@ -72,8 +72,6 @@ def GeneID(args):
 
 ###Protein-Protein Interaction Parser
 def interaction_parser(args):
-    header_interaction = ['Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Interaction_Detect_Method', 'PMID', 'Interaction_type']
-    print("\t".join(header_interaction))
 
     ###Calling dictionary functions
     Primary_AC_dict = PrimAC(args)
@@ -215,7 +213,7 @@ def interaction_parser(args):
     print("No. of times Uniprot Primary Accession found in the Uniprot Secondary Accession File:", found_inSecACFile, file = sys.stderr)
     print("No. of times Uniprot Primary Accession found in the GeneID File:", found_inGeneIDFile, file = sys.stderr)
 
-    ###Closing the file 
+    ###Closing the file
     interaction_file.close()
 
 ####Taking and handling command-line arguments
