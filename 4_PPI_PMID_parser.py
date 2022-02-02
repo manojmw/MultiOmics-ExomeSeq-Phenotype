@@ -1,20 +1,21 @@
 #!/usr/bin/python
 
-import argparse
+import sys, argparse
 
 ##Creating dictionary from the interaction_parser.py output file
 
-def IntPMID(args):
-    header = ('Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Publication Count', 'Publication_Identifier(s)')
+def IntPMID(curatedIntfile):
+
+    header = ('Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Publication_Count', 'Publication_Identifier(s)')
     print('\t'.join(header))
 
     PPI_PMID_dict = {} ##Initializing an empty dictionary
-    curatedPPI_file = open(args.incuratedPPI)
 
-    curatedPPI_file.readline() #Skip header
+    curatedIntfile = sys.stdin
 
     ###Parsing the curated interaction file
-    for line in curatedPPI_file:
+    for line in curatedIntfile:
+
         curatedPPI_fields = line.split('\t')
 
         ###Filtering out Interactions based on Interaction Detection Method
@@ -55,8 +56,6 @@ def IntPMID(args):
         interaction_out_line = (Protein_A, Protein_B, PMID_count, Pubmed_Identifier)
         print('\t'.join(interaction_out_line))
 
-    ###Closing the file
-    curatedPPI_file.close()
     return
 
 
@@ -65,21 +64,23 @@ def main():
     file_parser = argparse.ArgumentParser(description =
     """
 --------------------------------------------------------------------------------------------------------
-Program: Parses the output file produced by the interaction_parser.py, processes it and prints to STDOUT
+Program: Parses the output files produced by the interaction_parser.py, processes it and prints to STDOUT
 --------------------------------------------------------------------------------------------------------
-The output consists of four columns in .tsv format:
+The script should be run using the below command:
+
+    % cat curatedPPI_file1 curatedPPI_file2 | python 4_PPI_PMID_parser.py
+
+-> curatedPPI_files: output files produced by the interaction_parser.py
+
+The output (High-quality Human Interactome) consists of four columns in .tsv format:
   -> UniProt Primary Accession of Protein A
   -> UniProt Primary Accession of Protein B
   -> Number of Publications associated with the interaction of the above 2 proteins
-  -> PMID (or comma seperated list of PMIDs)
+  -> PMID (or a comma seperated list of PMIDs)
 --------------------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
-    required = file_parser.add_argument_group('Required arguments')
-    optional = file_parser.add_argument_group('Optional arguments')
-
-    required.add_argument('--incuratedPPI', metavar = "Input File", dest = "incuratedPPI", help = 'Input File Name (Curated Protein-protein Interaction file)', required = True)
     file_parser.set_defaults(func=IntPMID)
     args = file_parser.parse_args()
     args.func(args)
