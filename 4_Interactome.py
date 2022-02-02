@@ -20,13 +20,16 @@ def IntPMID(curatedIntfile):
 
         ###Filtering out Interactions based on Interaction Detection Method
         IntDetMethod = curatedPPI_fields[2]
-        ##MI:0004 -> affinity chromatography technology
         ##MI:0096 -> pull down
-        ##MI:0019 -> coimmunoprecipitation
-        ##MI:0006 -> anti bait coimmunoprecipitation
-        ##MI:0007 -> anti tag coimmunoprecipitation
+        ##MI:0254 -> genetic interference
+        ##MI:0686 -> unspecified method
 
-        if IntDetMethod not in ['MI:0004', 'MI:0096', 'MI:0019', 'MI:0006', 'MI:0007']:
+        ###Filtering out Interactions based on Interaction Type
+        IntType = curatedPPI_fields[4].rstrip('\n')
+        ##MI:0407 -> direct interaction
+        ##MI:0915 -> physical association
+
+        if IntDetMethod not in ['MI:0096', 'MI:0254', 'MI:0686'] and IntType in ['MI:0407', 'MI:0915']:
             #curatedPPI_fields[0] -> Protein_A_UniprotPrimAC
             #curatedPPI_fields[1] -> Protein_B_UniprotPrimAC
             Interactors = curatedPPI_fields[0] + '_' + curatedPPI_fields[1]
