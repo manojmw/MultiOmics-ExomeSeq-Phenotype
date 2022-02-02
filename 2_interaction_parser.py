@@ -205,7 +205,11 @@ def interaction_parser(args):
             continue
 
         #Here we grabbed all the necessary data, print to the file and move on to the next line
-        interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
+        if Prots[0] < Prots[1]: ###Sorting the PrimAC
+            interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
+        else:
+            interaction_out_line = [Prots[1], Prots[0], IntDetectMethod, PMID, Interaction_type]
+
         print("\t".join(interaction_out_line))
 
     ###Debug counter
