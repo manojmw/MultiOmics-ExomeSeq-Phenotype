@@ -79,10 +79,13 @@ def interaction_parser(args):
     GeneID_dict = GeneID(args)
 
     ###Debug counters
-    ###To check how many times the ACs are found in the respective dictionaries
+    ###To check how many times the UniProt Primary ACs are found in the respective dictionaries
     found_inPrimACFile = 0
     found_inSecACFile = 0
     found_inGeneIDFile = 0
+
+    PrimAC_inMainCols = 0 ##When PrimAC is identified using first 2 columns of the Interaction file
+    PrimAC_inAltCols = 0 ##When PrimAC is identified using AltID columns of the Interaction file
 
     ###User input -> Protein-protein Interaction file
     interaction_file = open(args.inInteraction)
@@ -118,6 +121,10 @@ def interaction_parser(args):
         PMID = ''
         Interaction_type = ''
 
+        ##line_fields[15] -> Expansion method(s) in mitab 2.7
+        ##For true binary interactions, this column will be '-'
+        ##thus, eliminates spoke expansion
+        #if line_fields[15] == '-':
         for protindex in [0,1]:
             if (re_uniprot.match(line_fields[protindex])):
                 ID = re_uniprot.match(line_fields[protindex]).group(2)
@@ -125,6 +132,7 @@ def interaction_parser(args):
                 if Primary_AC_dict.get(ID, False):
                     Prots[protindex] = ID
                     found_inPrimACFile += 1
+                    PrimAC_inMainCols += 1
                     continue
             elif (re_uniprot_missed.match(line_fields[protindex])):
                 sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
@@ -134,6 +142,7 @@ def interaction_parser(args):
                 if GeneID_dict.get(ID, "-1") != "-1":
                     Prots[protindex] = GeneID_dict[ID]
                     found_inGeneIDFile += 1
+                    PrimAC_inMainCols += 1
                     continue
             elif (re_GeneID_missed.match(line_fields[protindex])):
                 sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
@@ -149,6 +158,7 @@ def interaction_parser(args):
                     if Primary_AC_dict.get(ID, False):
                         Prots[protindex] = ID
                         found_inPrimACFile += 1
+                        PrimAC_inAltCols += 1
                         # we want "next protindex" but python doesn't have this
                         ##So we break and exit the loop
                         break
@@ -157,6 +167,7 @@ def interaction_parser(args):
                         ###Use the corresponding Primary AC
                         Prots[protindex] = Secondary_AC_dict[ID]
                         found_inSecACFile += 1
+                        PrimAC_inAltCols += 1
                         break
                 elif (re_uniprot_missed.match(altID)):
                     sys.exit("altID "+altID+" is Uniprot Accession but failed to grab it for line:\n" + line)
@@ -166,6 +177,7 @@ def interaction_parser(args):
                     if GeneID_dict.get(ID, "-1") != "-1":
                         Prots[protindex] = GeneID_dict[ID]
                         found_inGeneIDFile += 1
+                        PrimAC_inAltCols += 1
                         break
                 elif (re_GeneID_missed.match(altID)):
                     sys.exit("altID "+altID+" is a GeneID but failed to grab it for line:\n" + line)
@@ -213,9 +225,11 @@ def interaction_parser(args):
         print("\t".join(interaction_out_line))
 
     ###Debug counter
-    print("No. of times Uniprot Primary Accession found in the Uniprot Primary Accession File:", found_inPrimACFile, file = sys.stderr)
-    print("No. of times Uniprot Primary Accession found in the Uniprot Secondary Accession File:", found_inSecACFile, file = sys.stderr)
-    print("No. of times Uniprot Primary Accession found in the GeneID File:", found_inGeneIDFile, file = sys.stderr)
+    print("No. of times Uniprot Primary Accession identified using the Uniprot Primary Accession File:", found_inPrimACFile, file = sys.stderr)
+    print("No. of times Uniprot Primary Accession identified using the Uniprot Secondary Accession File:", found_inSecACFile, file = sys.stderr)
+    print("No. of times Uniprot Primary Accession identified using the GeneID File:", found_inGeneIDFile, file = sys.stderr)
+    print("No. of times Uniprot Primary Accession identified using the first 2 columns of the Interaction file:", PrimAC_inMainCols, file = sys.stderr)
+    print("No. of times Uniprot Primary Accession identified using the AltID columns of the Interaction file:", PrimAC_inAltCols, file = sys.stderr)
 
     ###Closing the file
     interaction_file.close()
