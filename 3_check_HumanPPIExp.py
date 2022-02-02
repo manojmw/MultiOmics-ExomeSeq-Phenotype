@@ -13,7 +13,7 @@ def checkHumanPPI(args):
     ###Skip header
     interaction_file.readline()
 
-    ###Keeping the count of Human-Human Interactions
+    ###Keeping the count of Human-Human Interaction experiments
     HumanInt_Count = 0
 
     ###Compiling all the regular expressions###
