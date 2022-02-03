@@ -60,11 +60,12 @@ def IntPMID(curatedIntfile):
         Protein_B = Proteins[1]
 
         Pubmed_Identifier = ', '.join(PPI_PMID_dict[Int_key])
-        PMID_count = str(len(PPI_PMID_dict[Int_key]))
-        Exp_count = str(len(PPI_Exp_dict[Int_key]))
+        PMID_count = len(PPI_PMID_dict[Int_key])
+        Exp_count = len(PPI_Exp_dict[Int_key])
 
-        interaction_out_line = (Protein_A, Protein_B, PMID_count, Pubmed_Identifier, Exp_count)
-        print('\t'.join(interaction_out_line))
+        if (PMID_count >= 2) or (PMID_count == 1 and Exp_count >= 3):
+            interaction_out_line = (Protein_A, Protein_B, str(PMID_count), Pubmed_Identifier, str(Exp_count))
+            print('\t'.join(interaction_out_line))
 
     return
 
