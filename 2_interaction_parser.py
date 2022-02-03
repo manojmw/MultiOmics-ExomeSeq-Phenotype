@@ -262,6 +262,13 @@ def main():
 ----------------------------------------------------------------------------------------------------
 Program: Parses a MITAB 2.5 or 2.7 file, maps to the uniprot file and prints to STDOUT in tsv format
 ----------------------------------------------------------------------------------------------------
+The output (Human-Human Protein Experiments) consists of five columns in .tsv format:
+ -> UniProt Primary Accession of Protein A
+ -> UniProt Primary Accession of Protein B
+ -> Interaction Detection Method
+ -> Pubmed Identifier
+ -> Interaction type
+ ----------------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
