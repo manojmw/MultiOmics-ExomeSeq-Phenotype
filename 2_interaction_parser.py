@@ -89,6 +89,13 @@ def interaction_parser(args):
     PrimAC_foundwithGeneID = 0 ##When PrimAC is identified using the GeneIDs
     PrimAC_foundwithSecAC = 0 ##When PrimAC is identified using the Secondary_ACs
 
+    ##Keeping count of the lines where PrimAC of proteins not found
+    notfound_Protein_A_PrimAC = 0
+    notfound_Protein_B_PrimAC = 0
+
+    ##Keeping count of PMID not found
+    notfound_PMID = 0
+
     ###User input -> Protein-protein Interaction file
     interaction_file = open(args.inInteraction)
 
@@ -126,7 +133,9 @@ def interaction_parser(args):
         ##line_fields[15] -> Expansion method(s) in mitab 2.7
         ##For true binary interactions, this column will be '-'
         ##thus, eliminates spoke expansion
-        #if line_fields[15] == '-':
+        if (len(line_fields)>15) and (line_fields[15] != '-'):
+            continue
+        #else if mitab 2.7 no spoke expansion
         for protindex in [0,1]:
             if (re_uniprot.match(line_fields[protindex])):
                 ID = re_uniprot.match(line_fields[protindex]).group(2)
@@ -187,12 +196,14 @@ def interaction_parser(args):
                 elif (re_GeneID_missed.match(altID)):
                     sys.exit("altID "+altID+" is a GeneID but failed to grab it for line:\n" + line)
                 #else: altID not recognized, look at next altID ie NOOP
-            #if protindex==0 and we didn't recognize the partner, no point in looking for second partner
-            if Prots[protindex] == '':
-                break
-        #done looking for both partners, if we didn't find them both move to next line
+
+        if Prots[0] == '':
+            notfound_Protein_A_PrimAC += 1 ##Keep count of the missing UniProt PrimAC of protein A
         if Prots[1] == '':
-            #testing Prots[1] is sufficient, because if Prots[0] not found we broke
+            notfound_Protein_B_PrimAC += 1 ##Keep count of the missing UniProt PrimAC of protein B
+
+        #if either Uniprot PrimAC is not found
+        if Prots[0] == '' or Prots[1] == '':
             continue #to next line
 
         #if we get here both partners were found, grab the remaining data
@@ -216,6 +227,7 @@ def interaction_parser(args):
             sys.exit("Failed to grab the Interaction_type for line:\n" + line)
         ###If no PMID, skip line
         if (PMID == ''):
+            notfound_PMID += 1
             continue
         ###We want only Human-Human Interactions
         if (Primary_AC_dict[Prots[0]] != '9606') or (Primary_AC_dict[Prots[1]] != '9606'):
@@ -229,7 +241,10 @@ def interaction_parser(args):
 
         print("\t".join(interaction_out_line))
 
-    ###Debug counter
+    ###Debug counters
+    print("\nNo. of times Uniprot Primary Accession not found for Protein A:", notfound_Protein_A_PrimAC, file = sys.stderr)
+    print("No. of times Uniprot Primary Accession not found for Protein B:", notfound_Protein_B_PrimAC, file = sys.stderr)
+    print("\nNo. of times Pubmed ID not found for the Interaction:", notfound_PMID, file = sys.stderr)
     print("\nNo. of times Uniprot Primary Accession identified using the Uniprot Primary Accession File:", found_inPrimACFile, file = sys.stderr)
     print("No. of times Uniprot Primary Accession identified using the Uniprot Secondary Accession File:", found_inSecACFile, file = sys.stderr)
     print("No. of times Uniprot Primary Accession identified using the GeneID File:", found_inGeneIDFile, file = sys.stderr)
