@@ -6,10 +6,11 @@ import sys, argparse
 
 def IntPMID(curatedIntfile):
 
-    header = ('Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Publication_Count', 'Publication_Identifier(s)')
+    header = ('Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Publication_Count', 'Publication_Identifier(s)', 'Experiment_count')
     print('\t'.join(header))
 
-    PPI_PMID_dict = {} ##Initializing an empty dictionary
+    PPI_PMID_dict = {} ###Dcitionary for interactions
+    PPI_Exp_dict = {} ###Dcitionary for experiments
 
     curatedIntfile = sys.stdin
 
@@ -46,6 +47,11 @@ def IntPMID(curatedIntfile):
             else:
                 PPI_PMID_dict[Int_key] = [PMID]
 
+            if PPI_Exp_dict.get(Int_key, False):
+                PPI_Exp_dict[Int_key].append(PMID) ##Not Avoiding duplicate PMIDs to keep the count of experiments
+            else:
+                PPI_Exp_dict[Int_key] = [PMID]
+
     ###Processing the dictionary and printing to STDOUT
     for Int_key in PPI_PMID_dict:
 
@@ -55,8 +61,9 @@ def IntPMID(curatedIntfile):
 
         Pubmed_Identifier = ', '.join(PPI_PMID_dict[Int_key])
         PMID_count = str(len(PPI_PMID_dict[Int_key]))
+        Exp_count = str(len(PPI_Exp_dict[Int_key]))
 
-        interaction_out_line = (Protein_A, Protein_B, PMID_count, Pubmed_Identifier)
+        interaction_out_line = (Protein_A, Protein_B, PMID_count, Pubmed_Identifier, Exp_count)
         print('\t'.join(interaction_out_line))
 
     return
@@ -75,11 +82,12 @@ The script should be run using the below command:
 
 -> curatedPPI_files: output files produced by the interaction_parser.py
 
-The output (High-quality Human Interactome) consists of four columns in .tsv format:
+The output (High-quality Human Interactome) consists of five columns in .tsv format:
   -> UniProt Primary Accession of Protein A
   -> UniProt Primary Accession of Protein B
   -> Number of Publications associated with the interaction of the above 2 proteins
   -> PMID (or a comma seperated list of PMIDs)
+  -> Count of Experiments for each interaction
 --------------------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
