@@ -9,8 +9,8 @@ def IntPMID(curatedIntfile):
     header = ('Protein_A_UniprotPrimAC', 'Protein_B_UniprotPrimAC', 'Publication_Count', 'Publication_Identifier(s)', 'Experiment_count')
     print('\t'.join(header))
 
-    PPI_PMID_dict = {} ###Dcitionary for interactions
-    PPI_Exp_dict = {} ###Dcitionary for experiments
+    PPI_PMID_dict = {} ###Dictionary for interactions
+    PPI_Exp_dict = {} ###Dictionary for experiments
 
     curatedIntfile = sys.stdin
 
