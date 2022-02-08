@@ -53,7 +53,7 @@ def IntPMID(curatedIntfile):
                 PPI_Exp_dict[Int_key] = [PMID]
 
     ###Processing the dictionary and printing to STDOUT
-    for Int_key in PPI_PMID_dict:
+    for Int_key, Int_key in zip(PPI_PMID_dict, PPI_Exp_dict):
 
         Proteins = Int_key.split('_')
         Protein_A = Proteins[0]
