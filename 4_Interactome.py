@@ -71,6 +71,9 @@ def IntPMID(curatedIntfile):
             PMID_count = len(PPI_PMID_dict[Int_key1])
             Exp_count = len(PPI_IntDetMethod_dict[Int_key2])
 
+            ###Final Quality Control
+            ##At least 2 publications for a given PPI
+            ##OR if it is one publication, then at least 3 experiments
             if ((PMID_count >= 2) or (PMID_count == 1 and Exp_count >= 3)):
                 interaction_out_line = (Protein_A, Protein_B, str(PMID_count), Pubmed_Identifier, str(Exp_count))
                 print('\t'.join(interaction_out_line))
