@@ -16,7 +16,7 @@ def checkHumanPPI(args):
     ###Keeping the count of Human-Human Interaction experiments
     HumanInt_Count = 0
 
-    ###Compiling all the regular expressions###
+    ###Compiling regular expression###
 
     ###TaxID id for protein
     re_taxID = re.compile('^taxid:(9606)')
@@ -46,9 +46,9 @@ def checkHumanPPI(args):
 def main():
     file_parser = argparse.ArgumentParser(description =
     """
------------------------------------------------------------------------------------------------------------
-Program: Parses a MITAB 2.5 or 2.7 file and prints the number of Human-Human Protein Interactions to STDOUT
------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------
+Program: Parses a MITAB 2.5 or 2.7 file and prints the number of Human-Human Protein Interaction experiments to STDOUT
+----------------------------------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
