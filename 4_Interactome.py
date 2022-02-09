@@ -2,7 +2,7 @@
 
 import sys, argparse
 
-##Creating dictionary from the interaction_parser.py output file
+##Creating dictionary from the interaction_parser.py output files
 
 def IntPMID(curatedIntfile):
 
@@ -90,7 +90,7 @@ Program: Parses the output files produced by the interaction_parser.py, processe
 --------------------------------------------------------------------------------------------------------
 The script should be run using the below command:
 
-    % cat curatedPPI_file1 curatedPPI_file2 | python 4_PPI_PMID_parser.py
+    % cat curatedPPI_file1 curatedPPI_file2 | python 4_Interactome.py
 
 -> curatedPPI_files: output files produced by the interaction_parser.py
 
