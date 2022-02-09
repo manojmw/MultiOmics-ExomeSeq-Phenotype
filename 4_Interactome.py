@@ -88,7 +88,7 @@ def main():
 --------------------------------------------------------------------------------------------------------
 Program: Parses the output files produced by the interaction_parser.py, processes it and prints to STDOUT
 --------------------------------------------------------------------------------------------------------
-The script should be run using the below command:
+Usage:
 
     % cat curatedPPI_file1 curatedPPI_file2 | python 4_Interactome.py
 
