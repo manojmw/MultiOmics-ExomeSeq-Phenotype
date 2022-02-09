@@ -1,14 +1,14 @@
 #!/usr/bin/python
 
 import re
-import argparse
+import argparse, sys
 
 ###Program to check the number of Human-Human Protein Interaction experiments
 
-def checkHumanPPI(args):
+def checkHumanPPI(interaction_file):
 
     ##User input -> Protein-protein Interaction file
-    interaction_file = open(args.inInteraction)
+    interaction_file = sys.stdin
 
     ###Skip header
     interaction_file.readline()
@@ -49,13 +49,16 @@ def main():
 ----------------------------------------------------------------------------------------------------------------------
 Program: Parses a MITAB 2.5 or 2.7 file and prints the number of Human-Human Protein Interaction experiments to STDOUT
 ----------------------------------------------------------------------------------------------------------------------
+Usage:
+
+    % python 3_check_HumanPPIExp.py < Input file
+                        OR
+    % cat Input file | python 3_check_HumanPPIExp.py
+----------------------------------------------------------------------------------------------------------------------
+
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
-    required = file_parser.add_argument_group('Required arguments')
-    optional = file_parser.add_argument_group('Optional arguments')
-
-    required.add_argument('--inInteraction', metavar = "Input File", dest = "inInteraction", help = 'Input File Name (Protein-protein Interaction file)', required = True)
     file_parser.set_defaults(func=checkHumanPPI)
     args = file_parser.parse_args()
     args.func(args)
