@@ -39,7 +39,7 @@ def main():
 --------------------------------------------------------------------------------------------------------------------
 Program: Parses the output file produced by Interactome.py, assigns a score to each Interaction and prints to STDOUT
 --------------------------------------------------------------------------------------------------------------------
-The script should be run using one of the below commands:
+Usage:
 
     % python 5_ModuleInputFile.py < Input file
                         OR
