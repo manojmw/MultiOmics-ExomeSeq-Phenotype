@@ -9,8 +9,8 @@ import argparse
 # i.e. Uniprot Primary Accession, Uniprot Secondary Accession, GeneID, TaxID, ENST(s) and ENSG(s)
 # Generates 3 output files
 # Output File 1 -> a tab-seperated file with four columns UniProt PrimAC, TaxID, ENST(s) and ENSG(s)
-# Output File 2 -> a tab-seperated file with 2 columns UniProt SecAC and UniProt PrimAC
-# Output File 3 -> a tab-seperated file with four columns GeneID and UniProt PrimAC
+# Output File 2 -> a tab-seperated file with two columns UniProt SecAC and UniProt PrimAC
+# Output File 3 -> a tab-seperated file with two columns GeneID and UniProt PrimAC
 def uniprot_parser(args):
     try:
         with open(args.outPrimAC, 'w') as PrimAC_outfile, open(args.outSecAC, 'w') as SecAC_outfile, open(args.outGeneID, 'w') as GeneID_outfile:
