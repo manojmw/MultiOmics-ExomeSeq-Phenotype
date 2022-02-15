@@ -3,7 +3,14 @@
 import re
 import argparse
 
-###UniProt Parser
+# Function for the UniProt Parser
+# Takes Uniprot file as an input
+# Processes each record by grabbing the REQUIRED FIELDS
+# i.e. Uniprot Primary Accession, Uniprot Secondary Accession, GeneID, TaxID, ENST(s) and ENSG(s)
+# Generates 3 output files
+# Output File 1 -> a tab-seperated file with four columns UniProt PrimAC, TaxID, ENST(s) and ENSG(s)
+# Output File 2 -> a tab-seperated file with 2 columns UniProt SecAC and UniProt PrimAC
+# Output File 3 -> a tab-seperated file with four columns GeneID and UniProt PrimAC
 def uniprot_parser(args):
     try:
         with open(args.outPrimAC, 'w') as PrimAC_outfile, open(args.outSecAC, 'w') as SecAC_outfile, open(args.outGeneID, 'w') as GeneID_outfile:
@@ -14,38 +21,38 @@ def uniprot_parser(args):
             print('\t'.join(SecAC_header), file = SecAC_outfile)
             print('\t'.join(GeneID_header), file = GeneID_outfile)
 
-            ###Initializing variables/accumulators
+            # Initializing variables/accumulators
             ACs = ''
             TaxID = 0
             ENSTs = []
             ENSGs = []
             GeneIDs = []
 
-            ###Compiling all the regular expressions###
+            # Compiling all the regular expressions###
 
-            ###Accession Numbers (AC), strip trailing ';'
+            # Accession Numbers (AC), strip trailing ';'
             re_AC = re.compile('^AC\s+(\S.*);$')
-            ###Organism (TaxID) from the OX line; some lines violate the uniprot spec
-            ###Grab only TaxID even if additional info comes after the TaxID
-            ###eg NCBI_TaxID=32201 {ECO:0000312|EMBL:ABW86978.1};
+            # Organism (TaxID) from the OX line; some lines violate the uniprot spec
+            # Grab only TaxID even if additional info comes after the TaxID
+            # eg NCBI_TaxID=32201 {ECO:0000312|EMBL:ABW86978.1};
             re_TaxID = re.compile('^OX\s+NCBI_TaxID=(\d+)[; ]')
-            ###Ensembl transcripts and Genes from the DR line
+            # Ensembl transcripts and Genes from the DR line
             re_ENS = re.compile('^DR\s+Ensembl; (\w+); \w+; (\w+)\.')
-            ###GeneIDs from the DR line
+            # GeneIDs from the DR line
             re_GID = re.compile('^DR\s+GeneID;\s+(\d+);')
 
-            ###Open and parse the input file
+            # Open and parse the input file
 
             for line in open(args.inuniprot):
-                line = line.rstrip('\r\n') ##removing trailing new lines and carriage returns
+                line = line.rstrip('\r\n') # removing trailing new lines and carriage returns
 
-                ###Matching and retrieving the records
+                # Matching and retrieving the records
                 if (re_AC.match(line)):
                     if (ACs != ''):
-                        #Add trailing separator to the previous entries - distingushes each AC
+                        # Add trailing separator to the previous entries - distingushes each AC
                         ACs += '; '
                     ACs += re_AC.match(line).group(1)
-                elif (re.match(r'^AC\s', line)): ##If any AC line is missed -> break the loop
+                elif (re.match(r'^AC\s', line)): # If any AC line is missed -> break the loop
                     print("Error: Missed the AC line %s\n", line)
                     break
                 elif (re_TaxID.match(line)):
@@ -54,7 +61,7 @@ def uniprot_parser(args):
                         break
                     TaxID = re_TaxID.match(line).group(1)
                 elif (re.match(r'^OX\s',line)):
-                    print("Error: Missed the OX line %s\n", line) ##If any OX line is missed -> break the loop
+                    print("Error: Missed the OX line %s\n", line) # If any OX line is missed -> break the loop
                     break
                 elif (re_ENS.match(line)):
                     ENS_match = re_ENS.match(line)
@@ -62,27 +69,27 @@ def uniprot_parser(args):
                     ENSG = ENS_match.group(2)
                     if ENSG not in ENSGs:
                         ENSGs.append(ENSG)
-                elif (re.match(r'^DR\s+Ensembl;', line)): ##If any DR line wtih Ensembl IDs is missed -> break the loop
+                elif (re.match(r'^DR\s+Ensembl;', line)): # If any DR line wtih Ensembl IDs is missed -> break the loop
                     print("Error: Failed to get all the Ensembl Identifiers\n", ACs, line)
                     break
                 elif (re_GID.match(line)):
                     GeneIDs.append(re_GID.match(line).group(1))
-                elif (re.match(r'^DR\s+GeneID.*', line)): ##If any DR line wtih GeneIDs is missed -> break the loop
+                elif (re.match(r'^DR\s+GeneID.*', line)): # If any DR line wtih GeneIDs is missed -> break the loop
                     print("Error: Missed the GeneIDs \n", ACs, line)
                     break
-                ###Processing the matched records of the protein
+                # Processing the matched records of the protein
                 elif (line == '//'):
                     # ignore entry if bad species; Human = 9606, Mouse = 10090
                     if ((TaxID == '9606') or (TaxID == '10090')):
                         try:
                             ACs_split = ACs.split('; ')
-                            primary_AC = ACs_split[0] ##Grab only the first AC
-                            secondary_ACs = ACs_split[1:] ##Grab the remaining ACs
+                            primary_AC = ACs_split[0] # Grab only the first AC
+                            secondary_ACs = ACs_split[1:] # Grab the remaining ACs
                         except:
                             print('Error: Failed to store Accession IDs for the protein: \t', ACs)
                             break
                         try:
-                            ##Processing ENSTs and ENSGs
+                            # Processing ENSTs and ENSGs
                             ENSTs = ','.join(ENSTs)
                             ENSGs = ','.join(ENSGs)
                         except:
@@ -90,7 +97,7 @@ def uniprot_parser(args):
                             break
 
 
-                        ###Writing to output files
+                        # Writing to output files
                         primaryAC_line = [primary_AC, TaxID, ENSTs, ENSGs]
                         print('\t'.join(primaryAC_line), file = PrimAC_outfile)
 
@@ -102,7 +109,7 @@ def uniprot_parser(args):
                             GeneID_line = [primary_AC, GeneID]
                             print('\t'.join(GeneID_line), file = GeneID_outfile)
 
-                    #Reset all accumulators and move on to the next record
+                    # Reset all accumulators and move on to the next record
                     ACs = ''
                     TaxID = 0
                     ENSTs = []
@@ -110,7 +117,7 @@ def uniprot_parser(args):
                     GeneIDs = []
                     continue
 
-        ###Closing the files
+        # Closing the files
         PrimAC_outfile.close()
         SecAC_outfile.close()
         GeneID_outfile.close()
@@ -118,7 +125,7 @@ def uniprot_parser(args):
     except IOError as e:
         print("Error: Unable to open the files for writing")
 
-####Taking and handling command-line arguments
+# Taking and handling command-line arguments
 def main():
 
     file_parser = argparse.ArgumentParser(description =
@@ -146,9 +153,9 @@ Output File 3 (--outGeneID):      A tab-seperated file (.tsv) with two columns
     required = file_parser.add_argument_group('Required arguments')
     optional = file_parser.add_argument_group('Optional arguments')
 
-    required.add_argument('--inuniprot',  metavar = "Input File", dest = "inuniprot", help = 'Input File Name (Uniprot File)', required = True)
-    required.add_argument('--outPrimaryAC',  metavar = "Output File", dest = "outPrimAC", help = 'Primary Accession File with ENSTs, ENSGs & TaxID', required = True)
-    required.add_argument('--outSecondaryAC', metavar = "Output File", dest = "outSecAC", help = 'Secondary Accession File', required = True)
+    required.add_argument('--inUniprot',  metavar = "Input File", dest = "inuniprot", help = 'Input File Name (Uniprot File)', required = True)
+    required.add_argument('--outPrimAC',  metavar = "Output File", dest = "outPrimAC", help = 'Primary Accession File with ENSTs, ENSGs & TaxID', required = True)
+    required.add_argument('--outSecAC', metavar = "Output File", dest = "outSecAC", help = 'Secondary Accession File', required = True)
     required.add_argument('--outGeneID', metavar = "Output File", dest = "outGeneID", help = 'GeneID File', required = True)
     file_parser.set_defaults(func=uniprot_parser)
     args = file_parser.parse_args()
