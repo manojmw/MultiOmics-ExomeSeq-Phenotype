@@ -23,7 +23,7 @@ def metaParser(args):
     # Extract Gene, pathologyID and Confidence score and drop rows with missing values
     Candidate_data = pd.DataFrame(meta_data, columns=['Gene', 'pathologyID', 'Confidence score']).dropna()
     print(Candidate_data.to_csv(sep = '\t', index = False))
-    
+
     return
 
 
@@ -32,7 +32,7 @@ def main():
     file_parser = argparse.ArgumentParser(description =
     """
 ------------------------------------------------------------------------------
-Program: Parses the patient metadata files, processes it and prints to STDOUT
+Program: Parses the patient metadata file(s), processes it and prints to STDOUT
 ------------------------------------------------------------------------------
 The output consists of 3 columns in .tsv format:
  -> Gene name
