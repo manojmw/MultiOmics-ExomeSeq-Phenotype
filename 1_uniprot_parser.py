@@ -3,7 +3,7 @@
 import re
 import argparse
 
-# Function for the UniProt Parser
+###Function for the UniProt Parser###
 # Takes Uniprot file as an input
 # Processes each record by grabbing the REQUIRED FIELDS
 # i.e. Uniprot Primary Accession, Uniprot Secondary Accession, GeneID, TaxID, ENST(s) and ENSG(s)
