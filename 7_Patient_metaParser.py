@@ -17,7 +17,7 @@ def metaParser(args):
 
     # Iterating over the list of files and appending to the DataFrame (meta_data)
     for file in candidate_files:
-        data = pd.read_excel(file, engine='openpyxl')
+        data = pd.read_excel(file)
         meta_data = meta_data.append(data)
 
     # Extract Gene, pathologyID and Confidence score and drop rows with missing values
