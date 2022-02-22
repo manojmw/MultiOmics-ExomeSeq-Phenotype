@@ -157,9 +157,9 @@ Output File 3 (--outGeneID):      A tab-seperated file (.tsv) with two columns
     required.add_argument('--outPrimAC',  metavar = "Output File", dest = "outPrimAC", help = 'Primary Accession File with ENSTs, ENSGs & TaxID', required = True)
     required.add_argument('--outSecAC', metavar = "Output File", dest = "outSecAC", help = 'Secondary Accession File', required = True)
     required.add_argument('--outGeneID', metavar = "Output File", dest = "outGeneID", help = 'GeneID File', required = True)
-    file_parser.set_defaults(func=uniprot_parser)
+
     args = file_parser.parse_args()
-    args.func(args)
+    uniprot_parser(args)
 
 if __name__ == "__main__":
     main()
