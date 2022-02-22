@@ -3,7 +3,7 @@
 import argparse, sys
 import re
 
-###Function for creating ranscripts_Gene dictionary###
+###Function for creating transcripts_Gene dictionary###
 # Takes tab-seperated canonical transcripts file as INPUT
 # Creates a dictionary using 2 columns: ENST and Gene
 # Key -> ENST; Value - Gene
@@ -55,7 +55,7 @@ def Uniprot2ENST(args):
     # Eliminating Mouse transcripts
     re_ENSMUST = re.compile('^ENSMUST')
 
-    #Counter for Uniprot Primary Accession
+    #Counter for Human Uniprot Primary Accession
     Count_HumanUniprotPrimAC = 0
 
     # Counter for canonical transcripts
@@ -88,31 +88,31 @@ def Uniprot2ENST(args):
         for UniProt_ENST in UniProt_ENSTs:
             if not re_ENSMUST.match(UniProt_ENST):
                 human_ENSTs.append(UniProt_ENST)
-            Count_HumanUniprotPrimAC += 1
+        if not human_ENSTs:
+            continue
+        Count_HumanUniprotPrimAC += 1
 
-            for ENST in human_ENSTs:
-                if ENST in Transcripts_Gene_dict.keys():
-                    canonical_human_ENSTs.append(ENST)
-                    canonical_transcripts_count += 1
+        for ENST in human_ENSTs:
+            if ENST in Transcripts_Gene_dict.keys():
+                canonical_human_ENSTs.append(ENST)
+                canonical_transcripts_count += 1
 
-            # Key -> Uniprot Primary accession
-            # Value -> Canonical_human_ENST
-            (UniprotPrimAC_key, canonical_ENST) = (UniprotPrimAC_fields[0], canonical_human_ENSTs)
+        # Key -> Uniprot Primary accession
+        # Value -> Canonical_human_ENST
 
-            # After eliminating mouse and non-canonical transcripts, some values can be empty
-            # So, we keep a count of these accessions
-            if len(canonical_human_ENSTs) == 0:
-                no_CanonicalHumanENST += 1
-            elif len(canonical_human_ENSTs) == 1:
-                Uniprot_ENST_dict[UniprotPrimAC_key] = canonical_ENST
-                output_line = (UniprotPrimAC_key, ''.join(Uniprot_ENST_dict[UniprotPrimAC_key]))
-                print('\t'.join(output_line))
-                single_CanonicalHumanENST += 1
-            elif len(canonical_human_ENSTs) > 1:
-                multiple_CanonicalHumanENST += 1
+        # After eliminating mouse and non-canonical transcripts, some values can be empty
+        # So, we keep a count of these accessions
+        if len(canonical_human_ENSTs) == 0:
+            no_CanonicalHumanENST += 1
+        elif len(canonical_human_ENSTs) == 1:
+            Uniprot_ENST_dict[UniprotPrimAC_fields[0]] = canonical_human_ENSTs[0]
+            print(UniprotPrimAC_fields[0], '\t', canonical_human_ENSTs[0])
+            single_CanonicalHumanENST += 1
+        elif len(canonical_human_ENSTs) > 1:
+            multiple_CanonicalHumanENST += 1
 
     print("\nTotal no. of Human UniProt Primary Accessions:", Count_HumanUniprotPrimAC, file = sys.stderr)
-    print("\nTotal no. of Canonical transcripts:", len(Transcripts_Gene_dict.keys()), file = sys.stderr)
+    print("\nTotal no. of Canonical transcripts in the Canonical Transcripts file:", len(Transcripts_Gene_dict.keys()), file = sys.stderr)
     print("\nTotal no. of Canonical transcripts in the UniProt Primary Accession file:", canonical_transcripts_count, file = sys.stderr)
     print("\nNo. of UniProt primary accessions without canonical human transcript:", no_CanonicalHumanENST, file = sys.stderr)
     print("\nNo. of UniProt primary accessions with single canonical human transcript:", single_CanonicalHumanENST, file = sys.stderr)
