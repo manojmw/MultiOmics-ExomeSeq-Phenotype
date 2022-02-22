@@ -112,9 +112,8 @@ The output (High-quality Human Interactome) consists of five columns in .tsv for
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
-    file_parser.set_defaults(func=IntPMID)
     args = file_parser.parse_args()
-    args.func(args)
+    IntPMID(args)
 
 if __name__ == "__main__":
     main()
