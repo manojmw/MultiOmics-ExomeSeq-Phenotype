@@ -7,10 +7,7 @@ import pandas as pd
 # Takes patient metadata file(s) in .xlsx format as INPUT
 # Extracts data from 3 columns - Gene, pathologyID and Confidence score
 # Prints to STDOUT in .tsv format
-def metaParser(args):
-
-    # candidate_files can contain a list of one or more files
-    candidate_files = args.inMetaFile
+def metaParser(candidate_files):
 
     # Initializing an empty data frame to store the data from all files
     meta_data = pd.DataFrame()
@@ -18,7 +15,7 @@ def metaParser(args):
     # Iterating over the list of files and appending to the DataFrame (meta_data)
     for file in candidate_files:
         data = pd.read_excel(file)
-        meta_data = meta_data.append(data)
+        meta_data = pd.concat([meta_data, data])
 
     # Extract Gene, pathologyID and Confidence score and drop rows with missing values
     Candidate_data = pd.DataFrame(meta_data, columns=['Gene', 'pathologyID', 'Confidence score']).dropna()
@@ -47,9 +44,8 @@ The output consists of 3 columns in .tsv format:
 
     required.add_argument('--inMetaFile', metavar = "Input File", dest = "inMetaFile", nargs = '+', help = 'Input File Name (Patient meta data file in xlsx format)', required = True)
 
-    file_parser.set_defaults(func=metaParser)
     args = file_parser.parse_args()
-    args.func(args)
+    metaParser(args.inMetaFile)
 
 if __name__ == "__main__":
     main()
