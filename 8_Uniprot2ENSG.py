@@ -5,8 +5,8 @@ import re
 
 ###Function for creating transcripts_Gene dictionary###
 # Takes tab-seperated canonical transcripts file as INPUT
-# Creates a dictionary using 2 columns: ENST and Gene
-# Key -> ENST; Value - Gene
+# Creates a dictionary using 2 columns: ENSG and Gene
+# Key -> ENSG; Value - Gene
 # Returns the dictionary
 def ENSG_Gene(inCanonicalFile):
 
@@ -58,11 +58,11 @@ def ENSG_Gene(inCanonicalFile):
 # Then, do not print and keep a count seperately
 def Uniprot2ENST(args):
 
-    # Calling the dictionary
+    # Calling the function ENSG_Gene
     Transcripts_Gene_dict = ENSG_Gene(args.inCanonicalFile)
 
+    # INPUT -> Uniprot Primary_AC File
     UniprotPrimAC_File = open(args.inPrimAC)
-
 
     UniprotPrimACFile_header_line = UniprotPrimAC_File.readline() # Grabbing the header line
 
@@ -93,16 +93,16 @@ def Uniprot2ENST(args):
     #Counter for Human Uniprot Primary Accession
     Count_HumanUniprotPrimAC = 0
 
-    # Counter for canonical transcripts
+    # Counter for canonical ENSGs
     canonical_ENSG_count = 0
 
-    # Counter for accessions with no canonical human ENST
+    # Counter for accessions with no canonical human ENSG
     no_CanonicalHumanENSG = 0
 
-    # Counter for accessions with single canonical human ENST
+    # Counter for accessions with single canonical human ENSG
     single_CanonicalHumanENSG = 0
 
-    # Counter for accessions with multiple canonical human ENSTs
+    # Counter for accessions with multiple canonical human ENSGs
     multiple_CanonicalHumanENSG = 0
 
     # Parsing the Uniprot Primary Accession file
@@ -110,16 +110,15 @@ def Uniprot2ENST(args):
         line = line.rstrip('\n')
         UniprotPrimAC_fields = line.split('\t')
 
-        # ENST column - UniprotPrimAC_fields[2]
-        # This is a single string containing comma-seperated ENSTs
+        # ENSG column  - This is a single string containing comma-seperated ENSGs
         # So we split it into a list that can be accessed later
         UniProt_ENSGs = UniprotPrimAC_fields[ENSG_col].split(',')
 
-        # Initializing an empty ENST list
+        # Initializing empty lists
         human_ENSGs = []
         canonical_human_ENSGs = []
 
-        # Eliminating Mouse transcripts
+        # Eliminating Mouse ENSGs
         for UniProt_ENSG in UniProt_ENSGs:
             if not re_ENSMUST.match(UniProt_ENSG):
                 human_ENSGs.append(UniProt_ENSG)
@@ -135,12 +134,11 @@ def Uniprot2ENST(args):
         # Key -> Uniprot Primary accession
         # Value -> Canonical_human_ENSG
 
-        # After eliminating mouse and non-canonical transcripts, some values can be empty
+        # After eliminating mouse and non-canonical ENSGs, some values can be empty
         # So, we keep a count of these accessions
         if len(canonical_human_ENSGs) == 0:
             no_CanonicalHumanENSG += 1
         elif len(canonical_human_ENSGs) == 1:
-            #Uniprot_ENSG_dict[UniprotPrimAC_fields[UniProt_PrimAC_col]] = canonical_human_ENSGs
             print(UniprotPrimAC_fields[UniProt_PrimAC_col], '\t', ''.join(canonical_human_ENSGs))
             single_CanonicalHumanENSG += 1
         elif len(canonical_human_ENSGs) > 1:
