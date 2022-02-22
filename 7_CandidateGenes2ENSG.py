@@ -21,11 +21,11 @@ def ENSG_Gene(inCanonicalFile):
     # Check the column headers and grab indexes of our columns of interest
     (ENSG_col, Gene_col) = (-1,-1)
 
-    for header in Canonical_header_fields:
-        if header == 'ENSG':
-            ENSG_col = Canonical_header_fields.index(header)
-        elif header == 'GENE':
-            Gene_col = Canonical_header_fields.index(header)
+    for i in range(len(Canonical_header_fields)):
+        if Canonical_header_fields[i] == 'ENSG':
+            ENSG_col  = i
+        elif Canonical_header_fields[i] == 'GENE':
+            Gene_col = i
 
     if not ENSG_col >= 0:
         sys.exit("Missing required column title: 'ENSG' \n")
@@ -80,10 +80,15 @@ def CandidateGene2ENSG(args):
     # Calling the function CandidateGeneParser
     CandidateGene_data = CandidateGeneParser(args.inCandidateFile)
 
+    lost_CandidateGene = 0
+
     for data in CandidateGene_data:
         if data[0] in Transcripts_Gene_dict.keys():
             print(Transcripts_Gene_dict.get(data[0]), '\t', data[1], '\t', data[2])
+        else:
+            lost_CandidateGene += 1
 
+    print(lost_CandidateGene, file = sys.stderr)
     return
 
 
@@ -91,9 +96,9 @@ def CandidateGene2ENSG(args):
 def main():
     file_parser = argparse.ArgumentParser(description =
     """
-------------------------------------------------------------------------------
-Program: Parses the patient metadata file(s), processes it and prints to STDOUT
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+Program: Parses the patient Candidate Gene file(s) and Canonical Transcripts file, processes it and prints to STDOUT
+--------------------------------------------------------------------------------------------------------------------
 The output consists of 3 columns in .tsv format:
  -> Gene name
  -> Pathology Identifier
