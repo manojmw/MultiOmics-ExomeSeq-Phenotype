@@ -8,25 +8,42 @@ import re
 # Creates a dictionary using 2 columns: ENST and Gene
 # Key -> ENST; Value - Gene
 # Returns the dictionary
-def Transcripts_Gene(args):
+def ENSG_Gene(inCanonicalFile):
 
-    Transcripts_Gene_dict = {} # Initializing an empty dictionary
+    ENSG_Gene_dict = {} # Initializing an empty dictionary
 
-    CanonicalTranscripts_File = open(args.inTranscripts)
+    Canonical_File = open(inCanonicalFile)
 
-    CanonicalTranscripts_File.readline() # Skip header
+    Canonical_header_line = Canonical_File.readline() # Grabbing the header line
+
+    Canonical_header_fields = Canonical_header_line.split('\t')
+
+    # Check the column headers and grab indexes of our columns of interest
+    (ENSG_col, Gene_col) = (-1,-1)
+
+    for header in Canonical_header_fields:
+        if header == 'ENSG':
+            ENSG_col = Canonical_header_fields.index(header)
+        elif header == 'GENE':
+            Gene_col = Canonical_header_fields.index(header)
+
+    if not ENSG_col >= 0:
+        sys.exit("Missing required column title: 'ENSG' \n")
+    elif not Gene_col >= 0:
+        sys.exit("Missing required column title: 'GENE' \n")
+    # else grabbed the required column indexes -> PROCEED
 
     # Parsing the Uniprot Primary Accession file
-    for line in CanonicalTranscripts_File:
+    for line in Canonical_File:
         line = line.rstrip('\n')
         CanonicalTranscripts_fields = line.split('\t')
 
-        # Key -> ENST
+        # Key -> ENSG
         # Value -> Gene
-        (ENST_key, Gene) = (CanonicalTranscripts_fields[0], CanonicalTranscripts_fields[1])
-        Transcripts_Gene_dict[ENST_key] = Gene
+        (ENSG_key, Gene) = (CanonicalTranscripts_fields[ENSG_col], CanonicalTranscripts_fields[Gene_col])
+        ENSG_Gene_dict[ENSG_key] = Gene
 
-    return Transcripts_Gene_dict
+    return ENSG_Gene_dict
 
 ###Function for mapping Uniprot Primary Accession to canonical transcripts###
 # Calls the above dictionary - Transcripts_Gene_dict
@@ -42,81 +59,99 @@ def Transcripts_Gene(args):
 def Uniprot2ENST(args):
 
     # Calling the dictionary
-    Transcripts_Gene_dict = Transcripts_Gene(args)
+    Transcripts_Gene_dict = ENSG_Gene(args.inCanonicalFile)
 
-    UniprotPrimAC_file = open(args.inPrimAC)
+    UniprotPrimAC_File = open(args.inPrimAC)
 
-    UniprotPrimAC_file.readline() # Skip header
 
-    Uniprot_ENST_dict = {} # Initializing an empty dictionary
+    UniprotPrimACFile_header_line = UniprotPrimAC_File.readline() # Grabbing the header line
+
+    UniprotPrimACFile_header_line = UniprotPrimACFile_header_line.strip('\n')
+
+    UniprotPrimACFile_header_fields = UniprotPrimACFile_header_line.split('\t')
+
+    # Check the column headers and grab indexes of our columns of interest
+    (UniProt_PrimAC_col, ENSG_col) = (-1,-1)
+
+    for header in UniprotPrimACFile_header_fields:
+        if header == 'Primary_AC':
+            UniProt_PrimAC_col = UniprotPrimACFile_header_fields.index(header)
+        elif header == 'ENSG':
+            ENSG_col = UniprotPrimACFile_header_fields.index(header)
+
+    if not UniProt_PrimAC_col >= 0:
+        sys.exit("Missing required column title: 'Primary_AC' \n")
+    elif not ENSG_col >= 0:
+        sys.exit("Missing required column title: 'ENSG' \n")
+    # else grabbed the required column indexes -> PROCEED
 
     # Compiling regular expressions###
 
-    # Eliminating Mouse transcripts
-    re_ENSMUST = re.compile('^ENSMUST')
+    # Eliminating Mouse ENSGs
+    re_ENSMUST = re.compile('^ENSMUSG')
 
     #Counter for Human Uniprot Primary Accession
     Count_HumanUniprotPrimAC = 0
 
     # Counter for canonical transcripts
-    canonical_transcripts_count = 0
+    canonical_ENSG_count = 0
 
     # Counter for accessions with no canonical human ENST
-    no_CanonicalHumanENST = 0
+    no_CanonicalHumanENSG = 0
 
     # Counter for accessions with single canonical human ENST
-    single_CanonicalHumanENST = 0
+    single_CanonicalHumanENSG = 0
 
     # Counter for accessions with multiple canonical human ENSTs
-    multiple_CanonicalHumanENST = 0
+    multiple_CanonicalHumanENSG = 0
 
     # Parsing the Uniprot Primary Accession file
-    for line in UniprotPrimAC_file:
+    for line in UniprotPrimAC_File:
         line = line.rstrip('\n')
         UniprotPrimAC_fields = line.split('\t')
 
         # ENST column - UniprotPrimAC_fields[2]
         # This is a single string containing comma-seperated ENSTs
         # So we split it into a list that can be accessed later
-        UniProt_ENSTs = UniprotPrimAC_fields[2].split(',')
+        UniProt_ENSGs = UniprotPrimAC_fields[ENSG_col].split(',')
 
         # Initializing an empty ENST list
-        human_ENSTs = []
-        canonical_human_ENSTs = []
+        human_ENSGs = []
+        canonical_human_ENSGs = []
 
         # Eliminating Mouse transcripts
-        for UniProt_ENST in UniProt_ENSTs:
-            if not re_ENSMUST.match(UniProt_ENST):
-                human_ENSTs.append(UniProt_ENST)
-        if not human_ENSTs:
+        for UniProt_ENSG in UniProt_ENSGs:
+            if not re_ENSMUST.match(UniProt_ENSG):
+                human_ENSGs.append(UniProt_ENSG)
+        if not human_ENSGs:
             continue
         Count_HumanUniprotPrimAC += 1
 
-        for ENST in human_ENSTs:
-            if ENST in Transcripts_Gene_dict.keys():
-                canonical_human_ENSTs.append(ENST)
-                canonical_transcripts_count += 1
+        for ENSG in human_ENSGs:
+            if ENSG in Transcripts_Gene_dict.keys():
+                canonical_human_ENSGs.append(ENSG)
+                canonical_ENSG_count += 1
 
         # Key -> Uniprot Primary accession
-        # Value -> Canonical_human_ENST
+        # Value -> Canonical_human_ENSG
 
         # After eliminating mouse and non-canonical transcripts, some values can be empty
         # So, we keep a count of these accessions
-        if len(canonical_human_ENSTs) == 0:
-            no_CanonicalHumanENST += 1
-        elif len(canonical_human_ENSTs) == 1:
-            Uniprot_ENST_dict[UniprotPrimAC_fields[0]] = canonical_human_ENSTs[0]
-            print(UniprotPrimAC_fields[0], '\t', canonical_human_ENSTs[0])
-            single_CanonicalHumanENST += 1
-        elif len(canonical_human_ENSTs) > 1:
-            multiple_CanonicalHumanENST += 1
+        if len(canonical_human_ENSGs) == 0:
+            no_CanonicalHumanENSG += 1
+        elif len(canonical_human_ENSGs) == 1:
+            #Uniprot_ENSG_dict[UniprotPrimAC_fields[UniProt_PrimAC_col]] = canonical_human_ENSGs
+            print(UniprotPrimAC_fields[UniProt_PrimAC_col], '\t', ''.join(canonical_human_ENSGs))
+            single_CanonicalHumanENSG += 1
+        elif len(canonical_human_ENSGs) > 1:
+            multiple_CanonicalHumanENSG += 1
 
     print("\nTotal no. of Human UniProt Primary Accessions:", Count_HumanUniprotPrimAC, file = sys.stderr)
-    print("\nTotal no. of Canonical transcripts in the Canonical Transcripts file:", len(Transcripts_Gene_dict.keys()), file = sys.stderr)
-    print("\nTotal no. of Canonical transcripts in the UniProt Primary Accession file:", canonical_transcripts_count, file = sys.stderr)
-    print("\nNo. of UniProt primary accessions without canonical human transcript:", no_CanonicalHumanENST, file = sys.stderr)
-    print("\nNo. of UniProt primary accessions with single canonical human transcript:", single_CanonicalHumanENST, file = sys.stderr)
-    print("\nNo. of UniProt primary accessions with multiple canonical human transcripts:", multiple_CanonicalHumanENST, file = sys.stderr)
+    print("\nTotal no. of ENSGs in the Canonical Transcripts file:", len(Transcripts_Gene_dict.keys()), file = sys.stderr)
+    print("\nTotal no. of ENSGs in the UniProt Primary Accession file:", canonical_ENSG_count, file = sys.stderr)
+    print("\nNo. of UniProt primary accessions without canonical human ENSG:", no_CanonicalHumanENSG, file = sys.stderr)
+    print("\nNo. of UniProt primary accessions with single canonical human ENSG:", single_CanonicalHumanENSG, file = sys.stderr)
+    print("\nNo. of UniProt primary accessions with multiple canonical human ENSGs:", multiple_CanonicalHumanENSG, file = sys.stderr)
 
     return
 
@@ -138,11 +173,10 @@ The output consists of 2 columns in .tsv format:
     optional = file_parser.add_argument_group('Optional arguments')
 
     required.add_argument('--inPrimAC', metavar = "Input File", dest = "inPrimAC", help = 'Uniprot Primary Accession File generated by the uniprot parser', required = True)
-    required.add_argument('--inTranscripts', metavar = "Input File", dest = "inTranscripts", help = 'Canonical Transcripts file', required = True)
+    required.add_argument('--inCanonicalFile', metavar = "Input File", dest = "inCanonicalFile", help = 'Canonical Transcripts file', required = True)
 
-    file_parser.set_defaults(func=Uniprot2ENST)
     args = file_parser.parse_args()
-    args.func(args)
+    Uniprot2ENST(args)
 
 if __name__ == "__main__":
     main()
