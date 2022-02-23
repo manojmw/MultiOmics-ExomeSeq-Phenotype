@@ -80,6 +80,7 @@ def CandidateGene2ENSG(args):
     # Calling the function CandidateGeneParser
     CandidateGene_data = CandidateGeneParser(args.inCandidateFile)
 
+    # Counter for canidate genes not found in the canonical transcripts file
     lost_CandidateGene = 0
 
     for data in CandidateGene_data:
@@ -88,7 +89,7 @@ def CandidateGene2ENSG(args):
         else:
             lost_CandidateGene += 1
 
-    print(lost_CandidateGene, file = sys.stderr)
+    print("\nNo. of candidate genes not found in the Canonical transcripts file: ", lost_CandidateGene, file = sys.stderr)
     return
 
 
