@@ -101,10 +101,10 @@ def main():
 Program: Parses the patient Candidate Gene file(s) and Canonical Transcripts file, processes it and prints to STDOUT
 --------------------------------------------------------------------------------------------------------------------
 The output consists of 3 columns in .tsv format:
- -> Gene name
+ -> Candidate ENSG
  -> Pathology Identifier
  -> Confidence score
------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
