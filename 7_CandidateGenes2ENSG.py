@@ -3,11 +3,13 @@
 import argparse, sys
 import pandas as pd
 
-###Function for creating transcripts_Gene dictionary###
-# Takes tab-seperated canonical transcripts file as INPUT
-# Creates a dictionary using 2 columns: ENSG and Gene
-# Key -> Gene; Value - ENSG
-# Returns the dictionary
+###########################################################
+
+# Parses tab-seperated canonical transcripts file
+# Required columns are: 'ENSG' and 'GENE' (can be in any order,
+# but they MUST exist)
+# Returns a dictionary:
+# Key -> ENSG; Value -> Gene
 def ENSG_Gene(inCanonicalFile):
 
     ENSG_Gene_dict = {} # Initializing an empty dictionary
