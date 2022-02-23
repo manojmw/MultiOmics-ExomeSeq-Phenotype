@@ -331,7 +331,7 @@ The output (High-quality Human Interactome) consists of five columns in .tsv for
 
 if __name__ == "__main__":
     # Logging to the file
-    date = time.strftime("%Y%m%d-%H%M%S")
+    date = time.strftime("%Y_%m_%d-%H%M%S")
     Log_Format = "%(levelname)s %(asctime)s - %(message)s \n"
     logging.basicConfig(filename ='Interactome_%s.log' % date, filemode = 'a', format  = Log_Format, level = logging.DEBUG)
     main()
