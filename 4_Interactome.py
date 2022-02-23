@@ -149,7 +149,7 @@ def ENSG_Gene(inCanonicalFile):
 
 ###########################################################
 
-# Parses the UniProt Primary Accession file prodeuced by uniprot_parser.py
+# Parses the UniProt Primary Accession file produced by uniprot_parser.py
 # Required columns are: 'Primary_AC' and 'ENSG' (can be in any order,
 # but they MUST exist)
 # Parses the dictionary returned by the function ENSG_Gene
@@ -260,8 +260,7 @@ def Uniprot_ENSG(inPrimAC, inCanonicalFile):
 
 ###########################################################
 
-# Parses the list - [Interactome_list] returned by the function: ENSG_Gene and
-# the dictionary - {ENSG_Gene_dict} returned by the function: UniProtInteractome
+# Parses the list - [Interactome_list] returned by the function: UniProtInteractome and
 # the dictionary - {Uniprot_ENSG_dict} returned by the function: Uniprot_ENSG
 #
 # Retrieves the ENSG of each interacting protein
