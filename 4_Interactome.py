@@ -2,6 +2,8 @@
 
 import sys, argparse
 import re
+import logging
+import time
 
 ###########################################################
 
@@ -247,12 +249,12 @@ def Uniprot_ENSG(inPrimAC, inCanonicalFile):
         elif len(canonical_human_ENSGs) > 1:
             multiple_CanonicalHumanENSG += 1
 
-    print("\nTotal no. of Human UniProt Primary Accessions: ", Count_HumanUniprotPrimAC, file = sys.stderr)
-    print("\nTotal no. of ENSGs in the Canonical Transcripts file: ", len(ENSG_Gene_dict.keys()), file = sys.stderr)
-    print("\nTotal no. of ENSGs in the UniProt Primary Accession file: ", canonical_ENSG_count, file = sys.stderr)
-    print("\nNo. of UniProt primary accessions without canonical human ENSG: ", no_CanonicalHumanENSG, file = sys.stderr)
-    print("\nNo. of UniProt primary accessions with single canonical human ENSG: ", single_CanonicalHumanENSG, file = sys.stderr)
-    print("\nNo. of UniProt primary accessions with multiple canonical human ENSGs: ", multiple_CanonicalHumanENSG, file = sys.stderr)
+    logging.debug("\nTotal no. of Human UniProt Primary Accessions: %d " % Count_HumanUniprotPrimAC)
+    logging.debug("\nTotal no. of ENSGs in the Canonical Transcripts file: %d " % len(ENSG_Gene_dict.keys()))
+    logging.debug("\nTotal no. of ENSGs in the UniProt Primary Accession file: %d " % canonical_ENSG_count)
+    logging.debug("\nNo. of UniProt primary accessions without canonical human ENSG: %d " % no_CanonicalHumanENSG)
+    logging.debug("\nNo. of UniProt primary accessions with single canonical human ENSG: %d " % single_CanonicalHumanENSG)
+    logging.debug("\nNo. of UniProt primary accessions with multiple canonical human ENSGs: %d " % multiple_CanonicalHumanENSG)
 
     return Uniprot_ENSG_dict
 
@@ -289,7 +291,7 @@ def Interactome_Uniprot2ENSG(args):
             lost_Interaction += 1
 
 
-    print("\nTotal no. of Interactions lost: ", lost_Interaction, file = sys.stderr)
+    logging.debug("\nTotal no. of Interactions lost: %d " % lost_Interaction)
 
     return
 
@@ -326,5 +328,10 @@ The output (High-quality Human Interactome) consists of five columns in .tsv for
     args = file_parser.parse_args()
     Interactome_Uniprot2ENSG(args)
 
+
 if __name__ == "__main__":
+    # Logging to the file
+    date = time.strftime("%Y%m%d-%H%M%S")
+    Log_Format = "%(levelname)s %(asctime)s - %(message)s \n"
+    logging.basicConfig(filename ='Interactome_%s.log' % date, filemode = 'a', format  = Log_Format, level = logging.DEBUG)
     main()
