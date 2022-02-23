@@ -205,12 +205,6 @@ def interaction_parser(args):
     # Keeping count of PMID not found
     notfound_PMID = 0
 
-    # User input -> Protein-protein Interaction file
-    interaction_file = open(args.inInteraction)
-
-    # Skip header
-    interaction_file.readline()
-
     # Compiling all the regular expressions###
 
     # uniprot ids for protein
@@ -227,6 +221,12 @@ def interaction_parser(args):
     # some pubmed identifiers are unassigned in Intact (pubmed:unassigned)
     re_PMID_unassigned = re.compile('^pubmed:unassigned')
     re_PMID_missed = re.compile('^pubmed:')
+
+    # User input Protein-protein Interaction file
+    interaction_file = open(args.inInteraction)
+
+    # Skip header
+    interaction_file.readline()
 
     # Parsing the interaction file
     for line in interaction_file:
@@ -366,20 +366,22 @@ def interaction_parser(args):
     # Closing the file
     interaction_file.close()
 
+    return
+
 # Taking and handling command-line arguments
 def main():
     file_parser = argparse.ArgumentParser(description =
     """
-----------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------
 Program: Parses a miTAB 2.5 or 2.7 file, maps to the uniprot file and prints to STDOUT in tsv format
-----------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------
 The output (Human-Human Protein Interaction Experiments) consists of five columns in .tsv format:
  -> UniProt Primary Accession of Protein A
  -> UniProt Primary Accession of Protein B
  -> Interaction Detection Method
  -> Pubmed Identifier
  -> Interaction type
- ----------------------------------------------------------------------------------------------------
+ -----------------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
