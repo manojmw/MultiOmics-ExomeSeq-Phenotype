@@ -1,13 +1,17 @@
 #!/usr/bin/python
 
-import argparse, sys
+import sys, argparse
 import re
+import logging
+import time
 
-###Function for creating transcripts_Gene dictionary###
-# Takes tab-seperated canonical transcripts file as INPUT
-# Creates a dictionary using 2 columns: ENSG and Gene
-# Key -> ENSG; Value - Gene
-# Returns the dictionary
+###########################################################
+
+# Parses tab-seperated canonical transcripts file
+# Required columns are: 'ENSG' and 'GENE' (can be in any order,
+# but they MUST exist)
+# Returns a dictionary:
+# Key -> ENSG; Value -> Gene
 def ENSG_Gene(inCanonicalFile):
 
     ENSG_Gene_dict = {} # Initializing an empty dictionary
@@ -45,21 +49,22 @@ def ENSG_Gene(inCanonicalFile):
 
     return ENSG_Gene_dict
 
-###Function for mapping Uniprot Primary Accession to canonical transcripts###
-# Calls the above dictionary - Transcripts_Gene_dict
-# Takes Uniprot Primary Accession file produced by uniprot_parser as INPUT
-# Creates another dictionary - Uniprot_ENST_dict using 2 columns
-# i.e. Uniprot Primary accession and ENST(s); # Key -> Uniprot Primary accession; Value - ENST(s)
-# Using these dictionaries, checks whether ENST(s) of each accession from Uniprot Primary Accession file
-# is present in the canonical transcripts file
-# If yes, checks whether this accession has single canonical_ENST asssociated
-# If yes, print the Accession and ENST to STDOUT in .tsv format
-# If multiple canonical_ENSTs or no canonical_ENST for a given UniProt accession
-# Then, do not print and keep a count seperately
-def Uniprot2ENST(args):
+###########################################################
+
+# Parses the UniProt Primary Accession file produced by uniprot_parser.py
+# Required columns are: 'Primary_AC' and 'ENSG' (can be in any order,
+# but they MUST exist)
+#
+# Parses the dictionary returned by the function ENSG_Gene
+# Maps UniProt Primary Accession to ENSG
+# Prints to STDOUT in .tsv format
+# Output consists of 2 columns in .tsv format:
+# - Uniprot Primary Accession
+# - Corresponding ENSG
+def Uniprot2ENSG(args):
 
     # Calling the function ENSG_Gene
-    Transcripts_Gene_dict = ENSG_Gene(args.inCanonicalFile)
+    ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
 
     # INPUT -> Uniprot Primary_AC File
     UniprotPrimAC_File = open(args.inPrimAC)
@@ -127,7 +132,7 @@ def Uniprot2ENST(args):
         Count_HumanUniprotPrimAC += 1
 
         for ENSG in human_ENSGs:
-            if ENSG in Transcripts_Gene_dict.keys():
+            if ENSG in ENSG_Gene_dict.keys():
                 canonical_human_ENSGs.append(ENSG)
                 canonical_ENSG_count += 1
 
@@ -144,16 +149,18 @@ def Uniprot2ENST(args):
         elif len(canonical_human_ENSGs) > 1:
             multiple_CanonicalHumanENSG += 1
 
-    print("\nTotal no. of Human UniProt Primary Accessions:", Count_HumanUniprotPrimAC, file = sys.stderr)
-    print("\nTotal no. of ENSGs in the Canonical Transcripts file:", len(Transcripts_Gene_dict.keys()), file = sys.stderr)
-    print("\nTotal no. of ENSGs in the UniProt Primary Accession file:", canonical_ENSG_count, file = sys.stderr)
-    print("\nNo. of UniProt primary accessions without canonical human ENSG:", no_CanonicalHumanENSG, file = sys.stderr)
-    print("\nNo. of UniProt primary accessions with single canonical human ENSG:", single_CanonicalHumanENSG, file = sys.stderr)
-    print("\nNo. of UniProt primary accessions with multiple canonical human ENSGs:", multiple_CanonicalHumanENSG, file = sys.stderr)
+    logging.debug("\nTotal no. of Human UniProt Primary Accessions: %d " % Count_HumanUniprotPrimAC)
+    logging.debug("\nTotal no. of ENSGs in the Canonical Transcripts file: %d " % len(ENSG_Gene_dict.keys()))
+    logging.debug("\nTotal no. of ENSGs in the UniProt Primary Accession file: %d " % canonical_ENSG_count)
+    logging.debug("\nNo. of UniProt primary accessions without canonical human ENSG: %d " % no_CanonicalHumanENSG)
+    logging.debug("\nNo. of UniProt primary accessions with single canonical human ENSG: %d " % single_CanonicalHumanENSG)
+    logging.debug("\nNo. of UniProt primary accessions with multiple canonical human ENSGs: %d " % multiple_CanonicalHumanENSG)
 
     return
 
-####Taking and handling command-line arguments
+###########################################################
+
+# Taking and handling command-line arguments
 def main():
     file_parser = argparse.ArgumentParser(description =
     """
@@ -174,7 +181,11 @@ The output consists of 2 columns in .tsv format:
     required.add_argument('--inCanonicalFile', metavar = "Input File", dest = "inCanonicalFile", help = 'Canonical Transcripts file', required = True)
 
     args = file_parser.parse_args()
-    Uniprot2ENST(args)
+    Uniprot2ENSG(args)
 
 if __name__ == "__main__":
+    # Logging to the file
+    date = time.strftime("%Y_%m_%d-%H%M%S")
+    Log_Format = "%(levelname)s %(asctime)s - %(message)s \n"
+    logging.basicConfig(filename ='Interactome_%s.log' % date, filemode = 'a', format  = Log_Format, level = logging.DEBUG)
     main()
