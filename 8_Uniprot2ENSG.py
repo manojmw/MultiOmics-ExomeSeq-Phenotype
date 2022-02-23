@@ -162,7 +162,7 @@ Program: Parses the Uniprot Primary Accession file produced by uniprot_parser, m
 ---------------------------------------------------------------------------------------------------------------------------------
 The output consists of 2 columns in .tsv format:
  -> Uniprot Primary Accession
- -> Corresponding ENST
+ -> Corresponding ENSG
 ---------------------------------------------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
