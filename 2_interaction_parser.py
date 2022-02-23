@@ -172,14 +172,25 @@ def GeneID(inGeneID):
 
     return GeneID_dict
 
-###Function for Protein-Protein Interaction Parser###
-# Uses the dictionaries produced by the above functions
-# Takes miTAB 2.5 or 2.7 file as INPUT
-# For each interaction, grabs the Primary Accession of the interacting proteins by mapping to UniProt
-# Then grabs Interaction Detection Method, PMID and Interaction type for the above interaction
-# Ignores interaction if Primary Accession does not map to Uniprot
-# or if PMID is missing or if TaxID of both interacting proteins in not '9606' i.e. human
-# Prints the grabbed interaction to STDOUT in .tsv format after sorting the Uniprot PrimAC
+###########################################################
+
+# Parses miTAB 2.5 or 2.7 file
+# Process it using the dictionaries returned by above functions
+#
+# For each interaction, grabs the UniProt Primary Accession of the interacting Proteins
+# Also grabs Interaction Detection Method, PMID and Interaction type
+# Ignores interactions if:
+# - UniProt Primary Accessions if either of the proteins cannot be found OR
+# - if PMID is missing OR
+# - if TaxID of both interacting proteins is not '9606' i.e. human
+#
+# Prints to STDOUT in .tsv format by sorting the Uniprot PrimAC
+# The output consists of 5 columns:
+# - Protein A UniProt Primary Accession
+# - Protein B UniProt Primary Accession
+# - Interaction Detection Method
+# - Pubmed Identifier
+# - Interaction Type
 def interaction_parser(args):
 
     # Calling dictionary functions
@@ -367,6 +378,8 @@ def interaction_parser(args):
     interaction_file.close()
 
     return
+
+###########################################################    
 
 # Taking and handling command-line arguments
 def main():
