@@ -24,6 +24,7 @@ def UniProtInteractome(inCuratedFile):
     PPI_PMID_dict = {} # Dictionary for PPIs
     PPI_IntDetMethod_dict = {} # Dictionary for experiments and filtering based on IntDetMethod
 
+    # List of User input curated interaction files
     curatedFiles = inCuratedFile
 
     # there can be multiple files
