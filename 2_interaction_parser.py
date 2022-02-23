@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
 import re
-import argparse
-import sys
+import argparse, sys
+import logging
+import time
 
 ###Creating dictionaries from uniprot output files###
 
@@ -270,16 +271,17 @@ def interaction_parser(args):
         print("\t".join(interaction_out_line))
 
     # Debug counters
-    print("\nNo. of times Uniprot Primary Accession not found for Protein A:", notfound_Protein_A_PrimAC, file = sys.stderr)
-    print("No. of times Uniprot Primary Accession not found for Protein B:", notfound_Protein_B_PrimAC, file = sys.stderr)
-    print("\nNo. of times Pubmed ID not found for the Interaction:", notfound_PMID, file = sys.stderr)
-    print("\nNo. of times Uniprot Primary Accession identified using the Uniprot Primary Accession File:", found_inPrimACFile, file = sys.stderr)
-    print("No. of times Uniprot Primary Accession identified using the Uniprot Secondary Accession File:", found_inSecACFile, file = sys.stderr)
-    print("No. of times Uniprot Primary Accession identified using the GeneID File:", found_inGeneIDFile, file = sys.stderr)
-    print("\nNo. of times Uniprot Primary Accession identified using the first 2 columns of the Interaction file:", PrimAC_inMainCols, file = sys.stderr)
-    print("No. of times Uniprot Primary Accession identified using the AltID columns of the Interaction file:", PrimAC_inAltCols, file = sys.stderr)
-    print("\nNo. of times Uniprot Primary Accession identified using GeneIDs:", PrimAC_foundwithGeneID, file = sys.stderr)
-    print("No. of times Uniprot Primary Accession identified using Secondary_AC:", PrimAC_foundwithSecAC, file = sys.stderr)
+    logging.debug("Log details for the input file: %s" % args.inInteraction)
+    logging.debug("\nNo. of times Uniprot Primary Accession not found for Protein A: %d" % notfound_Protein_A_PrimAC)
+    logging.debug("\nNo. of times Uniprot Primary Accession not found for Protein B: %d" % notfound_Protein_B_PrimAC)
+    logging.debug("\nNo. of times Pubmed ID not found for the Interaction: %d" % notfound_PMID)
+    logging.debug("\nNo. of times Uniprot Primary Accession identified using the Uniprot Primary Accession File: %d" % found_inPrimACFile)
+    logging.debug("\nNo. of times Uniprot Primary Accession identified using the Uniprot Secondary Accession File: %d" % found_inSecACFile)
+    logging.debug("\nNo. of times Uniprot Primary Accession identified using the GeneID File: %d" % found_inGeneIDFile)
+    logging.debug("\n\nNo. of times Uniprot Primary Accession identified using the first 2 columns of the Interaction file: %d" % PrimAC_inMainCols)
+    logging.debug("\nNo. of times Uniprot Primary Accession identified using the AltID columns of the Interaction file: %d" % PrimAC_inAltCols)
+    logging.debug("\nNo. of times Uniprot Primary Accession identified using GeneIDs: %d" % PrimAC_foundwithGeneID)
+    logging.debug("\nNo. of times Uniprot Primary Accession identified using Secondary_AC: %d" % PrimAC_foundwithSecAC)
 
     # Closing the file
     interaction_file.close()
@@ -313,4 +315,8 @@ The output (Human-Human Protein Interaction Experiments) consists of five column
     interaction_parser(args)
 
 if __name__ == "__main__":
+    # Logging to the file
+    date = time.strftime("%Y_%m_%d-%H%M%S")
+    Log_Format = "%(levelname)s %(asctime)s - %(message)s \n"
+    logging.basicConfig(filename ='curatedIntFile_%s.log' % date, filemode = 'a', format  = Log_Format, level = logging.DEBUG)
     main()
