@@ -24,10 +24,10 @@ def UniProtInteractome(inCuratedFile):
     PPI_PMID_dict = {} # Dictionary for PPIs
     PPI_IntDetMethod_dict = {} # Dictionary for experiments and filtering based on IntDetMethod
 
-    Intfiles = inCuratedFile
+    curatedFiles = inCuratedFile
 
     # there can be multiple files
-    for file in Intfiles:
+    for file in curatedFiles:
 
         curatedIntFile = open(file)
 
