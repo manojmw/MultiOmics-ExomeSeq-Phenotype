@@ -28,9 +28,9 @@ def ENSG_Gene(inCanonicalFile):
             Gene_col = i
 
     if not ENSG_col >= 0:
-        sys.exit("Missing required column title: 'ENSG' \n")
+        sys.exit("Missing required column title 'ENSG' in the file: %s \n" % inCanonicalFile)
     elif not Gene_col >= 0:
-        sys.exit("Missing required column title: 'GENE' \n")
+        sys.exit("Missing required column title 'GENE' in the file: %s \n" % inCanonicalFile)
     # else grabbed the required column indexes -> PROCEED
 
     # Parsing the Uniprot Primary Accession file
