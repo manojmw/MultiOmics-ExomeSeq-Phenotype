@@ -156,15 +156,15 @@ def ENSG_Gene(inCanonicalFile):
 # - Key: UniProt Primary Accession
 # - Value: Corresponding ENSG
 
-def Uniprot_ENSG(args):
+def Uniprot_ENSG(inPrimAC, inCanonicalFile):
 
     # Initializing the dictionary
     Uniprot_ENSG_dict = {}
 
-    UniprotPrimAC_File = args.inPrimAC
+    UniprotPrimAC_File = open(inPrimAC)
 
     # Calling the function ENSG_Gene
-    ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
+    ENSG_Gene_dict = ENSG_Gene(inCanonicalFile)
 
     # Grabbing the header line
     UniprotPrimAC_header = UniprotPrimAC_File.readline()
@@ -242,7 +242,7 @@ def Uniprot_ENSG(args):
         if len(canonical_human_ENSGs) == 0:
             no_CanonicalHumanENSG += 1
         elif len(canonical_human_ENSGs) == 1:
-            Uniprot_ENSG_dict[UniprotPrimAC_fields[UniProt_PrimAC_col]] = [canonical_human_ENSGs]
+            Uniprot_ENSG_dict[UniprotPrimAC_fields[UniProt_PrimAC_col]] = ''.join(canonical_human_ENSGs)
             single_CanonicalHumanENSG += 1
         elif len(canonical_human_ENSGs) > 1:
             multiple_CanonicalHumanENSG += 1
@@ -274,15 +274,13 @@ def Interactome_Uniprot2ENSG(args):
 
     # Calling the functions
     Uniprot_Interactome_list = UniProtInteractome(args.inCuratedFile)
-    Uniprot_ENSG_dict = Uniprot_ENSG(args.inPrimAC)
+    ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
+    Uniprot_ENSG_dict = Uniprot_ENSG(args.inPrimAC, args.inCanonicalFile)
 
     # Counter for UniProt Primary Accessions of proteins not mapping to ENSG
     lost_Interaction = 0
 
     for data in Uniprot_Interactome_list:
-
-        # Initializing output list
-        ENSG_Interactome_out = []
 
         if data[0] in Uniprot_ENSG_dict.keys() and data[1] in Uniprot_ENSG_dict.keys():
             ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[0]), Uniprot_ENSG_dict.get(data[1]), data[2], data[3], data[4])
@@ -327,7 +325,6 @@ The output (High-quality Human Interactome) consists of five columns in .tsv for
 
     args = file_parser.parse_args()
     Interactome_Uniprot2ENSG(args)
-    Uniprot_ENSG(args)
 
 if __name__ == "__main__":
     main()
