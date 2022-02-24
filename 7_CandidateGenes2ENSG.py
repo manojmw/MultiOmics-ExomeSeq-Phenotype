@@ -2,6 +2,8 @@
 
 import argparse, sys
 import pandas as pd
+import logging
+import time
 
 ###########################################################
 
@@ -46,13 +48,15 @@ def ENSG_Gene(inCanonicalFile):
 
     return ENSG_Gene_dict
 
+###########################################################
+
 ###Function for extracting data from candidate gene file###
 # Takes candidate gene file in .xlsx format as INPUT
 # Extracts data from 3 columns - Gene, pathologyID and Confidence score
 # Returns a DataFrame with the data from above 3 columns - Candidate_data
 def CandidateGeneParser(inCandidateFile):
 
-    # Input files
+    # Input - List of candidate gene file(s)
     candidate_files = inCandidateFile
 
     # Initializing an empty data frame to store the data from all files
@@ -68,35 +72,113 @@ def CandidateGeneParser(inCandidateFile):
 
     return CandidateGene_data.values.tolist()
 
+###########################################################
+
 ###Function for mapping Candidate Genes to canonical ENSGs###
 # Calls the functions ENSG_Gene and CandidateGeneParser
 # Parses the input files as described in the respective functions
 # Maps the Genes to ENSGs
 # Prints to STDOUT in .tsv format
 # Output consists of 3 columns: ENSG, PathologyID and Confidence Score
-def CandidateGene2ENSG(args):
+def CandidateGene2ENSG(inCanonicalFile, inCandidateFile):
 
     # Calling the function ENSG_Gene
-    ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
+    ENSG_Gene_dict = ENSG_Gene(inCanonicalFile)
 
     # Calling the function CandidateGeneParser
-    CandidateGene_data = CandidateGeneParser(args.inCandidateFile)
+    CandidateGene_data = CandidateGeneParser(inCandidateFile)
+
+    # Initializing output list
+    canidateGene_out_list = []
 
     # Counter for canidate genes not found in the canonical transcripts file
     lost_CandidateGene = 0
 
     for data in CandidateGene_data:
-        if data[0] in Transcripts_Gene_dict.keys():
-            print(Transcripts_Gene_dict.get(data[0]), '\t', data[1], '\t', data[2])
+        if data[0] in ENSG_Gene_dict.keys():
+            canidateGene_out = [ENSG_Gene_dict.get(data[0]),  data[1],  data[2]]
+            canidateGene_out_list.append(canidateGene_out)
         else:
             lost_CandidateGene += 1
 
-    print("\nNo. of candidate genes not found in the Canonical transcripts file: ", lost_CandidateGene, file = sys.stderr)
-    
-    return
+    logging.debug("\nNo. of candidate genes not found in the Canonical transcripts file: %d" % lost_CandidateGene)
+
+    return canidateGene_out_list
+
+###########################################################
+
+# Parses the High-quality Interactome produced by Interactome.py
+# Required columns:
+# First column - ENSG of Protein A
+# Second column - ENSG of Protein B
+#
+# Returns a list with 2 items (in each sub list):
+# - ENSG of Protein A
+# - ENSG of Protein B
+def Interacting_Proteins(inInteractome):
+
+    # Input - Interactome file
+    Interactome_File = open(inInteractome)
+
+    # Initializing Interactome dictionary
+    Interactome_list = []
+
+    for line in Interactome_File:
+        line = line.rstrip('\n')
+
+        Interactome_fields = line.split('\t')
+
+        Interacting_Proteins = [Interactome_fields[0], Interactome_fields[1]]
+
+        Interactome_list.append(Interacting_Proteins)
+
+    return Interactome_list
+
+###########################################################
+
+# Parses the canidateGene_out_list returned by the function: CandidateGene2ENSG
+# Checks the Number of interactors for each candidate gene
+# using the Interactome_list returned by the function: Interacting_Proteins
+# Checks the number of Interactors that are known candidate genes
+# Prints to STDOUT in .tsv format
+# Output consists of 5 columns:
+# - Candidate Gene
+# - Count of Proteins interacting with Candidate Gene
+# - List of ENSGs of Interacting proteins
+# - Count of Interacting proteins that are known candidate Genes
+# - List of Candidate Interacting Proteins
+def Lead1_CandidateGenes(args):
+
+    # Calling the functions
+    canidateGene_out_list = CandidateGene2ENSG(args.inCanonicalFile, args.inCandidateFile)
+    Interactome_list = Interacting_Proteins(args.inInteractome)
+
+    # Dictionary for storing the Candidate Genes and Interactors
+    candGene_Interactors_list = []
 
 
-####Taking and handling command-line arguments
+    for candidateGene in canidateGene_out_list:
+
+        Interactors = []
+
+        for Proteins in Interactome_list:
+            if (candidateGene[0] == Proteins[0]):
+                Interactors.append(Proteins[1])
+                candGene_Interactors = [candidateGene[0], candidateGene[1], len(Interactors), ''.join(Interactors)]
+                candGene_Interactors_list.append(candGene_Interactors)
+            elif (candidateGene[0] == Proteins[1]):
+                Interactors.append(Proteins[0])
+                candGene_Interactors = [candidateGene[0], candidateGene[1], len(Interactors), ','.join(Interactors)]
+                candGene_Interactors_list.append(candGene_Interactors)
+
+
+    return print(candGene_Interactors_list)
+
+
+
+###########################################################
+
+# Taking and handling command-line arguments
 def main():
     file_parser = argparse.ArgumentParser(description =
     """
@@ -116,9 +198,14 @@ The output consists of 3 columns in .tsv format:
 
     required.add_argument('--inCandidateFile', metavar = "Input File", dest = "inCandidateFile", nargs = '+', help = 'Input File Name (Patient meta data file in xlsx format)', required = True)
     required.add_argument('--inCanonicalFile', metavar = "Input File", dest = "inCanonicalFile", help = 'Canonical Transcripts file', required = True)
+    required.add_argument('--inInteractome', metavar = "Input File", dest = "inInteractome", help = 'Input File Name (High-quality Interactome (.tsv) produced by Interactome.py)', required = True)
 
     args = file_parser.parse_args()
-    CandidateGene2ENSG(args)
+    Lead1_CandidateGenes(args)
 
 if __name__ == "__main__":
+    # Logging to the file
+    date = time.strftime("%Y_%m_%d-%H%M%S")
+    Log_Format = "%(levelname)s %(asctime)s - %(message)s \n"
+    logging.basicConfig(filename ='Lead-1_candidateGenes_%s.log' % date, filemode = 'a', format  = Log_Format, level = logging.DEBUG)
     main()
