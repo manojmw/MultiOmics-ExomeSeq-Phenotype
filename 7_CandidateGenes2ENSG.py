@@ -141,7 +141,7 @@ def Interacting_Proteins(inInteractome):
 # using the Interactome_list returned by the function: Interacting_Proteins
 # Checks the number of Interactors that are known candidate genes
 # Prints to STDOUT in .tsv format
-# Output consists of 5 columns:
+# Output consists of 4 columns:
 # - Candidate Gene
 # - Count of Proteins interacting with Candidate Gene
 # - Count of Interacting proteins that are known candidate Genes
@@ -151,6 +151,10 @@ def Lead1_CandidateGenes(args):
     # Calling the functions
     canidateGene_out_list = CandidateGene2ENSG(args.inCanonicalFile, args.inCandidateFile)
     Interactome_list = Interacting_Proteins(args.inInteractome)
+
+    # Printing the header for the output
+    header = ['Candidate_Gene', 'pathologyID', 'No_of_Interactors', 'No_of_KnownInteractors', 'List_KnownInteractors']
+    print('\t'.join(header))
 
     # Dictionary for storing the Candidate Genes and Interactors
     candGene_Interactors_list = []
@@ -197,8 +201,6 @@ def Lead1_CandidateGenes(args):
             print(output[0], '\t', output[1], '\t', output[2])
 
     return
-
-
 
 ###########################################################
 
