@@ -144,7 +144,6 @@ def Interacting_Proteins(inInteractome):
 # Output consists of 5 columns:
 # - Candidate Gene
 # - Count of Proteins interacting with Candidate Gene
-# - List of ENSGs of Interacting proteins
 # - Count of Interacting proteins that are known candidate Genes
 # - List of Candidate Interacting Proteins
 def Lead1_CandidateGenes(args):
@@ -156,23 +155,48 @@ def Lead1_CandidateGenes(args):
     # Dictionary for storing the Candidate Genes and Interactors
     candGene_Interactors_list = []
 
+    # Keep the count of candidate genes not interacting with any protein
+    nonInteracting_candGene_count = 0
+
+    # List of non-interacting candidate genes
+    nonInteracting_candGeneList = []
 
     for candidateGene in canidateGene_out_list:
 
+        # List for interacting proteins
         Interactors = []
 
+        # List for interacting proteins that are known candidate genes
+        Known_interactor = []
+
         for Proteins in Interactome_list:
+            # If candidate gene is protein A
             if (candidateGene[0] == Proteins[0]):
+                # then, get the interacting protein (protein B)
                 Interactors.append(Proteins[1])
-                candGene_Interactors = [candidateGene[0], candidateGene[1], len(Interactors), ''.join(Interactors)]
-                candGene_Interactors_list.append(candGene_Interactors)
+
+            # If candidate gene is protein B
             elif (candidateGene[0] == Proteins[1]):
+                # then, get the interacting protein (protein A)
                 Interactors.append(Proteins[0])
-                candGene_Interactors = [candidateGene[0], candidateGene[1], len(Interactors), ','.join(Interactors)]
-                candGene_Interactors_list.append(candGene_Interactors)
 
+        candGene_Interactors = [candidateGene[0], candidateGene[1], str(len(Interactors)), Interactors]
+        candGene_Interactors_list.append(candGene_Interactors)
 
-    return print(candGene_Interactors_list)
+    for candidateGene in canidateGene_out_list:
+        for data in candGene_Interactors_list:
+            for interactor in data[3]:
+                if interactor in candidateGene:
+                    Known_interactor.append(interactor)
+                    data.append(Known_interactor)
+
+    for output in candGene_Interactors_list:
+        if len(output) > 4:
+            print(output[0], '\t', output[1], '\t', output[2], '\t', len(output[4]), '\t', ','.join(output[4]))
+        else:
+            print(output[0], '\t', output[1], '\t', output[2])
+
+    return
 
 
 
