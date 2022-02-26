@@ -176,9 +176,6 @@ def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
         # List for interacting proteins
         Interactors = []
 
-        # List for interacting proteins that are known candidate genes
-        Known_interactor = []
-
         for Proteins in Interactome_list:
             # If candidate gene is protein A
             if (candidateENSG[0] == Proteins[0]):
@@ -195,6 +192,10 @@ def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
 
     # Checking the number of interactors that are known candidate genes
     for data in candENSG_Interactors_list:
+
+        # List for interacting proteins that are known candidate genes
+        Known_interactor = []
+        
         for interactor in data[4]:
             for candidateENSG in canidateENSG_out_list:
                 if interactor in candidateENSG:
