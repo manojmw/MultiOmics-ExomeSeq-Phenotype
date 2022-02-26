@@ -177,15 +177,16 @@ def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
         Interactors = []
 
         for Proteins in Interactome_list:
-            # If candidate gene is protein A
+            # If candidate ENSG is protein A
             if (candidateENSG[0] == Proteins[0]):
-                # then, get the interacting protein (protein B)
+                # then, get the ENSG of the interacting protein (protein B)
                 Interactors.append(Proteins[1])
 
-            # If candidate gene is protein B
+            # If candidate ENSG is protein B
             elif (candidateENSG[0] == Proteins[1]):
-                # then, get the interacting protein (protein A)
-                Interactors.append(Proteins[0])
+                # then, get the ENSG of the interacting protein (protein A)
+                if not Proteins[0] in Interactors:
+                    Interactors.append(Proteins[0])
 
         candENSG_Interactors = [candidateENSG[0], candidateENSG[1], candidateENSG[2], str(len(Interactors)), Interactors]
         candENSG_Interactors_list.append(candENSG_Interactors)
@@ -195,11 +196,16 @@ def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
 
         # List for interacting proteins that are known candidate genes
         Known_interactor = []
-        
+
         for interactor in data[4]:
             for candidateENSG in canidateENSG_out_list:
+                # Checking if the interactor is a known ENSG (candidate ENSG)
                 if interactor in candidateENSG:
-                    Known_interactor.append(interactor)
+                    # Avoid adding the same interactor to the
+                    # Known_interactor list, especially, if the same known
+                    # interactor is associated with different pathologies/phenotypes
+                    if interactor not in Known_interactor:
+                        Known_interactor.append(interactor)
         data.append(Known_interactor)
 
     return candENSG_Interactors_list
@@ -235,17 +241,14 @@ def Lead1_CandidateGene(args):
         candidateGene = [GeneName for (GeneName, ENSG) in ENSG_Gene_dict.items() if ENSG == CandidateENSG_data[0]]
 
         # If there are known interactors in the candGene_Interactors_list
-        if len(CandidateENSG_data) > 5:
-            # Get the Gene name of the known interactor using the dictionary (ENSG_Gene_dict)
-            for Interactors_ENSG in CandidateENSG_data[5]:
-                Known_Interactor_GeneList = [GeneName for (GeneName, ENSG) in ENSG_Gene_dict.items() if ENSG == Interactors_ENSG]
-                Known_Interactor_GeneStr = ''.join(Known_Interactor_GeneList)
-                Known_Interactors_Genes.append(Known_Interactor_GeneStr)
-            print(''.join(candidateGene), '\t', CandidateENSG_data[1], '\t', CandidateENSG_data[2], '\t', CandidateENSG_data[3], '\t', len(CandidateENSG_data[5]), '\t', ','.join(Known_Interactors_Genes))
-        else:
-            # No known interactors indicates only 4 items in the list (candGene_Interactors_list)
-            # 3rd and 4th columns indicated by '-'
-            print(''.join(candidateGene), '\t', CandidateENSG_data[1], '\t', CandidateENSG_data[2], '\t', CandidateENSG_data[3], '\t', '-', '\t', '-')
+        # Get the Gene name of the known interactor using the dictionary (ENSG_Gene_dict)
+        for Interactors_ENSG in CandidateENSG_data[5]:
+            Known_Interactor_GeneList = [GeneName for (GeneName, ENSG) in ENSG_Gene_dict.items() if ENSG == Interactors_ENSG]
+            Known_Interactor_GeneStr = ''.join(Known_Interactor_GeneList)
+            Known_Interactors_Genes.append(Known_Interactor_GeneStr)
+
+        # Print to STDOUT     
+        print(''.join(candidateGene), '\t', CandidateENSG_data[1], '\t', CandidateENSG_data[2], '\t', CandidateENSG_data[3], '\t', len(CandidateENSG_data[5]), '\t', ','.join(Known_Interactors_Genes))
 
     return
 
