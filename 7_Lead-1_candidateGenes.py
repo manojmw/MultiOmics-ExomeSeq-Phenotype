@@ -196,13 +196,13 @@ def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
         candGene_Interactors = [candidateGene[0], candidateGene[1], candidateGene[2], str(len(Interactors)), Interactors]
         candGene_Interactors_list.append(candGene_Interactors)
 
-    # Checking the number of interactors that are known canidate genes
+    # Checking the number of interactors that are known candidate genes
     for candidateGene in canidateGene_out_list:
         for data in candGene_Interactors_list:
             for interactor in data[4]:
                 if interactor in candidateGene:
                     Known_interactor.append(interactor)
-                    data.append(Known_interactor)
+            data.append(Known_interactor)
 
     return candGene_Interactors_list
 
@@ -235,14 +235,18 @@ def Lead1_CandidateGene(args):
         Known_Interactors_Genes = []
 
         candidateGene = [GeneName for (GeneName, ENSG) in ENSG_Gene_dict.items() if ENSG == CandidateENSG_data[0]]
+
+        # If there are known interactors in the candGene_Interactors_list
         if len(CandidateENSG_data) > 5:
+            # Get the Gene name of the known interactor using the dictionary (ENSG_Gene_dict)
             for Interactors_ENSG in CandidateENSG_data[5]:
                 Known_Interactor_GeneList = [GeneName for (GeneName, ENSG) in ENSG_Gene_dict.items() if ENSG == Interactors_ENSG]
                 Known_Interactor_GeneStr = ''.join(Known_Interactor_GeneList)
                 Known_Interactors_Genes.append(Known_Interactor_GeneStr)
             print(''.join(candidateGene), '\t', CandidateENSG_data[1], '\t', CandidateENSG_data[2], '\t', CandidateENSG_data[3], '\t', len(CandidateENSG_data[5]), '\t', ','.join(Known_Interactors_Genes))
         else:
-            # No known interactors indicated by '-' in the 3rd and fourth columns
+            # No known interactors indicates only 4 items in the list (candGene_Interactors_list)
+            # 3rd and fourth columns indicated by '-'
             print(''.join(candidateGene), '\t', CandidateENSG_data[1], '\t', CandidateENSG_data[2], '\t', CandidateENSG_data[3], '\t', '-', '\t', '-')
 
     return
