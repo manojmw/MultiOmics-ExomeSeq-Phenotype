@@ -157,7 +157,7 @@ def ENSG_Gene(inCanonicalFile):
 ###########################################################
 
 # Parses the UniProt Primary Accession file produced by uniprot_parser.py
-# Required columns are: 'Primary_AC' and 'ENSG' (can be in any order,
+# Required columns are: 'Primary_AC' and 'ENSGs' (can be in any order,
 # but they MUST exist)
 #
 # Parses the dictionary returned by the function ENSG_Gene
@@ -189,7 +189,7 @@ def Uniprot_ENSG(inPrimAC, inCanonicalFile):
     for i in range(len(UniprotPrimAC_header_fields)):
         if UniprotPrimAC_header_fields[i] == 'Primary_AC':
             UniProt_PrimAC_col = i
-        elif UniprotPrimAC_header_fields[i] == 'ENSG':
+        elif UniprotPrimAC_header_fields[i] == 'ENSGs':
             ENSG_col = i
 
     if not UniProt_PrimAC_col >= 0:
