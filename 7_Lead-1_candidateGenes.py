@@ -103,21 +103,24 @@ def CandidateGene2ENSG(inCanonicalFile, inCandidateFile):
     CandidateGene_data = CandidateGeneParser(inCandidateFile)
 
     # Initializing output list
-    canidateGene_out_list = []
+    canidateENSG_out_list = []
 
     # Counter for canidate genes not found in the canonical transcripts file
     lost_CandidateGene = 0
 
     for data in CandidateGene_data:
-        if data[0] in ENSG_Gene_dict.keys():
-            canidateGene_out = [ENSG_Gene_dict.get(data[0]),  data[1],  data[2]]
-            canidateGene_out_list.append(canidateGene_out)
+        # data[0] -> Candidate Gene
+        # data[1] -> pathologyID
+        # data[2] -> Confidence Score
+        if data[0] in ENSG_Gene_dict.keys(): # Get the corresponding ENSG
+            canidateENSG_out = [ENSG_Gene_dict.get(data[0]),  data[1],  data[2]]
+            canidateENSG_out_list.append(canidateENSG_out)
         else:
             lost_CandidateGene += 1
 
     logging.debug("\nNo. of candidate genes not found in the Canonical transcripts file: %d" % lost_CandidateGene)
 
-    return canidateGene_out_list
+    return canidateENSG_out_list
 
 ###########################################################
 
@@ -162,19 +165,13 @@ def Interacting_Proteins(inInteractome):
 def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
 
     # Calling the functions
-    canidateGene_out_list = CandidateGene2ENSG(inCanonicalFile, inCandidateFile)
+    canidateENSG_out_list = CandidateGene2ENSG(inCanonicalFile, inCandidateFile)
     Interactome_list = Interacting_Proteins(inInteractome)
 
-    # Dictionary for storing the Candidate Genes and Interactors
-    candGene_Interactors_list = []
+    # Dictionary for storing the Candidate ENSGs and Interactors
+    candENSG_Interactors_list = []
 
-    # Keep the count of candidate genes not interacting with any protein
-    nonInteracting_candGene_count = 0
-
-    # List of non-interacting candidate genes
-    nonInteracting_candGeneList = []
-
-    for candidateGene in canidateGene_out_list:
+    for candidateENSG in canidateENSG_out_list:
 
         # List for interacting proteins
         Interactors = []
@@ -184,27 +181,27 @@ def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
 
         for Proteins in Interactome_list:
             # If candidate gene is protein A
-            if (candidateGene[0] == Proteins[0]):
+            if (candidateENSG[0] == Proteins[0]):
                 # then, get the interacting protein (protein B)
                 Interactors.append(Proteins[1])
 
             # If candidate gene is protein B
-            elif (candidateGene[0] == Proteins[1]):
+            elif (candidateENSG[0] == Proteins[1]):
                 # then, get the interacting protein (protein A)
                 Interactors.append(Proteins[0])
 
-        candGene_Interactors = [candidateGene[0], candidateGene[1], candidateGene[2], str(len(Interactors)), Interactors]
-        candGene_Interactors_list.append(candGene_Interactors)
+        candENSG_Interactors = [candidateENSG[0], candidateENSG[1], candidateENSG[2], str(len(Interactors)), Interactors]
+        candENSG_Interactors_list.append(candENSG_Interactors)
 
     # Checking the number of interactors that are known candidate genes
-    for data in candGene_Interactors_list:
+    for data in candENSG_Interactors_list:
         for interactor in data[4]:
-            for candidateGene in canidateGene_out_list:
-                if interactor in candidateGene:
+            for candidateENSG in canidateENSG_out_list:
+                if interactor in candidateENSG:
                     Known_interactor.append(interactor)
         data.append(Known_interactor)
 
-    return candGene_Interactors_list
+    return candENSG_Interactors_list
 
 ###########################################################
 
@@ -222,14 +219,14 @@ def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
 # - List of Known Interacting genes
 def Lead1_CandidateGene(args):
 
-    candGene_Interactors_list = Lead1_CandidateENSG(args.inCanonicalFile, args.inCandidateFile, args.inInteractome)
+    candENSG_Interactors_list = Lead1_CandidateENSG(args.inCanonicalFile, args.inCandidateFile, args.inInteractome)
     ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
 
     # Printing the header for the output
     header = ['Candidate_Gene', 'pathologyID', 'Confidence_Score', 'No_of_Interactors', 'No_of_KnownInteractors', 'List_KnownInteractors']
     print('\t'.join(header))
 
-    for CandidateENSG_data in candGene_Interactors_list:
+    for CandidateENSG_data in candENSG_Interactors_list:
 
         # known interactor genes
         Known_Interactors_Genes = []
@@ -246,7 +243,7 @@ def Lead1_CandidateGene(args):
             print(''.join(candidateGene), '\t', CandidateENSG_data[1], '\t', CandidateENSG_data[2], '\t', CandidateENSG_data[3], '\t', len(CandidateENSG_data[5]), '\t', ','.join(Known_Interactors_Genes))
         else:
             # No known interactors indicates only 4 items in the list (candGene_Interactors_list)
-            # 3rd and fourth columns indicated by '-'
+            # 3rd and 4th columns indicated by '-'
             print(''.join(candidateGene), '\t', CandidateENSG_data[1], '\t', CandidateENSG_data[2], '\t', CandidateENSG_data[3], '\t', '-', '\t', '-')
 
     return
