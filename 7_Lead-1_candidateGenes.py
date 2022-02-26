@@ -197,12 +197,12 @@ def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
         candGene_Interactors_list.append(candGene_Interactors)
 
     # Checking the number of interactors that are known candidate genes
-    for candidateGene in canidateGene_out_list:
-        for data in candGene_Interactors_list:
-            for interactor in data[4]:
+    for data in candGene_Interactors_list:
+        for interactor in data[4]:
+            for candidateGene in canidateGene_out_list:
                 if interactor in candidateGene:
                     Known_interactor.append(interactor)
-                    data.append(Known_interactor)
+        data.append(Known_interactor)
 
     return candGene_Interactors_list
 
