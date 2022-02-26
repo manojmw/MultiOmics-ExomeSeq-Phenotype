@@ -76,6 +76,9 @@ def UniProtInteractome(inCuratedFile):
                 else:
                     PPI_IntDetMethod_dict[Int_key] = [IntDetMeth]
 
+        # Closing the file
+        curatedIntFile.close()
+
     # Initializing output list
     Uniprot_Interactome_list = []
 
@@ -146,6 +149,9 @@ def ENSG_Gene(inCanonicalFile):
 
         ENSG_Gene_dict[CanonicalTranscripts_fields[ENSG_col]] = CanonicalTranscripts_fields[Gene_col]
 
+    # Closing the file
+    Canonical_File.close()
+
     return ENSG_Gene_dict
 
 ###########################################################
@@ -153,6 +159,7 @@ def ENSG_Gene(inCanonicalFile):
 # Parses the UniProt Primary Accession file produced by uniprot_parser.py
 # Required columns are: 'Primary_AC' and 'ENSG' (can be in any order,
 # but they MUST exist)
+#
 # Parses the dictionary returned by the function ENSG_Gene
 # Maps UniProt Primary Accession to ENSG
 # Returns a dictionary:
@@ -232,6 +239,7 @@ def Uniprot_ENSG(inPrimAC, inCanonicalFile):
             continue
         Count_HumanUniprotPrimAC += 1
 
+
         for ENSG in human_ENSGs:
             if ENSG in ENSG_Gene_dict.keys():
                 canonical_human_ENSGs.append(ENSG)
@@ -257,6 +265,9 @@ def Uniprot_ENSG(inPrimAC, inCanonicalFile):
     logging.debug("\nNo. of UniProt primary accessions with single canonical human ENSG: %d " % single_CanonicalHumanENSG)
     logging.debug("\nNo. of UniProt primary accessions with multiple canonical human ENSGs: %d " % multiple_CanonicalHumanENSG)
 
+    # Closing the file
+    UniprotPrimAC_File.close()
+
     return Uniprot_ENSG_dict
 
 ###########################################################
@@ -264,7 +275,7 @@ def Uniprot_ENSG(inPrimAC, inCanonicalFile):
 # Parses the list - [Interactome_list] returned by the function: UniProtInteractome and
 # the dictionary - {Uniprot_ENSG_dict} returned by the function: Uniprot_ENSG
 #
-# Retrieves the ENSG of each interacting protein
+# Maps the UniProt Primary Accessions to ENSG using the dictionary: {ENSG_Gene_dict}
 # Prints to STDOUT in .tsv format
 # Output consists of 5 columns:
 # - ENSG of Protein A
@@ -276,7 +287,6 @@ def Interactome_Uniprot2ENSG(args):
 
     # Calling the functions
     Uniprot_Interactome_list = UniProtInteractome(args.inCuratedFile)
-    ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
     Uniprot_ENSG_dict = Uniprot_ENSG(args.inPrimAC, args.inCanonicalFile)
 
     # Counter for UniProt Primary Accessions of proteins not mapping to ENSG
@@ -302,7 +312,7 @@ def main():
     file_parser = argparse.ArgumentParser(description =
     """
 -------------------------------------------------------------------------------------------------------------
-Program: Parses the output files produced by the interaction_parser.py to produce a high-quality interactome,
+Program: Parses the output file(s) produced by the interaction_parser.py to produce a high-quality interactome,
          maps the UniProt Primary Accession of interacting proteins to ENSG in the Canonical transcripts file
          and prints to STDOUT
 -------------------------------------------------------------------------------------------------------------
