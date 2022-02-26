@@ -202,7 +202,7 @@ def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
             for interactor in data[4]:
                 if interactor in candidateGene:
                     Known_interactor.append(interactor)
-            data.append(Known_interactor)
+                    data.append(Known_interactor)
 
     return candGene_Interactors_list
 
