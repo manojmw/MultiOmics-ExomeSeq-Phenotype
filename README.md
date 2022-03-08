@@ -105,7 +105,7 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
 
 ## Metadata files
 
-- Currently, the scripts uses only one metadata file i.e. `candidateGenes.xlsx`. Later, description of the more files will be added.
+- Currently, the scripts uses only one metadata file i.e. `candidateGenes.xlsx`. Later, description of other files will be added.
 
 1. candidateGenes.xlsx: </br>
   * Lists known candidate genes. This eases the identification of a patient's likely causal variant: variants impacting a known candidate gene can be easily selected. Several such files can be provided (comma-separated), to facilitate their maintenance. 
