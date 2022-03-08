@@ -83,6 +83,7 @@ python 5_ModuleInputFile.py < Interactome.tsv
 </br>
 
 - Parses the output (Ex: Interactome.tsv) produced by 4_Interactome.py 
+- Produces the input files that can be used for most of the MODULE IDENTIFICATION METHODS/CLUSTERING/COMMUNITY IDENTIFICATION
 - For more detailed description on the arguments and the output, please use the help option with the script: </br> `python 5_ModuleInputFile.py --help`
 
 </br>
