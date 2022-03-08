@@ -119,7 +119,7 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
 ## Dependencies
 
 * Requires **python ≥ 3**
-* External dependencies are kept to minimum in all the scripts. The only required python modules are listed below:
- - Pandas
+* External dependencies are kept to minimum in all the scripts. The only required python modules are listed below: </br>
+  - Pandas
 * Most other standard core modules should already be available on your system
 </br>
