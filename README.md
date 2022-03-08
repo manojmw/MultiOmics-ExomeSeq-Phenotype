@@ -115,3 +115,11 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
     - Confidence score: indicates how confident you are that LOF variants in this gene are causal for this pathology. We recommend using integers between 1 and 5, 5 meaning the gene is definitely causal while 1 is a lower-confidence candidate.
 
 </br>
+
+## Dependencies
+
+* Requires **python ≥ 3**
+* External dependencies are kept to minimum in all the scripts. The only required python modules are listed below:
+ - Pandas
+* Most other standard core modules should already be available on your system
+</br>
