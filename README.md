@@ -99,7 +99,7 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
 
 ## Detailed Description
 
-- For more detailed description on arguments, input files and the output generated, please use the help option with the scripts - `python script.py --help`
+- For more detailed description on arguments, input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
 
 </br>
 
