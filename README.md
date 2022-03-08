@@ -2,7 +2,7 @@
 
 This is the main repository containing all the scripts for the project: 
 
-"Developing a Multi-Omics Integrative Analysis method to score Exome-Seq derived Genomic Variants that are causal for the Patient's Phenotype"
+"MultiOmics-ExomeSeq-Phenotype"
 
 </br>
 
