@@ -1,10 +1,5 @@
 #!/usr/bin/python
 
-###########################################################
-# Written by: Manoj M Wagle
-# Date: 22 November, 2021
-###########################################################
-
 import re
 import argparse
 
@@ -46,16 +41,19 @@ def uniprot_parser(args):
             ENSGs = []
             GeneIDs = []
 
-            # Compiling all the regular expressions###
+            # Compiling all the regular expressions
 
             # Accession Numbers (AC), strip trailing ';'
             re_AC = re.compile('^AC\s+(\S.*);$')
+
             # Organism (TaxID) from the OX line; some lines violate the uniprot spec
             # Grab only TaxID even if additional info comes after the TaxID
             # eg NCBI_TaxID=32201 {ECO:0000312|EMBL:ABW86978.1};
             re_TaxID = re.compile('^OX\s+NCBI_TaxID=(\d+)[; ]')
+
             # Ensembl transcripts and Genes from the DR line
             re_ENS = re.compile('^DR\s+Ensembl; (\w+); \w+; (\w+)\.')
+            
             # GeneIDs from the DR line
             re_GID = re.compile('^DR\s+GeneID;\s+(\d+);')
 
@@ -143,7 +141,7 @@ def uniprot_parser(args):
     except IOError as e:
         print("Error: Unable to open the files for writing")
 
-###########################################################        
+###########################################################
 
 # Taking and handling command-line arguments
 def main():
