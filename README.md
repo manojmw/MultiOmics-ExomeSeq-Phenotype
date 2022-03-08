@@ -20,7 +20,6 @@ python 1_uniprot_parser.py --inUniprot uniprot_sprot.dat --outPrimAC uniprot_mai
 - This will basically parse a uniprot file (Ex: uniprot_sprot.dat)
 - Extracts the required data from each record
 - Populates the output files with the processed data
-- For more detailed description on the output files generated, please use the help option with the script: </br> `python 1_uniprot_parser.py --help`
 
 </br>
 
@@ -37,7 +36,6 @@ python 2_interaction_parser.py --inInteraction intact.txt --inPrimAC uniprot_mai
 - Maps the data for each protein-protein interaction experiment to the output files produced by `1_uniprot_parser.py`
 - Extracts the uniprot accessions of the interacting proteins as well as other associated data
 - Prints to STDOUT in tab-separated format
-- For more detailed description on the arguments and the output, please use the help option with the script: </br> `python 2_interaction_parser.py --help`
 
 </br>
 
@@ -68,7 +66,6 @@ python 4_Interactome.py --inCuratedFile curatedPPI_BioGRID.tsv curatedPPI_Intact
 
 - Parses the output files (Ex: curatedPPI_BioGRID.tsv and curatedPPI_Intact.tsv) produced by `2_interaction_parser.py` and generates a high-quality human interactome
 - Further, maps the uniprot accessions to ENSG using the canonical transcripts file and prints to STDOUT
-- For more detailed description on the arguments and the output, please use the help option with the script: </br> `python 4_Interactome.py --help`
 
 </br>
 
@@ -84,7 +81,6 @@ python 5_ModuleInputFile.py < Interactome.tsv
 
 - Parses the output (Ex: Interactome.tsv) produced by `4_Interactome.py` 
 - Produces the input files that can be used for most of the module identification/clustering methods
-- For more detailed description on the arguments and the output, please use the help option with the script: </br> `python 5_ModuleInputFile.py --help`
 
 </br>
 
@@ -100,6 +96,19 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
 
 - Parses output files produced by `1_uniprot_parser.py` and `the canonical transcripts file (Ex: canonicalTranscripts_220221.tsv)
 - Maps uniprot accessions to ENSG and prints to STDOUT
-- For more detailed description on the arguments, please use the help option with the script: </br> `python 6_Uniprot2ENSG.py --help`
 
+</br>
+
+## Detailed Description
+
+- For more detailed description on arguments, input files and the output generated, please use the help option with the scripts 
+</br>
+
+Example:
+
+</br>
+
+```console
+python 1_uniprot_parser.py --help
+```
 </br>
