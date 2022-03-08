@@ -2,7 +2,6 @@
 
 This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype (**The project is still in progress**)
 
-</br>
 
 ## Example Usage of the Scripts:
 
@@ -15,7 +14,9 @@ python 1_uniprot_parser.py --inUniprot uniprot_sprot.dat --outPrimAC uniprot_mai
 ```    
 </br>
 
-- This will basically parse a uniprot file (Ex: uniprot_sprot.dat). Extracts the required data from each record and populates the output files with the processed data.
+- This will basically parse a uniprot file (Ex: uniprot_sprot.dat)
+- Extracts the required data from each record 
+- Populates the output files with the processed data.
 
 </br>
 
@@ -93,13 +94,11 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
 - Parses output files produced by `1_uniprot_parser.py` and `the canonical transcripts file (Ex: canonicalTranscripts_220221.tsv)
 - Maps uniprot accessions to ENSG and prints to STDOUT
 
-</br>
 
 ## Detailed Description
 
 - For more detailed description on arguments, input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
 
-</br>
 
 ## Metadata files
 
@@ -112,7 +111,6 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
     - pathologyID: pathology/phenotype, as in the previous metadata files.
     - Confidence score: indicates how confident you are that LOF variants in this gene are causal for this pathology. We recommend using integers between 1 and 5, 5 meaning the gene is definitely causal while 1 is a lower-confidence candidate.
 
-</br>
 
 ## Dependencies
 
