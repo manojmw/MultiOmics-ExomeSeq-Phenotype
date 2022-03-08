@@ -1,6 +1,6 @@
 ## Introduction
 
-This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype
+This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype (**The project is still in progress**)
 
 </br>
 
@@ -15,9 +15,7 @@ python 1_uniprot_parser.py --inUniprot uniprot_sprot.dat --outPrimAC uniprot_mai
 ```    
 </br>
 
-- This will basically parse a uniprot file (Ex: uniprot_sprot.dat)
-- Extracts the required data from each record
-- Populates the output files with the processed data
+- This will basically parse a uniprot file (Ex: uniprot_sprot.dat). Extracts the required data from each record and populates the output files with the processed data.
 
 </br>
 
