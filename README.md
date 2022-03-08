@@ -1,8 +1,6 @@
 ## Introduction
 
-This is the main repository containing all the scripts for the project: 
-
-"MultiOmics-ExomeSeq-Phenotype"
+This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype
 
 </br>
 
