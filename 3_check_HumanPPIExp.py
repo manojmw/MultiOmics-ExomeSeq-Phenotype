@@ -3,9 +3,10 @@
 import re
 import argparse, sys
 
-###Function to check the number of Human-Human Protein Interaction experiments###
-# Takes miTAB 2.5 or 2.7 file as input
-# Keeps the count of experiments where both proteins have TaxID = 9606 i.e Human
+###########################################################
+
+# Parses miTAB 2.5 or 2.7 file
+# Counts the experiments where both proteins have TaxID = '9606' i.e Human
 # Prints the total no. of Human-Human Protein Interaction experiments to STDOUT
 def checkHumanPPI(interaction_file):
 
@@ -15,7 +16,7 @@ def checkHumanPPI(interaction_file):
     # Skip header
     interaction_file.readline()
 
-    # Keeping the count of Human-Human Interaction experiments
+    # Keeping the count of Human-Human protein interaction experiments
     HumanInt_Count = 0
 
     # Compiling regular expression
@@ -28,7 +29,7 @@ def checkHumanPPI(interaction_file):
         line = line.rstrip('\n')
         line_fields = line.split('\t')
 
-        # Initializing accumulators
+        # Initializing TaxID accumulator
         TaxIDs = ['','']
 
         for taxindex in [0,1]:
@@ -36,13 +37,17 @@ def checkHumanPPI(interaction_file):
                 ID = re_taxID.match(line_fields[taxindex+9]).group(1)
                 TaxIDs[taxindex] = ID
                 continue
+
         if (TaxIDs[0] == '9606') and (TaxIDs[1] == '9606'):
             HumanInt_Count += 1
             continue
+
     print("\nTotal Number of Human-Human Protein Interaction experiments: ", HumanInt_Count, "\n")
 
     # Closing the file
     interaction_file.close()
+
+###########################################################
 
 # Taking and handling command-line arguments
 def main():
@@ -57,7 +62,6 @@ Usage:
                         OR
     % cat Input file | python 3_check_HumanPPIExp.py
 ----------------------------------------------------------------------------------------------------------------------
-
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
