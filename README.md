@@ -66,7 +66,7 @@ python 4_Interactome.py --inCuratedFile curatedPPI_BioGRID.tsv curatedPPI_Intact
 
 </br>
 
-- Parses the output files (Ex: curatedPPI_BioGRID.tsv and curatedPPI_Intact.tsv) produced by 2_interaction_parser.py and generates a high-quality human interactome
+- Parses the output files (Ex: curatedPPI_BioGRID.tsv and curatedPPI_Intact.tsv) produced by `2_interaction_parser.py` and generates a high-quality human interactome
 - Further, maps the uniprot accessions to ENSG using the canonical transcripts file and prints to STDOUT
 - For more detailed description on the arguments and the output, please use the help option with the script: </br> `python 4_Interactome.py --help`
 
@@ -82,8 +82,24 @@ python 5_ModuleInputFile.py < Interactome.tsv
 
 </br>
 
-- Parses the output (Ex: Interactome.tsv) produced by 4_Interactome.py 
+- Parses the output (Ex: Interactome.tsv) produced by `4_Interactome.py` 
 - Produces the input files that can be used for most of the module identification/clustering methods
 - For more detailed description on the arguments and the output, please use the help option with the script: </br> `python 5_ModuleInputFile.py --help`
+
+</br>
+
+> 6_Uniprot2ENSG.py
+
+</br>
+
+```console
+python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
+```                      
+
+</br>
+
+- Parses output files produced by `1_uniprot_parser.py` and `the canonical transcripts file (Ex: canonicalTranscripts_220221.tsv)
+- Maps uniprot accessions to ENSG and prints to STDOUT
+- For more detailed description on the arguments, please use the help option with the script: </br> `python 6_Uniprot2ENSG.py --help`
 
 </br>
