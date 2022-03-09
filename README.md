@@ -9,7 +9,7 @@ This is the main repository containing all the scripts for the project: MultiOmi
    - [Interactome generator](#interactome)
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
-- [Detailed Description(Arguments, Input Files and Output](#detailed-description)
+- [Detailed Description(Arguments, Input Files and Output)](#detailed-description)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
 
