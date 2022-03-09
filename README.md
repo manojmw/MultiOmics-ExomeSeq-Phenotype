@@ -15,7 +15,7 @@ This is the main repository containing all the scripts for the project: MultiOmi
 
 ## Example Usage of the Scripts
 
-> Uniprot Parser: 1_uniprot_parser.py
+> Uniprot Parser
 
 </br>
 
@@ -30,7 +30,7 @@ python 1_uniprot_parser.py --inUniprot uniprot_sprot.dat --outPrimAC uniprot_mai
 
 </br>
 
-> Protein-Protein Interaction Parser: 2_interaction_parser.py
+> Protein-Protein Interaction Parser
 
 </br>
 
@@ -46,7 +46,7 @@ python 2_interaction_parser.py --inInteraction intact.txt --inPrimAC uniprot_mai
 
 </br>
 
-> PPI Experiment Count: 3_check_HumanPPIExp.py
+> PPI Experiment Count
 
 </br>
 
@@ -61,7 +61,7 @@ python 3_check_HumanPPIExp.py < intact.txt
 
 </br>
 
-> Interactome generator: 4_Interactome.py
+> Interactome generator
 
 </br>
 
@@ -76,7 +76,7 @@ python 4_Interactome.py --inCuratedFile curatedPPI_BioGRID.tsv curatedPPI_Intact
 
 </br>
 
-> Module Input File Generator: 5_ModuleInputFile.py
+> Module Input File Generator
 
 </br>
 
@@ -91,7 +91,7 @@ python 5_ModuleInputFile.py < Interactome.tsv
 
 </br>
 
-> Uniprot2ENSG Mapper: 6_Uniprot2ENSG.py
+> Uniprot2ENSG Mapper
 
 </br>
 
