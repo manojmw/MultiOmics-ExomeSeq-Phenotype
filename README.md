@@ -89,14 +89,13 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
 
 </br>
 
-- Parses output files produced by `1_uniprot_parser.py` and `the canonical transcripts file (Ex: canonicalTranscripts_220221.tsv)
-- Maps uniprot accessions to ENSG and prints to STDOUT
-
+- Parses the output files produced by `1_uniprot_parser.py` and the `canonical transcripts file` (Ex: canonicalTranscripts_220221.tsv)
+- Maps uniprot accession to ENSG and prints to STDOUT
+- To produce the `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
 
 ## Detailed Description
 
 - For more detailed description on arguments, input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
-
 
 ## Metadata files
 
