@@ -15,7 +15,7 @@ This is the main repository containing all the scripts for the project: MultiOmi
 
 ## Example Usage of the Scripts
 
-> #Uniprot Parser
+### Uniprot Parser
 
 </br>
 
