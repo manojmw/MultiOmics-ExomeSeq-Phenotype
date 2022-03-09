@@ -3,7 +3,7 @@
 This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype. All the scripts are written in python. (**The project is still in progress**)
 </br>
 - [Example Usage](#Example-Usage-of-the-Scripts)
-   - [Uniprot Parser](#Uniprot-Parser)
+   - [Uniprot Parser](#-Uniprot-Parser)
    - [Protein-Protein Interaction Parser](#Protein-Protein-Interaction-Parser)
    - [PPI Experiment Count](#PPI-Experiment-Count) 
    - [Interactome generator](#Interactome-generator)
