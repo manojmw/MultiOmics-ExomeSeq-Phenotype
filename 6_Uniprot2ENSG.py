@@ -32,9 +32,9 @@ def ENSG_Gene(inCanonicalFile):
             Gene_col = Canonical_header_fields.index(header)
 
     if not ENSG_col >= 0:
-        sys.exit("Missing required column title: 'ENSG' \n")
+        sys.exit("Missing required column title: 'ENSG' in the file: %s \n" % inCanonicalFile)
     elif not Gene_col >= 0:
-        sys.exit("Missing required column title: 'GENE' \n")
+        sys.exit("Missing required column title: 'GENE' in the file: %s \n" % inCanonicalFile)
     # else grabbed the required column indexes -> PROCEED
 
     # Parsing the Uniprot Primary Accession file
@@ -81,13 +81,13 @@ def Uniprot2ENSG(args):
     for header in UniprotPrimACFile_header_fields:
         if header == 'Primary_AC':
             UniProt_PrimAC_col = UniprotPrimACFile_header_fields.index(header)
-        elif header == 'ENSG':
+        elif header == 'ENSGs':
             ENSG_col = UniprotPrimACFile_header_fields.index(header)
 
     if not UniProt_PrimAC_col >= 0:
-        sys.exit("Missing required column title: 'Primary_AC' \n")
+        sys.exit("Missing required column title: 'Primary_AC' in the file: %s \n" % inPrimAC)
     elif not ENSG_col >= 0:
-        sys.exit("Missing required column title: 'ENSG' \n")
+        sys.exit("Missing required column title: 'ENSGs' in the file: %s \n" % inPrimAC)
     # else grabbed the required column indexes -> PROCEED
 
     # Compiling regular expressions###
@@ -187,5 +187,5 @@ if __name__ == "__main__":
     # Logging to the file
     date = time.strftime("%Y_%m_%d-%H%M%S")
     Log_Format = "%(levelname)s %(asctime)s - %(message)s \n"
-    logging.basicConfig(filename ='Interactome_%s.log' % date, filemode = 'a', format  = Log_Format, level = logging.DEBUG)
+    logging.basicConfig(filename ='Uniprot2ENSG_%s.log' % date, filemode = 'a', format  = Log_Format, level = logging.DEBUG)
     main()
