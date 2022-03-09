@@ -9,15 +9,13 @@ This is the main repository containing all the scripts for the project: MultiOmi
    - [Interactome generator](#interactome)
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
-- [Detailed Description](#detailed-description)
+- [Detailed Description(Arguments, Input Files and Output)](#detailed-description)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
 
 ## Example Usage of the Scripts
 
 <a name="uniprotparser"></a>**Uniprot Parser**
-
-</br>
 
 ```console
 python 1_uniprot_parser.py --inUniprot uniprot_sprot.dat --outPrimAC uniprot_main.tsv --outSecAC uniprot_secondary.tsv --outGeneID geneID.tsv
@@ -26,13 +24,11 @@ python 1_uniprot_parser.py --inUniprot uniprot_sprot.dat --outPrimAC uniprot_mai
 
 - This will basically parse a uniprot file (Ex: uniprot_sprot.dat)
 - Extracts the required data from each record 
-- Populates the output files (Ex: uniprot_main.tsv with the processed data.
+- Populates the output files with the processed data.
 
 </br>
 
 <a name="ppiparser"></a>**Protein-Protein Interaction Parser**
-
-</br>
 
 ```console
 python 2_interaction_parser.py --inInteraction intact.txt --inPrimAC uniprot_main.tsv --inSecAC uniprot_secondary.tsv --inGeneID geneID.tsv
@@ -48,8 +44,6 @@ python 2_interaction_parser.py --inInteraction intact.txt --inPrimAC uniprot_mai
 
 <a name="ppiexpcount"></a>**PPI Experiment Count**
 
-</br>
-
 ```console
 python 3_check_HumanPPIExp.py < intact.txt
 ```                      
@@ -63,8 +57,6 @@ python 3_check_HumanPPIExp.py < intact.txt
 
 <a name="interactome"></a>**Interactome generator**
 
-</br>
-
 ```console
 python 4_Interactome.py --inCuratedFile curatedPPI_BioGRID.tsv curatedPPI_Intact.tsv --inPrimAC uniprot_main.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
 ```                      
@@ -73,12 +65,11 @@ python 4_Interactome.py --inCuratedFile curatedPPI_BioGRID.tsv curatedPPI_Intact
 
 - Parses the output files (Ex: curatedPPI_BioGRID.tsv and curatedPPI_Intact.tsv) produced by `2_interaction_parser.py` and generates a high-quality human interactome
 - Further, maps the uniprot accessions to ENSG using the canonical transcripts file and prints to STDOUT
+- To produce the `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
 
 </br>
 
 <a name="modulefile"></a>**Module Input File Generator**
-
-</br>
 
 ```console
 python 5_ModuleInputFile.py < Interactome.tsv
@@ -93,22 +84,18 @@ python 5_ModuleInputFile.py < Interactome.tsv
 
 <a name="uniprotensgmapper"></a>**Uniprot2ENSG Mapper**
 
-</br>
-
 ```console
 python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
 ```                      
 
 </br>
 
-- Parses output files produced by `1_uniprot_parser.py` and `the canonical transcripts file (Ex: canonicalTranscripts_220221.tsv)
-- Maps uniprot accessions to ENSG and prints to STDOUT
-
+- Parses the output files produced by `1_uniprot_parser.py` and the `canonical transcripts file` (Ex: canonicalTranscripts_220221.tsv)
+- Maps uniprot accession to ENSG and prints to STDOUT
 
 ## Detailed Description
 
 - For more detailed description on arguments, input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
-
 
 ## Metadata files
 
