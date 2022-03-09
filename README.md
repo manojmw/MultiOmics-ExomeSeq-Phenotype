@@ -2,20 +2,20 @@
 
 This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype. All the scripts are written in python. (**The project is still in progress**)
 </br>
-- [Example Usage](#Example-Usage-of-the-Scripts)
-   - [Uniprot Parser](#-Uniprot-Parser)
-   - [Protein-Protein Interaction Parser](#Protein-Protein-Interaction-Parser)
-   - [PPI Experiment Count](#PPI-Experiment-Count) 
-   - [Interactome generator](#Interactome-generator)
-   - [Module Input File Generator](#Module-Input-File-Generator)
-   - [Uniprot2ENSG Mapper](#Uniprot2ENSG-Mapper)
-- [Detailed Description](#Detailed-Description)
-- [Metadata files](#Metadata-files)
-- [Dependencies](#Dependencies)
+- [Example Usage](#example-usage-of-the-scripts)
+   - [Uniprot Parser](#uniprot-parser)
+   - [Protein-Protein Interaction Parser](#protein-protein-interaction-parser)
+   - [PPI Experiment Count](#ppi-experiment-count) 
+   - [Interactome generator](#interactome-generator)
+   - [Module Input File Generator](#module-input-file-generator)
+   - [Uniprot2ENSG Mapper](#uniprot2ensg-mapper)
+- [Detailed Description](#detailed-description)
+- [Metadata files](#metadata-files)
+- [Dependencies](#dependencies)
 
 ## Example Usage of the Scripts
 
-> Uniprot Parser
+> #Uniprot Parser
 
 </br>
 
@@ -30,7 +30,7 @@ python 1_uniprot_parser.py --inUniprot uniprot_sprot.dat --outPrimAC uniprot_mai
 
 </br>
 
-> Protein-Protein Interaction Parser
+> #Protein-Protein Interaction Parser
 
 </br>
 
@@ -46,7 +46,7 @@ python 2_interaction_parser.py --inInteraction intact.txt --inPrimAC uniprot_mai
 
 </br>
 
-> PPI Experiment Count
+> #PPI Experiment Count
 
 </br>
 
@@ -61,7 +61,7 @@ python 3_check_HumanPPIExp.py < intact.txt
 
 </br>
 
-> Interactome generator
+> #Interactome generator
 
 </br>
 
@@ -76,7 +76,7 @@ python 4_Interactome.py --inCuratedFile curatedPPI_BioGRID.tsv curatedPPI_Intact
 
 </br>
 
-> Module Input File Generator
+> #Module Input File Generator
 
 </br>
 
@@ -91,7 +91,7 @@ python 5_ModuleInputFile.py < Interactome.tsv
 
 </br>
 
-> Uniprot2ENSG Mapper
+> #Uniprot2ENSG Mapper
 
 </br>
 
