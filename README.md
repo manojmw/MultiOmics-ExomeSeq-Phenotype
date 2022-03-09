@@ -13,6 +13,7 @@ This is the main repository containing all the scripts for the project: MultiOmi
 - [Detailed Description (Arguments, Input Files and Output)](#detailed-description)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
+- [License](#license)
 
 ## Example Usage of the Scripts
 
@@ -117,3 +118,7 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
   - Pandas ([Installation Guide](https://pandas.pydata.org/docs/getting_started/install.html))
 * Most other standard core modules should already be available on your system
 </br>
+
+## License
+
+Licensed under GNU General Public License v3.0 (Refer LICENSE file for more details)
