@@ -1,9 +1,10 @@
 ## Introduction
 
-This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype. All the scripts are written in python. (**The project is still in progress**)
+This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype.(**Note: The project is still in progress, and more scripts will be added**). At a later stage, I will try to combine all the individual scripts into a single pipeline.
 </br>
+
 - [Example Usage](#example-usage-of-the-scripts)
-   - [Uniprot Parser](#uniprotparser)
+   - [UniProt Parser](#uniprotparser)
    - [Protein-Protein Interaction Parser](#ppiparser)
    - [PPI Experiment Count](#ppiexpcount) 
    - [Interactome generator](#interactome)
@@ -15,14 +16,14 @@ This is the main repository containing all the scripts for the project: MultiOmi
 
 ## Example Usage of the Scripts
 
-<a name="uniprotparser"></a>**Uniprot Parser**
+<a name="uniprotparser"></a>**UniProt Parser**
 
 ```console
 python 1_uniprot_parser.py --inUniprot uniprot_sprot.dat --outPrimAC uniprot_main.tsv --outSecAC uniprot_secondary.tsv --outGeneID geneID.tsv
 ```    
 </br>
 
-- This will basically parse a uniprot file (Ex: uniprot_sprot.dat)
+- This will basically parse a UniProt file (Ex: uniprot_sprot.dat)
 - Extracts the required data from each record 
 - Populates the output files with the processed data.
 
@@ -36,8 +37,8 @@ python 2_interaction_parser.py --inInteraction intact.txt --inPrimAC uniprot_mai
 </br>
 
 - Parses a miTAB 2.5 or 2.7 file (Ex: intact.txt)
-- Maps the data for each protein-protein interaction experiment to the output files produced by `1_uniprot_parser.py`
-- Extracts the uniprot accessions of the interacting proteins as well as other associated data
+- Maps the data of each protein-protein interaction experiment to the output files produced by `1_uniprot_parser.py`
+- Extracts the UniProt accessions of the interacting proteins as well as other associated data
 - Prints to STDOUT in tab-separated format
 
 </br>
@@ -64,7 +65,7 @@ python 4_Interactome.py --inCuratedFile curatedPPI_BioGRID.tsv curatedPPI_Intact
 </br>
 
 - Parses the output files (Ex: curatedPPI_BioGRID.tsv and curatedPPI_Intact.tsv) produced by `2_interaction_parser.py` and generates a high-quality human interactome
-- Further, maps the uniprot accessions to ENSG using the canonical transcripts file and prints to STDOUT
+- Further, maps the UniProt accessions to ENSG using the `canonical transcripts file` and prints to STDOUT
 - To produce the `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
 
 </br>
@@ -82,7 +83,7 @@ python 5_ModuleInputFile.py < Interactome.tsv
 
 </br>
 
-<a name="uniprotensgmapper"></a>**Uniprot2ENSG Mapper**
+<a name="uniprotensgmapper"></a>**UniProt2ENSG Mapper**
 
 ```console
 python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
@@ -91,7 +92,7 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
 </br>
 
 - Parses the output files produced by `1_uniprot_parser.py` and the `canonical transcripts file` (Ex: canonicalTranscripts_220221.tsv)
-- Maps uniprot accession to ENSG and prints to STDOUT
+- Maps UniProt accession to ENSG and prints to STDOUT
 
 ## Detailed Description
 
