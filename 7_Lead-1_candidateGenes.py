@@ -87,23 +87,21 @@ def CandidateGeneParser(inCandidateFile):
 # Parses the dictionary (ENSG_Gene_dict) returned
 # by the function: ENSG_Gene and the list (CandidateGene_data)
 # returned by the function: CandidateGeneParser
-# Calls the functions ENSG_Gene and CandidateGeneParser
 #
 # Maps Gene name to ENSG
-# Returns a list with 3 items (in each sublist:
+# Returns 2 lists:
+# The first list has 3 items (in each sublist:
 # - ENSG
 # - pathologyID
 # - Confidence score)
-def CandidateGene2ENSG(inCanonicalFile, inCandidateFile):
+# The second list contains all the pathologies
+def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
 
-    # Calling the function ENSG_Gene
-    ENSG_Gene_dict = ENSG_Gene(inCanonicalFile)
-
-    # Calling the function CandidateGeneParser
-    CandidateGene_data = CandidateGeneParser(inCandidateFile)
+    # List of pathologies
+    pathologies_list = []
 
     # Initializing output list
-    canidateENSG_out_list = []
+    candidateENSG_out_list = []
 
     # Counter for canidate genes not found in the canonical transcripts file
     lost_CandidateGene = 0
@@ -113,14 +111,36 @@ def CandidateGene2ENSG(inCanonicalFile, inCandidateFile):
         # data[1] -> pathologyID
         # data[2] -> Confidence Score
         if data[0] in ENSG_Gene_dict.keys(): # Get the corresponding ENSG
-            canidateENSG_out = [ENSG_Gene_dict.get(data[0]),  data[1],  data[2]]
-            canidateENSG_out_list.append(canidateENSG_out)
+            candidateENSG_out = [ENSG_Gene_dict.get(data[0]),  data[1],  data[2]]
+            candidateENSG_out_list.append(candidateENSG_out)
         else:
             lost_CandidateGene += 1
 
+        if not data[1] in pathologies_list:
+            pathologies_list.append(data[1])
+
     logging.debug("\nNo. of candidate genes not found in the Canonical transcripts file: %d" % lost_CandidateGene)
 
-    return canidateENSG_out_list
+    return candidateENSG_out_list, pathologies_list
+
+###########################################################
+
+# Parses the candidateENSG_out_list & pathologies_list
+# Counts the total number of candidate genes
+# associated with each pathology
+# Returns a list with the total count (for each pathology)
+def CountCandidateGenes(candidateENSG_out_list, pathologies_list):
+
+    # List to count total candidate genes
+    # associated with each pathology
+    pathology_CandidateCount = [0] * len(pathologies_list)
+
+    for candidateGenedata in candidateENSG_out_list:
+        for i in range(len(pathologies_list)):
+            if candidateGenedata[1] == pathologies_list[i]:
+                pathology_CandidateCount[i] += 1
+
+    return pathology_CandidateCount
 
 ###########################################################
 
@@ -129,10 +149,11 @@ def CandidateGene2ENSG(inCanonicalFile, inCandidateFile):
 # First column - ENSG of Protein A
 # Second column - ENSG of Protein B
 #
-# Returns a list with 2 items (in each sub list):
+# Returns 2 lists:
+# First list contains 2 items (in each sub list):
 # - ENSG of Protein A
 # - ENSG of Protein B
-# Also return a list containing only Protein A
+# Second list contains all the interacting proteins from the interactome
 def Interacting_Proteins(inInteractome):
 
     # Input - Interactome file
@@ -141,8 +162,8 @@ def Interacting_Proteins(inInteractome):
     # Initializing Interactome dictionary
     Interactome_list = []
 
-    # List of all Protein_A from the Interactome
-    Proteins_list = []
+    # List of all genes from the Interactome
+    Gene_list = []
 
     for line in Interactome_File:
         line = line.rstrip('\n')
@@ -155,15 +176,15 @@ def Interacting_Proteins(inInteractome):
 
         # Storing all the proteins in Proteins_list
         # While avoiding adding the same protein to the list
-        if not Interactome_fields[0] in Proteins_list:
-            Proteins_list.append(Interactome_fields[0])
-        elif not Interactome_fields[1] in Proteins_list:
-            Proteins_list.append(Interactome_fields[1])
+        if not Interactome_fields[0] in Gene_list:
+            Gene_list.append(Interactome_fields[0])
+        elif not Interactome_fields[1] in Gene_list:
+            Gene_list.append(Interactome_fields[1])
 
     # Closing the file
     Interactome_File.close()
 
-    return Interactome_list, Proteins_list
+    return Interactome_list, Gene_list
 
 ###########################################################
 
@@ -179,95 +200,47 @@ def Interacting_Proteins(inInteractome):
 def Lead1_CandidateENSG(args):
 
     # Calling the functions
-    canidateENSG_out_list = CandidateGene2ENSG(args.inCanonicalFile, args.inCandidateFile)
-    (Interactome_list, Proteins_list) = Interacting_Proteins(args.inInteractome)
+    CandidateGene_data = CandidateGeneParser(args.inCandidateFile)
+    ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
+    (Interactome_list, Gene_list) = Interacting_Proteins(args.inInteractome)
+    (candidateENSG_out_list, pathologies_list) = CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data)
+    pathology_CandidateCount = CountCandidateGenes(candidateENSG_out_list, pathologies_list)
+
+    # print(pathologies_list)
 
     # Printing the header for the output
-    header = ['Gene', 'No_of_Interactors', 'Globo', 'Macro', 'Headless', 'FF', 'PreImpA', 'OATS', 'Terato', 'MMAF', 'PCD', 'AST', 'Necro', 'NOA', 'OA', 'OMD', 'POF', 'DSD', 'OG', 'preprm2']
-    print('\t'.join(header))
+    print('Gene', '\t', 'No_of_Interactors', '\t', '\t'.join(pathology for pathology in pathologies_list))
 
     # Checking the number of interactors for each protein
-    for Protein in Proteins_list:
+    for Gene in Gene_list:
 
         # List for interacting proteins
         Interactors = []
 
-        # List of Known_interactors for each pathology
-        Globo = []
-        Macro = []
-        Headless = []
-        FF = []
-        PreImpA = []
-        OATS = []
-        Terato = []
-        MMAF = []
-        PCD = []
-        AST = []
-        Necro = []
-        NOA = []
-        OA = []
-        OMD = []
-        POF = []
-        DSD = []
-        OG = []
-        preprm2 = []
+        # List for known interactor
+        Known_Interactors = [0] * len(pathologies_list)
 
         for Proteins in Interactome_list:
             # If Protein_A is the first protein
-            if (Protein == Proteins[0]):
+            if (Gene == Proteins[0]):
                 # Get the interacting protein
                 if not Proteins[1] in Interactors:
                     Interactors.append(Proteins[1])
             # If Protein_A is the Second protein
-            elif (Protein == Proteins[1]):
+            elif (Gene == Proteins[1]):
                 if not Proteins[0] in Interactors:
                     # Get the interacting protein
                     Interactors.append(Proteins[0])
 
+        # Checking if the interactor is a known ENSG (candidate ENSG)
         for interactor in Interactors:
-            for candidateENSG in canidateENSG_out_list:
-            # Checking if the interactor is a known ENSG (candidate ENSG)
+            for candidateENSG in candidateENSG_out_list:
                 if interactor in candidateENSG:
-                    if candidateENSG[1] == 'Globo':
-                        Globo.append(interactor)
-                    elif candidateENSG[1] == 'Macro':
-                        Macro.append(interactor)
-                    elif candidateENSG[1] == 'Headless':
-                        Headless.append(interactor)
-                    elif candidateENSG[1] == 'FF':
-                        FF.append(interactor)
-                    elif candidateENSG[1] == 'PreImpA':
-                        PreImpA.append(interactor)
-                    elif candidateENSG[1] == 'OATS':
-                        OATS.append(interactor)
-                    elif candidateENSG[1] == 'Terato':
-                        Terato.append(interactor)
-                    elif candidateENSG[1] == 'MMAF':
-                        MMAF.append(interactor)
-                    elif candidateENSG[1] == 'PCD':
-                        PCD.append(interactor)
-                    elif candidateENSG[1] == 'AST':
-                        AST.append(interactor)
-                    elif candidateENSG[1] == 'Necro':
-                        Necro.append(interactor)
-                    elif candidateENSG[1] == 'NOA':
-                        NOA.append(interactor)
-                    elif candidateENSG[1] == 'OA':
-                        OA.append(interactor)
-                    elif candidateENSG[1] == 'OMD':
-                        OMD.append(interactor)
-                    elif candidateENSG[1] == 'POF':
-                        POF.append(interactor)
-                    elif candidateENSG[1] == 'DSD':
-                        DSD.append(interactor)
-                    elif candidateENSG[1] == 'OG':
-                        OG.append(interactor)
-                    elif candidateENSG[1] == 'preprm2':
-                        preprm2.append(interactor)
+                    for i in range(len(pathologies_list)):
+                        if candidateENSG[1] == pathologies_list[i]:
+                            Known_Interactors[i] += 1
 
-
-        lead1_output = (Protein, len(Interactors), len(Globo), len(Macro), len(Headless), len(FF), len(PreImpA), len(OATS), len(Terato), len(MMAF), len(PCD), len(AST), len(Necro), len(NOA), len(OA), len(OMD), len(POF), len(DSD), len(OG), len(preprm2))
-        print('\t'.join(str(out) for out in lead1_output))
+        print(Gene, '\t', len(Interactors), '\t', '\t'.join(str(Known_Interactor) for Known_Interactor in Known_Interactors))
 
     return
 
@@ -384,7 +357,6 @@ Program: Parses the Interactome file generated by Interactome.py, checks the num
 The output consists of following columns in .tsv format:
  -> Gene
  -> Number of Interactors
- -> Number of Known Interactors
  -> No. of Known interactors associated with each pathology (one pathology per column)
 -----------------------------------------------------------------------------------------------------------------------
     """,
