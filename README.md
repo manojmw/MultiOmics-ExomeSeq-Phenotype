@@ -68,6 +68,8 @@ python 4_Interactome.py --inCuratedFile curatedPPI_BioGRID.tsv curatedPPI_Intact
 - Parses the output files (Ex: curatedPPI_BioGRID.tsv and curatedPPI_Intact.tsv) produced by `2_interaction_parser.py` and generates a high-quality human interactome
 - Further, maps the UniProt accessions to ENSG using the `canonical transcripts file` and prints to STDOUT
 - To produce the `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
+</br></br>
+**Note:** We consider only true binary interactions, and eliminate most of the complex expansion data while building the Interactome.
 
 </br>
 
