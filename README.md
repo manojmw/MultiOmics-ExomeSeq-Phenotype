@@ -1,6 +1,6 @@
 ## Introduction
 
-This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype (**Note: The project is still in progress, and more scripts will be added**). At a later stage, I will try to combine all the individual scripts into a single pipeline.
+This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype (**Note: The project is still in progress, and more scripts will be added, such as those that provide scoring component for the machine learning step**). At a later stage, I will try to combine all the individual scripts into a single pipeline.
 </br>
 
 - [Example Usage](#example-usage-of-the-scripts)
