@@ -160,21 +160,19 @@ def ENSG_Gene(inCanonicalFile):
 # Required columns are: 'Primary_AC' and 'ENSGs' (can be in any order,
 # but they MUST exist)
 #
-# Parses the dictionary returned by the function ENSG_Gene
+# Parses the dictionary ENSG_Gene_dict
+# returned by the function ENSG_Gene
 # Maps UniProt Primary Accession to ENSG
 # Returns a dictionary:
 # - Key: UniProt Primary Accession
 # - Value: Corresponding ENSG
 
-def Uniprot_ENSG(inPrimAC, inCanonicalFile):
+def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 
     # Initializing the dictionary
     Uniprot_ENSG_dict = {}
 
     UniprotPrimAC_File = open(inPrimAC)
-
-    # Calling the function ENSG_Gene
-    ENSG_Gene_dict = ENSG_Gene(inCanonicalFile)
 
     # Grabbing the header line
     UniprotPrimAC_header = UniprotPrimAC_File.readline()
@@ -239,7 +237,6 @@ def Uniprot_ENSG(inPrimAC, inCanonicalFile):
             continue
         Count_HumanUniprotPrimAC += 1
 
-
         for ENSG in human_ENSGs:
             if ENSG in ENSG_Gene_dict.keys():
                 canonical_human_ENSGs.append(ENSG)
@@ -287,7 +284,8 @@ def Interactome_Uniprot2ENSG(args):
 
     # Calling the functions
     Uniprot_Interactome_list = UniProtInteractome(args.inCuratedFile)
-    Uniprot_ENSG_dict = Uniprot_ENSG(args.inPrimAC, args.inCanonicalFile)
+    ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
+    Uniprot_ENSG_dict = Uniprot_ENSG(args.inPrimAC, ENSG_Gene_dict)
 
     # Counter for UniProt Primary Accessions of proteins not mapping to ENSG
     lost_Interaction = 0
