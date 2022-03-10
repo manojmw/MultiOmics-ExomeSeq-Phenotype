@@ -183,7 +183,7 @@ def Lead1_CandidateENSG(args):
     (Interactome_list, Proteins_list) = Interacting_Proteins(args.inInteractome)
 
     # Printing the header for the output
-    header = ['Gene', 'No_of_Interactors', 'No_of_KnownInteractors', 'Globo', 'Macro', 'Headless', 'FF', 'PreImpA', 'OATS', 'Terato', 'MMAF', 'PCD', 'AST', 'Necro', 'NOA', 'OA', 'OMD', 'POF', 'DSD', 'OG', 'preprm2']
+    header = ['Gene', 'No_of_Interactors', 'Globo', 'Macro', 'Headless', 'FF', 'PreImpA', 'OATS', 'Terato', 'MMAF', 'PCD', 'AST', 'Necro', 'NOA', 'OA', 'OMD', 'POF', 'DSD', 'OG', 'preprm2']
     print('\t'.join(header))
 
     # Checking the number of interactors for each protein
@@ -191,9 +191,6 @@ def Lead1_CandidateENSG(args):
 
         # List for interacting proteins
         Interactors = []
-
-        # List for interacting proteins that are known candidate genes
-        Known_interactor = []
 
         # List of Known_interactors for each pathology
         Globo = []
@@ -231,7 +228,6 @@ def Lead1_CandidateENSG(args):
             for candidateENSG in canidateENSG_out_list:
             # Checking if the interactor is a known ENSG (candidate ENSG)
                 if interactor in candidateENSG:
-                    Known_interactor.append(interactor)
                     if candidateENSG[1] == 'Globo':
                         Globo.append(interactor)
                     elif candidateENSG[1] == 'Macro':
@@ -270,7 +266,7 @@ def Lead1_CandidateENSG(args):
                         preprm2.append(interactor)
 
 
-        lead1_output = (Protein, len(Interactors), len(Known_interactor), len(Globo), len(Macro), len(Headless), len(FF), len(PreImpA), len(OATS), len(Terato), len(MMAF), len(PCD), len(AST), len(Necro), len(NOA), len(OA), len(OMD), len(POF), len(DSD), len(OG), len(preprm2))
+        lead1_output = (Protein, len(Interactors), len(Globo), len(Macro), len(Headless), len(FF), len(PreImpA), len(OATS), len(Terato), len(MMAF), len(PCD), len(AST), len(Necro), len(NOA), len(OA), len(OMD), len(POF), len(DSD), len(OG), len(preprm2))
         print('\t'.join(str(out) for out in lead1_output))
 
     return
