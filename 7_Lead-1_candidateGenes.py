@@ -175,8 +175,8 @@ def Interacting_Proteins(inInteractome):
 
         Interactome_list.append(Interacting_Proteins)
 
-        # Storing all the proteins in Proteins_list
-        # While avoiding adding the same protein to the list
+        # Storing all the interacting genes in Gene_list
+        # While avoiding adding the same gene to the list
         if not Interactome_fields[0] in Gene_list:
             Gene_list.append(Interactome_fields[0])
         elif not Interactome_fields[1] in Gene_list:
@@ -189,16 +189,17 @@ def Interacting_Proteins(inInteractome):
 
 ###########################################################
 
-# Parses the Interactome_list returned by the function: Interacting_Proteins
+# Parses the Interactome_list & Gene_list returned
+# by the function: Interacting_Proteins
 # Checks the number of interactors for each gene
 # Checks the number of known interactors
-# using the canidateGene_out_list returned by the function: CandidateGene2ENSG
-# Prints to STDOUT in .tsv format
-# Output consists of:
+# using the candidateGene_out_list returned by the function: CandidateGene2ENSG
+#
+# Returns a list with following items:
 # - Gene
 # - No. of Interactors
-# - No. of Known interactors associated with each pathology (one pathology per column)
-def Lead1_CandidateENSG(args):
+# - Sub-list of Known interactors count and p-value (for each pathology)
+def Interactors_PValue(args):
 
     # Calling the functions
     CandidateGene_data = CandidateGeneParser(args.inCandidateFile)
@@ -207,7 +208,7 @@ def Lead1_CandidateENSG(args):
     (candidateENSG_out_list, pathologies_list) = CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data)
     pathology_CandidateCount = CountCandidateGenes(candidateENSG_out_list, pathologies_list)
 
-    total_human_ENSG = 22000 # Approximate count, will corrected later using Uniprot file
+    total_human_ENSG = 22000 # Approximate count, will be corrected later using Uniprot file
 
     # Printing the header for the output
     print('Gene', '\t', 'No_of_Interactors', '\t', '\t'.join(pathology + '\tp_value' for pathology in pathologies_list))
@@ -245,7 +246,8 @@ def Lead1_CandidateENSG(args):
                         if candidateENSG[1] == pathologies_list[i]:
                             Known_Interactors[i] += 1
 
-        count_with_p_value_list = []
+        # Initializing list to store Known interactor count and p-value
+        count_with_p_value_list = [Gene, len(Interactors)]
 
         # Applying Fisher's exact test to calculate p-values
         for i in range(len(Known_Interactors)):
@@ -254,7 +256,7 @@ def Lead1_CandidateENSG(args):
             count_with_p_value = [str(Known_Interactors[i]), str(p_value)]
             count_with_p_value_list.append(count_with_p_value)
 
-        print(Gene, '\t', len(Interactors), '\t', count_with_p_value_list)
+        print(count_with_p_value_list)
 
     #     Output1_list = [Gene, len(Interactors), Known_Interactors]
     #     Output_no_p_value.append(Output1_list)
@@ -391,7 +393,7 @@ The output consists of following columns in .tsv format:
     required.add_argument('--inInteractome', metavar = "Input File", dest = "inInteractome", help = 'Input File Name (High-quality Interactome (.tsv) produced by Interactome.py)', required = True)
 
     args = file_parser.parse_args()
-    Lead1_CandidateENSG(args)
+    Interactors_PValue(args)
 
 if __name__ == "__main__":
     # Logging to the file
