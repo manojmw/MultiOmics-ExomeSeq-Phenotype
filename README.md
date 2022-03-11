@@ -118,7 +118,7 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
 * Requires **Python version ≥ 3**
 * External dependencies are kept to minimum in all the scripts. The only required python modules are listed below: </br>
   - Pandas ([Installation Guide](https://pandas.pydata.org/docs/getting_started/install.html))
-  - SciPy([Installation Guide](https://scipy.org/install/)
+  - SciPy ([Installation Guide](https://scipy.org/install/))
 * Most other standard core modules should already be available on your system
 
 ## License
