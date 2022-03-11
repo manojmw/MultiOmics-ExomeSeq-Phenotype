@@ -207,7 +207,7 @@ def Lead1_CandidateENSG(args):
     (candidateENSG_out_list, pathologies_list) = CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data)
     pathology_CandidateCount = CountCandidateGenes(candidateENSG_out_list, pathologies_list)
 
-    total_human_ENSG = 22000
+    total_human_ENSG = 22000 # Approximate count, will corrected later using Uniprot file
 
     # Printing the header for the output
     print('Gene', '\t', 'No_of_Interactors', '\t', '\t'.join(pathology + '\tp_value' for pathology in pathologies_list))
@@ -247,6 +247,7 @@ def Lead1_CandidateENSG(args):
 
         count_with_p_value_list = []
 
+        # Applying Fisher's exact test to calculate p-values
         for i in range(len(Known_Interactors)):
             raw_data = [[Known_Interactors[i], len(Interactors)],[pathology_CandidateCount[i], total_human_ENSG]]
             (odd_ratio, p_value) = stats.fisher_exact(raw_data)
