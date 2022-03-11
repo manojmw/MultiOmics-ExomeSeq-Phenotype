@@ -132,7 +132,7 @@ def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
 # Returns a list with the total count (for each pathology)
 def CountCandidateGenes(candidateENSG_out_list, pathologies_list):
 
-    # List to count total candidate genes
+    # List for counting total candidate genes
     # associated with each pathology
     pathology_CandidateCount = [0] * len(pathologies_list)
 
@@ -163,8 +163,8 @@ def Interacting_Proteins(inInteractome):
     # Initializing Interactome dictionary
     Interactome_list = []
 
-    # List of all genes from the Interactome
-    Gene_list = []
+    # List of all interactings from the Interactome
+    All_Interactors_list = []
 
     for line in Interactome_File:
         line = line.rstrip('\n')
@@ -175,21 +175,20 @@ def Interacting_Proteins(inInteractome):
 
         Interactome_list.append(Interacting_Proteins)
 
-        # Storing all the interacting genes in Gene_list
-        # While avoiding adding the same gene to the list
-        if not Interactome_fields[0] in Gene_list:
-            Gene_list.append(Interactome_fields[0])
-        elif not Interactome_fields[1] in Gene_list:
-            Gene_list.append(Interactome_fields[1])
+        # Storing all the interactors in All_Interactors_list
+        if not Interactome_fields[0] in All_Interactors_list:
+            All_Interactors_list.append(Interactome_fields[0])
+        elif not Interactome_fields[1] in All_Interactors_list:
+            All_Interactors_list.append(Interactome_fields[1])
 
     # Closing the file
     Interactome_File.close()
 
-    return Interactome_list, Gene_list
+    return Interactome_list, All_Interactors_list
 
 ###########################################################
 
-# Parses the Interactome_list & Gene_list returned
+# Parses the Interactome_list & All_Interactors_list returned
 # by the function: Interacting_Proteins
 # Checks the number of interactors for each gene
 # Checks the number of known interactors
@@ -198,13 +197,14 @@ def Interacting_Proteins(inInteractome):
 # Returns a list with following items:
 # - Gene
 # - No. of Interactors
-# - Sub-list of Known interactors count and p-value (for each pathology)
+# - Sub-list containing count of Known_interactor for each pathology
+# - Sub-list containing p-value for each pathology
 def Interactors_PValue(args):
 
     # Calling the functions
     CandidateGene_data = CandidateGeneParser(args.inCandidateFile)
     ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
-    (Interactome_list, Gene_list) = Interacting_Proteins(args.inInteractome)
+    (Interactome_list, All_Interactors_list) = Interacting_Proteins(args.inInteractome)
     (candidateENSG_out_list, pathologies_list) = CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data)
     pathology_CandidateCount = CountCandidateGenes(candidateENSG_out_list, pathologies_list)
 
@@ -217,7 +217,7 @@ def Interactors_PValue(args):
     Output_no_p_value = []
 
     # Checking the number of interactors for each protein
-    for Gene in Gene_list:
+    for ENSG in All_Interactors_list:
 
         # List for interacting proteins
         Interactors = []
@@ -225,15 +225,14 @@ def Interactors_PValue(args):
         # List for known interactor
         Known_Interactors = [0] * len(pathologies_list)
 
-
         for Proteins in Interactome_list:
             # If Protein_A is the first protein
-            if (Gene == Proteins[0]):
+            if (ENSG == Proteins[0]):
                 # Get the interacting protein
                 if not Proteins[1] in Interactors:
                     Interactors.append(Proteins[1])
             # If Protein_A is the Second protein
-            elif (Gene == Proteins[1]):
+            elif (ENSG == Proteins[1]):
                 if not Proteins[0] in Interactors:
                     # Get the interacting protein
                     Interactors.append(Proteins[0])
@@ -246,23 +245,18 @@ def Interactors_PValue(args):
                         if candidateENSG[1] == pathologies_list[i]:
                             Known_Interactors[i] += 1
 
+
         # Initializing list to store Known interactor count and p-value
-        count_with_p_value_list = [Gene, len(Interactors)]
+        count_with_p_value_list = [ENSG, len(Interactors), Known_Interactors, []]
 
         # Applying Fisher's exact test to calculate p-values
         for i in range(len(Known_Interactors)):
             raw_data = [[Known_Interactors[i], len(Interactors)],[pathology_CandidateCount[i], total_human_ENSG]]
             (odd_ratio, p_value) = stats.fisher_exact(raw_data)
-            count_with_p_value = [str(Known_Interactors[i]), str(p_value)]
-            count_with_p_value_list.append(count_with_p_value)
+            # count_with_p_value = [Known_Interactors[i], p_value]
+            count_with_p_value_list[-1].append(p_value)
 
         print(count_with_p_value_list)
-
-    #     Output1_list = [Gene, len(Interactors), Known_Interactors]
-    #     Output_no_p_value.append(Output1_list)
-    #
-    # for data in Output_no_p_value:
-    #     print(data)
 
 
     return
