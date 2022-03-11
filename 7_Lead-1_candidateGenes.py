@@ -2,6 +2,7 @@
 
 import argparse, sys
 import pandas as pd
+import scipy.stats as stats
 import logging
 import time
 
@@ -206,10 +207,13 @@ def Lead1_CandidateENSG(args):
     (candidateENSG_out_list, pathologies_list) = CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data)
     pathology_CandidateCount = CountCandidateGenes(candidateENSG_out_list, pathologies_list)
 
-    # print(pathologies_list)
+    total_human_ENSG = 22000
 
     # Printing the header for the output
-    print('Gene', '\t', 'No_of_Interactors', '\t', '\t'.join(pathology for pathology in pathologies_list))
+    print('Gene', '\t', 'No_of_Interactors', '\t', '\t'.join(pathology + '\tp_value' for pathology in pathologies_list))
+
+    # Initializing first output list without p-values
+    Output_no_p_value = []
 
     # Checking the number of interactors for each protein
     for Gene in Gene_list:
@@ -219,6 +223,7 @@ def Lead1_CandidateENSG(args):
 
         # List for known interactor
         Known_Interactors = [0] * len(pathologies_list)
+
 
         for Proteins in Interactome_list:
             # If Protein_A is the first protein
@@ -240,7 +245,22 @@ def Lead1_CandidateENSG(args):
                         if candidateENSG[1] == pathologies_list[i]:
                             Known_Interactors[i] += 1
 
-        print(Gene, '\t', len(Interactors), '\t', '\t'.join(str(Known_Interactor) for Known_Interactor in Known_Interactors))
+        count_with_p_value_list = []
+
+        for i in range(len(Known_Interactors)):
+            raw_data = [[Known_Interactors[i], len(Interactors)],[pathology_CandidateCount[i], total_human_ENSG]]
+            (odd_ratio, p_value) = stats.fisher_exact(raw_data)
+            count_with_p_value = [str(Known_Interactors[i]), str(p_value)]
+            count_with_p_value_list.append(count_with_p_value)
+
+        print(Gene, '\t', len(Interactors), '\t', count_with_p_value_list)
+
+    #     Output1_list = [Gene, len(Interactors), Known_Interactors]
+    #     Output_no_p_value.append(Output1_list)
+    #
+    # for data in Output_no_p_value:
+    #     print(data)
+
 
     return
 
