@@ -5,7 +5,7 @@ import pandas as pd
 import scipy.stats as stats
 import logging
 import time
-
+import snoop
 ###########################################################
 
 # Parses tab-seperated canonical transcripts file
@@ -193,12 +193,6 @@ def Interacting_Proteins(inInteractome):
 # Checks the number of interactors for each gene
 # Checks the number of known interactors
 # using the candidateGene_out_list returned by the function: CandidateGene2ENSG
-#
-# Returns a list with following items:
-# - Gene
-# - No. of Interactors
-# - Sub-list containing count of Known_interactor for each pathology
-# - Sub-list containing p-value  for each pathology
 def Interactors_PValue(args):
 
     # Calling the functions
@@ -215,9 +209,12 @@ def Interactors_PValue(args):
 
     # Initializing first output list with p-values
     # each sublist represents one pathology
-    patho_p_value = [[]] * len(pathologies_list)
+    patho_p_value = []
 
     for i in range(len(pathologies_list)):
+
+        # Initializing a list to store data for each pathology
+        Output_eachPatho = []
 
         # Checking the number of interactors for each gene
         for ENSG in All_Interactors_list:
@@ -251,18 +248,18 @@ def Interactors_PValue(args):
             raw_data = [[Known_Interactors, len(Interactors)],[pathology_CandidateCount[i], total_human_ENSG]]
             (odd_ratio, p_value) = stats.fisher_exact(raw_data)
 
-            Output = [ENSG, len(Interactors), Known_Interactors, p_value]
-            patho_p_value[i].append(Output)
+            Output_eachENSG = [ENSG, len(Interactors), Known_Interactors, p_value]
 
-    #  list to store count with sorted p-values
-    pathosorted_p_value = [[]] * len(pathologies_list)
+            Output_eachPatho.append(Output_eachENSG)
+
+        patho_p_value.append(Output_eachPatho)
 
     # Sorting the p-values for each pathology
-    for i in range(len(patho_p_value)):
-        patho_p_value[i].sort(key = lambda x:x[3])
-        pathosorted_p_value[i].append(patho_p_value[i])
+    for each_patho in patho_p_value:
+        each_patho.sort(key = lambda x:x[3])
+        # pathosorted_p_value[i].append(patho_p_value[i])
 
-    print(pathosorted_p_value)
+    print(patho_p_value)
 
     return
 
