@@ -109,8 +109,8 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
   * Lists known candidate genes. This eases the identification of a patient's likely causal variant: variants impacting a known candidate gene can be easily selected.  
   * Required columns: </br>
     - Gene: name of gene (should be the HGNC name, see www.genenames.org).
-    - pathologyID: pathology/phenotype, as in the previous metadata files.
-    - Confidence score: indicates how confident you are that LOF variants in this gene are causal for this pathology. We recommend using integers between 1 and 5, 5 meaning the gene is definitely causal while 1 is a lower-confidence candidate.
+    - pathologyID: pathology/phenotype
+    - Confidence score: indicates how confident you are that LOF variants in this gene are causal for this pathology. We recommend using integers between 1 and 5 (5 meaning the gene is definitely causal, while 1 is a lower-confidence candidate).
 
 
 ## Dependencies
