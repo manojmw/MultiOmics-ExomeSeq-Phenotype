@@ -4,7 +4,7 @@ This is the main repository containing all the scripts for the project: MultiOmi
 </br>
 
 - [Arguments, Input Files and Output](#Arguments-Input-Files-and-Output)
-- [Example Usage](#example-usage-of-the-scripts)
+- [Example Usage](#example-usage-&-details-of-the-scripts)
    - [UniProt Parser](#uniprotparser)
    - [Protein-Protein Interaction Parser](#ppiparser)
    - [PPI Experiment Count](#ppiexpcount) 
@@ -19,7 +19,7 @@ This is the main repository containing all the scripts for the project: MultiOmi
 
 - For detailed description on arguments, input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
 
-## Example Usage of the Scripts
+## Example Usage & Details of the Scripts
 
 <a name="uniprotparser"></a>**UniProt Parser**
 
