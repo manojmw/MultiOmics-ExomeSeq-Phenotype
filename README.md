@@ -3,21 +3,17 @@
 This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype (**Note: The project is still in progress, and more scripts will be added, such as those that provide scoring component for the machine learning step**). At a later stage, I will try to combine all the individual scripts into a single pipeline.
 </br>
 
-- [Arguments, Input Files and Output](#Arguments-Input-Files-and-Output)
-- [Example Usage](#example-usage-&-details-of-the-scripts)
+- [Example Usage](#example-usage-details-of-the-scripts)
    - [UniProt Parser](#uniprotparser)
    - [Protein-Protein Interaction Parser](#ppiparser)
    - [PPI Experiment Count](#ppiexpcount) 
    - [Interactome generator](#interactome)
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
+- [Arguments, Input Files and Output](#Arguments-Input-Files-and-Output)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
 - [License](#license)
-
-## Arguments, Input Files and Output
-
-- For detailed description on arguments, input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
 
 ## Example Usage & Details of the Scripts
 
@@ -100,6 +96,10 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
 
 - Parses the output files produced by `1_uniprot_parser.py` and the `canonical transcripts file` (Ex: canonicalTranscripts_220221.tsv)
 - Maps UniProt accession to ENSG and prints to STDOUT
+
+## Arguments, Input Files and Output
+
+- For detailed description on arguments, input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
 
 
 ## Metadata files
