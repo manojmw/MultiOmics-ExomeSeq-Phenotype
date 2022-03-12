@@ -198,7 +198,7 @@ def Interacting_Proteins(inInteractome):
 # - Gene
 # - No. of Interactors
 # - Sub-list containing count of Known_interactor for each pathology
-# - Sub-list containing p-value for each pathology
+# - Sub-list containing p-value  for each pathology
 def Interactors_PValue(args):
 
     # Calling the functions
@@ -210,54 +210,59 @@ def Interactors_PValue(args):
 
     total_human_ENSG = 22000 # Approximate count, will be corrected later using Uniprot file
 
-    # Printing the header for the output
-    print('Gene', '\t', 'No_of_Interactors', '\t', '\t'.join(pathology + '\tp_value' for pathology in pathologies_list))
+    # # Printing the header for the output
+    # print('Gene', '\t', 'No_of_Interactors', '\t', '\t'.join(pathology + '\tp_value' for pathology in pathologies_list))
 
-    # Initializing first output list without p-values
-    Output_no_p_value = []
+    # Initializing first output list with p-values
+    # each sublist represents one pathology
+    patho_p_value = [[]] * len(pathologies_list)
 
-    # Checking the number of interactors for each protein
-    for ENSG in All_Interactors_list:
+    for i in range(len(pathologies_list)):
 
-        # List for interacting proteins
-        Interactors = []
+        # Checking the number of interactors for each gene
+        for ENSG in All_Interactors_list:
 
-        # List for known interactor
-        Known_Interactors = [0] * len(pathologies_list)
+            # List of interactors
+            Interactors = []
 
-        for Proteins in Interactome_list:
-            # If Protein_A is the first protein
-            if (ENSG == Proteins[0]):
-                # Get the interacting protein
-                if not Proteins[1] in Interactors:
-                    Interactors.append(Proteins[1])
-            # If Protein_A is the Second protein
-            elif (ENSG == Proteins[1]):
-                if not Proteins[0] in Interactors:
+            # List for known interactor
+            Known_Interactors = 0
+
+            for Proteins in Interactome_list:
+                # If Protein_A is the first protein
+                if (ENSG == Proteins[0]):
                     # Get the interacting protein
-                    Interactors.append(Proteins[0])
+                    if not Proteins[1] in Interactors:
+                        Interactors.append(Proteins[1])
+                # If Protein_A is the Second protein
+                elif (ENSG == Proteins[1]):
+                    if not Proteins[0] in Interactors:
+                        # Get the interacting protein
+                        Interactors.append(Proteins[0])
 
-        # Checking if the interactor is a known ENSG (candidate ENSG)
-        for interactor in Interactors:
-            for candidateENSG in candidateENSG_out_list:
-                if interactor in candidateENSG:
-                    for i in range(len(pathologies_list)):
+            # Checking if the interactor is a known ENSG (candidate ENSG)
+            for interactor in Interactors:
+                for candidateENSG in candidateENSG_out_list:
+                    if interactor in candidateENSG:
                         if candidateENSG[1] == pathologies_list[i]:
-                            Known_Interactors[i] += 1
+                            Known_Interactors += 1
 
-
-        # Initializing list to store Known interactor count and p-value
-        count_with_p_value_list = [ENSG, len(Interactors), Known_Interactors, []]
-
-        # Applying Fisher's exact test to calculate p-values
-        for i in range(len(Known_Interactors)):
-            raw_data = [[Known_Interactors[i], len(Interactors)],[pathology_CandidateCount[i], total_human_ENSG]]
+            # Applying Fisher's exact test to calculate p-values
+            raw_data = [[Known_Interactors, len(Interactors)],[pathology_CandidateCount[i], total_human_ENSG]]
             (odd_ratio, p_value) = stats.fisher_exact(raw_data)
-            # count_with_p_value = [Known_Interactors[i], p_value]
-            count_with_p_value_list[-1].append(p_value)
 
-        print(count_with_p_value_list)
+            Output = [ENSG, len(Interactors), Known_Interactors, p_value]
+            patho_p_value[i].append(Output)
 
+    #  list to store count with sorted p-values
+    pathosorted_p_value = [[]] * len(pathologies_list)
+
+    # Sorting the p-values for each pathology
+    for i in range(len(patho_p_value)):
+        patho_p_value[i].sort(key = lambda x:x[3])
+        pathosorted_p_value[i].append(patho_p_value[i])
+
+    print(pathosorted_p_value)
 
     return
 
