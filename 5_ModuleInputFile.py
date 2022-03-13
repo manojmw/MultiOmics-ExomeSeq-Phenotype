@@ -19,7 +19,7 @@ def ModuleInputFile(highqualityPPI):
 
     highqualityPPI = sys.stdin
 
-    logging.info("Processing data from File: %s" % highqualityPPI)
+    logging.info("Processing data from Input file")
 
     highqualityPPI.readline() # Skip header
 
@@ -46,7 +46,7 @@ def ModuleInputFile(highqualityPPI):
 
         print(Interactome_fields[0], "\t", Interactome_fields[1], "\t", round(Edge_attrib, 2))
 
-    logging.info("Done 🎉")    
+    logging.info("Done 🎉")
 
     return
 
