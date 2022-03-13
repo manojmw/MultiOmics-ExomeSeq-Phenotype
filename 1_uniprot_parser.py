@@ -2,6 +2,8 @@
 
 import re
 import argparse
+import logging
+import sys
 
 ###########################################################
 
@@ -53,11 +55,14 @@ def uniprot_parser(args):
 
             # Ensembl transcripts and Genes from the DR line
             re_ENS = re.compile('^DR\s+Ensembl; (\w+); \w+; (\w+)\.')
-            
+
             # GeneIDs from the DR line
             re_GID = re.compile('^DR\s+GeneID;\s+(\d+);')
 
             # Open and parse the input file
+
+            logging.info("Processing data from UniProt File: %s" % args.inuniprot)
+            logging.info("Writing data to output files...")
 
             for line in open(args.inuniprot):
                 line = line.rstrip('\r\n') # removing trailing new lines and carriage returns
@@ -141,6 +146,10 @@ def uniprot_parser(args):
     except IOError as e:
         print("Error: Unable to open the files for writing")
 
+    logging.info("Done 🎉")
+
+    return
+
 ###########################################################
 
 # Taking and handling command-line arguments
@@ -180,4 +189,7 @@ Output File 3 (--outGeneID):      A tab-seperated file (.tsv) with two columns
     uniprot_parser(args)
 
 if __name__ == "__main__":
+    # Logging to the file
+    Log_Format = "%(levelname)s - %(asctime)s - %(message)s \n"
+    logging.basicConfig(stream = sys.stderr, format  = Log_Format, level = logging.DEBUG)
     main()
