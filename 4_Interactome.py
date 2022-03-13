@@ -112,8 +112,10 @@ def UniProtInteractome(inCuratedFile):
 # Parses tab-seperated canonical transcripts file
 # Required columns are: 'ENSG' and 'GENE' (can be in any order,
 # but they MUST exist)
+#
 # Returns a dictionary:
-# Key -> ENSG; Value -> Gene
+# Key -> ENSG
+# Value -> Gene
 def ENSG_Gene(inCanonicalFile):
 
     ENSG_Gene_dict = {} # Initializing an empty dictionary
