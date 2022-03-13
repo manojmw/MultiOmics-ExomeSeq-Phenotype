@@ -10,7 +10,7 @@ This is the main repository containing all the scripts for the project: MultiOmi
    - [Interactome generator](#interactome)
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
-   - [Machine Learning ScoreComponent-1](#Machine-Learning-ScoreComponent-1)
+   - [Machine Learning ScoreComponent-1](#Machine-Learning-ScoreComponent1)
 - [Arguments, Input Files and Output](#Arguments-Input-Files-and-Output)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
