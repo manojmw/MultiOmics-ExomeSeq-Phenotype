@@ -27,10 +27,10 @@ def UniProtInteractome(inCuratedFile):
     # List of User input curated interaction files
     curatedFiles = inCuratedFile
 
-    logging.info("Building High-Quality Human Interactome...")
-
     # there can be multiple files
     for file in curatedFiles:
+
+        logging.info("Processing data from File: %s" % file)
 
         curatedIntFile = open(file)
 
@@ -84,6 +84,8 @@ def UniProtInteractome(inCuratedFile):
     # Initializing output list
     Uniprot_Interactome_list = []
 
+    logging.info("Building High-Quality Human Interactome...")
+
     # Processing the dictionaries and returning a list
     # Since both the dictionaries have the same keys,
     # We can use the keys from PPI_PMID_dict to iterate through PPI_IntDetMethod_dict
@@ -131,7 +133,7 @@ def ENSG_Gene(inCanonicalFile):
     # Check the column headers and grab indexes of our columns of interest
     (ENSG_col, Gene_col) = (-1,-1)
 
-    logging.info("Processing data from Canonical Transcripts File")
+    logging.info("Processing data from Canonical Transcripts File: %s" % inCanonicalFile)
 
     for i in range(len(Canonical_header_fields)):
         if Canonical_header_fields[i] == 'ENSG':
@@ -190,7 +192,7 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
     # Check the column header and grab indexes of our columns of interest
     (UniProt_PrimAC_col, ENSG_col) = (-1, -1)
 
-    logging.info("Processing data from Uniprot Primary Accession File")
+    logging.info("Processing data from Uniprot Primary Accession File: %s" % inPrimAC)
 
     for i in range(len(UniprotPrimAC_header_fields)):
         if UniprotPrimAC_header_fields[i] == 'Primary_AC':
