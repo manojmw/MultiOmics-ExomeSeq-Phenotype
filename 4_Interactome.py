@@ -27,6 +27,8 @@ def UniProtInteractome(inCuratedFile):
     # List of User input curated interaction files
     curatedFiles = inCuratedFile
 
+    logging.info("Building High-Quality Human Interactome...")
+
     # there can be multiple files
     for file in curatedFiles:
 
@@ -129,6 +131,8 @@ def ENSG_Gene(inCanonicalFile):
     # Check the column headers and grab indexes of our columns of interest
     (ENSG_col, Gene_col) = (-1,-1)
 
+    logging.info("Processing data from Canonical Transcripts File")
+
     for i in range(len(Canonical_header_fields)):
         if Canonical_header_fields[i] == 'ENSG':
             ENSG_col = i
@@ -185,6 +189,8 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 
     # Check the column header and grab indexes of our columns of interest
     (UniProt_PrimAC_col, ENSG_col) = (-1, -1)
+
+    logging.info("Processing data from Uniprot Primary Accession File")
 
     for i in range(len(UniprotPrimAC_header_fields)):
         if UniprotPrimAC_header_fields[i] == 'Primary_AC':
@@ -257,12 +263,12 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
         elif len(canonical_human_ENSGs) > 1:
             multiple_CanonicalHumanENSG += 1
 
-    logging.debug("\nTotal no. of Human UniProt Primary Accessions: %d " % Count_HumanUniprotPrimAC)
-    logging.debug("\nTotal no. of ENSGs in the Canonical Transcripts file: %d " % len(ENSG_Gene_dict.keys()))
-    logging.debug("\nTotal no. of ENSGs in the UniProt Primary Accession file: %d " % canonical_ENSG_count)
-    logging.debug("\nNo. of UniProt primary accessions without canonical human ENSG: %d " % no_CanonicalHumanENSG)
-    logging.debug("\nNo. of UniProt primary accessions with single canonical human ENSG: %d " % single_CanonicalHumanENSG)
-    logging.debug("\nNo. of UniProt primary accessions with multiple canonical human ENSGs: %d " % multiple_CanonicalHumanENSG)
+    logging.debug("Total no. of Human UniProt Primary Accessions: %d " % Count_HumanUniprotPrimAC)
+    logging.debug("Total no. of ENSGs in the Canonical Transcripts file: %d " % len(ENSG_Gene_dict.keys()))
+    logging.debug("Total no. of ENSGs in the UniProt Primary Accession file: %d " % canonical_ENSG_count)
+    logging.debug("No. of UniProt primary accessions without canonical human ENSG: %d " % no_CanonicalHumanENSG)
+    logging.debug("No. of UniProt primary accessions with single canonical human ENSG: %d " % single_CanonicalHumanENSG)
+    logging.debug("No. of UniProt primary accessions with multiple canonical human ENSGs: %d " % multiple_CanonicalHumanENSG)
 
     # Closing the file
     UniprotPrimAC_File.close()
@@ -292,6 +298,8 @@ def Interactome_Uniprot2ENSG(args):
     # Counter for UniProt Primary Accessions of proteins not mapping to ENSG
     lost_Interaction = 0
 
+    logging.info("Mapping UniProt Primary Accessions to ENSG")
+
     for data in Uniprot_Interactome_list:
 
         if data[0] in Uniprot_ENSG_dict.keys() and data[1] in Uniprot_ENSG_dict.keys():
@@ -301,7 +309,8 @@ def Interactome_Uniprot2ENSG(args):
             lost_Interaction += 1
 
 
-    logging.debug("\nTotal no. of Interactions lost: %d " % lost_Interaction)
+    logging.debug("Total no. of Interactions lost: %d " % lost_Interaction)
+    logging.info("Done 🎉")
 
     return
 
@@ -341,7 +350,6 @@ The output (High-quality Human Interactome) consists of five columns in .tsv for
 
 if __name__ == "__main__":
     # Logging to the file
-    date = time.strftime("%Y_%m_%d-%H%M%S")
-    Log_Format = "%(levelname)s %(asctime)s - %(message)s \n"
-    logging.basicConfig(filename ='Interactome_%s.log' % date, filemode = 'a', format  = Log_Format, level = logging.DEBUG)
+    Log_Format = "%(levelname)s - %(asctime)s - %(message)s \n"
+    logging.basicConfig(stream = sys.stderr, format  = Log_Format, level = logging.DEBUG)
     main()
