@@ -27,7 +27,7 @@ def ENSG_Gene(inCanonicalFile):
     # Check the column headers and grab indexes of our columns of interest
     (ENSG_col, Gene_col) = (-1,-1)
 
-    logging.info("Processing data from Canonical Transcripts File")
+    logging.info("Processing data from Canonical Transcripts File: %s" % inCanonicalFile)
 
     for i in range(len(Canonical_header_fields)):
         if Canonical_header_fields[i] == 'ENSG':
@@ -75,10 +75,9 @@ def CandidateGeneParser(inCandidateFile):
     # Initializing an empty data frame to store the data from all files
     meta_data = pd.DataFrame()
 
-    logging.info("Processing data from Candidate Genes File(s)")
-
     # Iterating over the list of files and appending to the DataFrame (meta_data)
     for file in candidate_files:
+        logging.info("Processing data from Candidate Gene File: %s" % file)
         data = pd.read_excel(file)
         meta_data = pd.concat([meta_data, data])
 
@@ -172,7 +171,7 @@ def Interacting_Proteins(inInteractome):
     # List of all interactings from the Interactome
     All_Interactors_list = []
 
-    logging.info("Processing Interactome File")
+    logging.info("Processing data from Interactome File: %s" % inInteractome)
 
     for line in Interactome_File:
         line = line.rstrip('\n')
@@ -224,7 +223,7 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
     # Check the column header and grab indexes of our columns of interest
     (UniProt_PrimAC_col, ENSG_col) = (-1, -1)
 
-    logging.info("Processing UniProt Primary Accession File")
+    logging.info("Processing data from UniProt Primary Accession File: %s" % inPrimAC)
 
     for i in range(len(UniprotPrimAC_header_fields)):
         if UniprotPrimAC_header_fields[i] == 'Primary_AC':
