@@ -357,6 +357,10 @@ def Interactors_PValue(args):
             BH_p_value = round((data[3] * len(patho_p_value[i]))/(patho_p_value[i].index(data)+1), 2)
             data[3] = BH_p_value
 
+    # Printing header
+    header_line = ['pathologyID', 'Gene', 'No_Interactors', 'No_KnownInteractors', 'BH_adjustPvalue']
+    print('\t'.join(header for header in header_line))
+
     for eachPathoIndex in range(len(patho_p_value)):
         for sublist in patho_p_value[eachPathoIndex]:
             print(pathologies_list[eachPathoIndex], '\t', '\t'.join(str(value) for value in sublist))
