@@ -10,7 +10,7 @@ This is the main repository containing all the scripts for the project: MultiOmi
    - [Interactome generator](#interactome)
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
-   - [Machine Learning ScoreComponent-1](#Machine-Learning-ScoreComponent)
+   - [Machine Learning ScoreComponent-1](#MLScoreComp1)
 - [Arguments, Input Files and Output](#Arguments-Input-Files-and-Output)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
@@ -101,7 +101,7 @@ python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonical
 
 </br>
 
-<a name="uniprotensgmapper"></a>**Machine Learning ScoreComponent-1**
+<a name="MLScoreComp1"></a>**Machine Learning ScoreComponent-1**
 
 ```console
 python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFile candidateGenes.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human.tsv
