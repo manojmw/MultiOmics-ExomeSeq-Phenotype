@@ -255,9 +255,23 @@ def Interactors_PValue(args):
         patho_p_value.append(Output_eachPatho)
 
     # Sorting the p-values for each pathology
-    for each_patho in patho_p_value:
-        each_patho.sort(key = lambda x:x[3])
-        # pathosorted_p_value[i].append(patho_p_value[i])
+    for i in range(len(patho_p_value)):
+        patho_p_value[i].sort(key = lambda x:x[3])
+
+        # Calculating Benjamini-Hochberg corrected p-values
+        for data in patho_p_value[i]:
+
+            # Rank of p-value -> patho_p_value[i].index(data) + 1
+            # (+1 because list index starts from 0)
+
+            # p-value -> data[3]
+
+            # Total number of tests -> len(patho_p_value[i])
+
+            # Benjamini Hochberg corrected p-value = p-value*Total number of tests/Rank of p-value
+
+            BH_p_value = (data[3] * len(patho_p_value[i]))/(patho_p_value[i].index(data)+1)
+            data.append(BH_p_value)
 
     print(patho_p_value)
 
