@@ -290,7 +290,7 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 # Prints to STDOUT in .tsv format
 # The output consists of:
 # - pathology/phenotype
-# - Gene
+# - Gene Name
 # - Number of Interactors
 # - No. of Known interactors
 # - Benjamini-Hochberg adjusted P-value
@@ -310,7 +310,7 @@ def Interactors_PValue(args):
 
     for i in range(len(pathologies_list)):
 
-        logging.info("Processing data for Pathology/Phenotype: %s" % pathologies_list[i])
+        logging.info("Processing data, Checking Interactors and Computing P-values for Pathology/Phenotype: %s" % pathologies_list[i])
 
         # Initializing a list to store data for each pathology
         Output_eachPatho = []
@@ -353,82 +353,38 @@ def Interactors_PValue(args):
 
         patho_p_value.append(Output_eachPatho)
 
-    # Sorting the p-values for each pathology
-    for i in range(len(patho_p_value)):
-        logging.info("Sorting P-values for Pathology/Phenotype: %s" % pathologies_list[i])
-        patho_p_value[i].sort(key = lambda x:x[3])
-
-        logging.info("Computing Benjamini-Hochberg corrected P-value for Pathology/Phenotype: %s" % pathologies_list[i])
-        # Calculating Benjamini-Hochberg corrected p-values
-        for data in patho_p_value[i]:
-
-            # Rank of p-value -> patho_p_value[i].index(data) + 1
-            # (+1 because list index starts from 0)
-
-            # p-value -> data[3]
-
-            # Total number of tests -> len(patho_p_value[i])
-
-            # Benjamini Hochberg corrected p-value = p-value*Total number of tests/Rank of p-value
-
-            BH_p_value = round((data[3] * len(patho_p_value[i]))/(patho_p_value[i].index(data)+1), 2)
-            data[3] = BH_p_value
-
+    logging.info("Computing Benjamini-Hochberg corrected P-values")
     logging.info("Preparing Output...")
 
     # Printing header
     header_line = ['pathologyID', 'Gene', 'No_Interactors', 'No_KnownInteractors', 'BH_adjustPvalue']
     print('\t'.join(header for header in header_line))
 
-    for eachPathoIndex in range(len(patho_p_value)):
-        for sublist in patho_p_value[eachPathoIndex]:
-            print(pathologies_list[eachPathoIndex], '\t', '\t'.join(str(value) for value in sublist))
+    # Sorting the p-values for each pathology
+    for pathoIndex in range(len(patho_p_value)):
+        patho_p_value[pathoIndex].sort(key = lambda x:x[3])
+
+        # Calculating Benjamini-Hochberg corrected p-values
+        for data in patho_p_value[pathoIndex]:
+
+            # Rank of p-value -> patho_p_value[i].index(data) + 1
+            # (+1 because list index starts from 0)
+            # p-value -> data[3]
+            # Total number of tests -> len(patho_p_value[i])
+            # Benjamini Hochberg corrected p-value = p-value*Total number of tests/Rank of p-value
+
+            # Computing Benjamini Hochberg corrected p-value
+            BH_p_value = round((data[3] * len(patho_p_value[pathoIndex]))/(patho_p_value[pathoIndex].index(data)+1), 2)
+
+            # Replacing P-value with Benjamini Hochberg corrected p-value
+            data[3] = BH_p_value
+
+            final_output = [pathologies_list[pathoIndex], ENSG_Gene_dict[data[0]], str(data[1]), str(data[2]), str(data[3])]
+            print('\t'.join(final_output))
 
     logging.info("Done 🎉")
 
     return
-
-# ###########################################################
-#
-# # Parses the list (candGene_Interactors_list)
-# # returned by the function: Lead1_CandidateENSG
-# # Maps the ENSGs in the list to Gene names using the dictionary: ENSG_Gene_dict
-# #
-# # Prints to STDOUT in .tsv format
-# # Output consists of 6 columns:
-# # - Candidate Gene
-# # - Pathology Identifier
-# # - Confidence Score
-# # - Count of Proteins interacting with Candidate Gene
-# # - Count of Interacting genes that are known candidate Genes
-# # - List of Known Interacting genes
-# def Lead1_CandidateGene(args):
-#
-#     candENSG_Interactors_list = Lead1_CandidateENSG(args.inCanonicalFile, args.inCandidateFile, args.inInteractome)
-#     ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
-#
-#     # Printing the header for the output
-#     header = ['Candidate_Gene', 'pathologyID', 'Confidence_Score', 'No_of_Interactors', 'No_of_KnownInteractors', 'List_KnownInteractors']
-#     print('\t'.join(header))
-#
-#     for CandidateENSG_data in candENSG_Interactors_list:
-#
-#         # known interactor genes
-#         Known_Interactors_Genes = []
-#
-#         candidateGene = [GeneName for (GeneName, ENSG) in ENSG_Gene_dict.items() if ENSG == CandidateENSG_data[0]]
-#
-#         # If there are known interactors in the candGene_Interactors_list
-#         # Get the Gene name of the known interactor using the dictionary (ENSG_Gene_dict)
-#         for Interactors_ENSG in CandidateENSG_data[5]:
-#             Known_Interactor_GeneList = [GeneName for (GeneName, ENSG) in ENSG_Gene_dict.items() if ENSG == Interactors_ENSG]
-#             Known_Interactor_GeneStr = ''.join(Known_Interactor_GeneList)
-#             Known_Interactors_Genes.append(Known_Interactor_GeneStr)
-#
-#         # Print to STDOUT
-#         print(''.join(candidateGene), '\t', CandidateENSG_data[1], '\t', CandidateENSG_data[2], '\t', CandidateENSG_data[3], '\t', len(CandidateENSG_data[5]), '\t', ','.join(Known_Interactors_Genes))
-#
-#     return
 
 ###########################################################
 
@@ -443,7 +399,7 @@ Program: Parses the Interactome file generated by Interactome.py, checks the num
 -----------------------------------------------------------------------------------------------------------------------
 The output consists of:
  -> Pathology/Phenotype
- -> Gene
+ -> Gene Name
  -> Number of Interactors
  -> No. of Known interactors
  -> Benjamini-Hochberg adjusted P-value
