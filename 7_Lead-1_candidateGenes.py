@@ -3,18 +3,17 @@
 import argparse, sys
 import pandas as pd
 import scipy.stats as stats
+import re
 import logging
 import time
-
-###########################################################
 
 # Parses tab-seperated canonical transcripts file
 # Required columns are: 'ENSG' and 'GENE' (can be in any order,
 # but they MUST exist)
 #
 # Returns a dictionary:
-# Key -> Gene
-# Value -> ENSG
+# Key -> ENSG
+# Value -> Gene
 def ENSG_Gene(inCanonicalFile):
 
     ENSG_Gene_dict = {} # Initializing an empty dictionary
@@ -30,7 +29,7 @@ def ENSG_Gene(inCanonicalFile):
 
     for i in range(len(Canonical_header_fields)):
         if Canonical_header_fields[i] == 'ENSG':
-            ENSG_col  = i
+            ENSG_col = i
         elif Canonical_header_fields[i] == 'GENE':
             Gene_col = i
 
@@ -45,9 +44,10 @@ def ENSG_Gene(inCanonicalFile):
         line = line.rstrip('\n')
         CanonicalTranscripts_fields = line.split('\t')
 
-        # Key ->  Gene
-        # Value -> ENSG
-        ENSG_Gene_dict[CanonicalTranscripts_fields[Gene_col]] = CanonicalTranscripts_fields[ENSG_col]
+        # Key -> ENSG
+        # Value -> Gene
+
+        ENSG_Gene_dict[CanonicalTranscripts_fields[ENSG_col]] = CanonicalTranscripts_fields[Gene_col]
 
     # Closing the file
     Canonical_File.close()
@@ -104,23 +104,21 @@ def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
     # Initializing output list
     candidateENSG_out_list = []
 
-    # Counter for canidate genes not found in the canonical transcripts file
-    lost_CandidateGene = 0
-
     for data in CandidateGene_data:
         # data[0] -> Candidate Gene
         # data[1] -> pathologyID
         # data[2] -> Confidence Score
-        if data[0] in ENSG_Gene_dict.keys(): # Get the corresponding ENSG
-            candidateENSG_out = [ENSG_Gene_dict.get(data[0]),  data[1],  data[2]]
-            candidateENSG_out_list.append(candidateENSG_out)
-        else:
-            lost_CandidateGene += 1
+        # ENSG_Gene_dict: Key -> ENSG; Value -> Gene
+
+        for ENSG in ENSG_Gene_dict.keys():
+            # Check if candidate gene is present in ENSG_Gene_dict
+            if data[0] == ENSG_Gene_dict[ENSG]:
+                # Store the ENSG along with other data
+                candidateENSG_out = [ENSG,  data[1],  data[2]]
+                candidateENSG_out_list.append(candidateENSG_out)
 
         if not data[1] in pathologies_list:
             pathologies_list.append(data[1])
-
-    logging.debug("\nNo. of candidate genes not found in the Canonical transcripts file: %d" % lost_CandidateGene)
 
     return candidateENSG_out_list, pathologies_list
 
@@ -188,6 +186,88 @@ def Interacting_Proteins(inInteractome):
 
 ###########################################################
 
+# Parses the UniProt Primary Accession file produced by uniprot_parser.py
+# Required columns are: 'Primary_AC' and 'ENSGs' (can be in any order,
+# but they MUST exist)
+#
+# Parses the dictionary ENSG_Gene_dict
+# returned by the function ENSG_Gene
+# Maps UniProt Primary Accession to ENSG
+# Returns the count of proteins with unique ENSGs
+# Count corresponds to total genes
+# This count is later used for calculating
+# Benjamini-Hochberg adjusted P-values
+def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
+
+    # Initializing the dictionary
+    Uniprot_ENSG_dict = {}
+
+    UniprotPrimAC_File = open(inPrimAC)
+
+    # Grabbing the header line
+    UniprotPrimAC_header = UniprotPrimAC_File.readline()
+
+    UniprotPrimAC_header = UniprotPrimAC_header.rstrip('\n')
+
+    UniprotPrimAC_header_fields = UniprotPrimAC_header.split('\t')
+
+    # Check the column header and grab indexes of our columns of interest
+    (UniProt_PrimAC_col, ENSG_col) = (-1, -1)
+
+    for i in range(len(UniprotPrimAC_header_fields)):
+        if UniprotPrimAC_header_fields[i] == 'Primary_AC':
+            UniProt_PrimAC_col = i
+        elif UniprotPrimAC_header_fields[i] == 'ENSGs':
+            ENSG_col = i
+
+    if not UniProt_PrimAC_col >= 0:
+        sys.exit("Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
+    elif not ENSG_col >= 0:
+        sys.exit("Missing required column title 'ENSG' in the file: %s \n" % inPrimAC)
+    # else grabbed the required column indexes -> PROCEED
+
+    # Compiling regular expression
+
+    # Eliminating Mouse ENSGs
+    re_ENSMUST = re.compile('^ENSMUSG')
+
+    # Counter for accessions with single canonical human ENSG
+    Count_UniqueENSGs = 0
+
+    # Parsing the Uniprot Primary Accession file
+    for line in UniprotPrimAC_File:
+        line = line.rstrip('\n')
+        UniprotPrimAC_fields = line.split('\t')
+
+        # ENSG column  - This is a single string containing comma-seperated ENSGs
+        # So we split it into a list that can be accessed later
+        UniProt_ENSGs = UniprotPrimAC_fields[ENSG_col].split(',')
+
+        # Initializing empty lists
+        human_ENSGs = []
+        canonical_human_ENSGs = []
+
+        # Eliminating Mouse ENSGs
+        for UniProt_ENSG in UniProt_ENSGs:
+            if not re_ENSMUST.match(UniProt_ENSG):
+                human_ENSGs.append(UniProt_ENSG)
+        if not human_ENSGs:
+            continue
+
+        # If ENSG is in the canonical transcripts file
+        # Append it to canonical_human_ENSGs
+        for ENSG in human_ENSGs:
+            if ENSG in ENSG_Gene_dict.keys():
+                canonical_human_ENSGs.append(ENSG)
+
+        # Keeping the count of protein with single ENSGs
+        if len(canonical_human_ENSGs) == 1:
+            Count_UniqueENSGs += 1
+
+    return Count_UniqueENSGs
+
+###########################################################
+
 # Parses the Interactome_list & All_Interactors_list returned
 # by the function: Interacting_Proteins
 # Checks the number of interactors for each gene
@@ -195,8 +275,8 @@ def Interacting_Proteins(inInteractome):
 # using the candidateGene_out_list returned by the function: CandidateGene2ENSG
 #
 # Prints to STDOUT in .tsv format
-# The output consists of sublist(s) per each line
-# Each sublist represents one pathology/phenotype and consists of:
+# The output consists of:
+# - pathology/phenotype
 # - Gene
 # - Number of Interactors
 # - No. of Known interactors
@@ -209,8 +289,7 @@ def Interactors_PValue(args):
     (Interactome_list, All_Interactors_list) = Interacting_Proteins(args.inInteractome)
     (candidateENSG_out_list, pathologies_list) = CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data)
     pathology_CandidateCount = CountCandidateGenes(candidateENSG_out_list, pathologies_list)
-
-    total_human_ENSG = 22000 # Approximate count, will be corrected later using Uniprot file
+    Count_UniqueENSGs = Uniprot_ENSG(args.inPrimAC, ENSG_Gene_dict)
 
     # Initializing first output list with p-values
     # each sublist represents one pathology
@@ -250,7 +329,7 @@ def Interactors_PValue(args):
                             Known_Interactors += 1
 
             # Applying Fisher's exact test to calculate p-values
-            raw_data = [[Known_Interactors, len(Interactors)],[pathology_CandidateCount[i], total_human_ENSG]]
+            raw_data = [[Known_Interactors, len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
             (odd_ratio, p_value) = stats.fisher_exact(raw_data)
 
             Output_eachENSG = [ENSG, len(Interactors), Known_Interactors, p_value]
@@ -278,18 +357,9 @@ def Interactors_PValue(args):
             BH_p_value = round((data[3] * len(patho_p_value[i]))/(patho_p_value[i].index(data)+1), 2)
             data[3] = BH_p_value
 
-    # Printing the header for the output
-    print('\t'.join(pathology for pathology in pathologies_list))
-
-    for i in range(len(patho_p_value)):
-        # * allows us to unpack the sublists
-        # So that we can access indivdual elements of the sublist
-        # zip to get a list of the first element from the sublists
-        # list because zip in python 3 doesn't return a list
-        # Once we get a list, we iterate and add a tab seperator
-        out_tuple = (list(zip(*patho_p_value))[i])
-        out_tabsep = '\t'.join(str(value) for value in out_tuple)
-        print(out_tabsep)
+    for eachPathoIndex in range(len(patho_p_value)):
+        for sublist in patho_p_value[eachPathoIndex]:
+            print(pathologies_list[eachPathoIndex], '\t', '\t'.join(str(value) for value in sublist))
 
     return
 
@@ -346,7 +416,8 @@ Program: Parses the Interactome file generated by Interactome.py, checks the num
          parses the patient Candidate Gene file(s) and Canonical Transcripts file. Checks the number of interactors
          that are known candidate genes, calculates P-values and prints to STDOUT in .tsv format
 -----------------------------------------------------------------------------------------------------------------------
-The output consists of sublist(s) per each line. Each sublist represents one pathology/phenotype and consists of:
+The output consists of:
+ -> Pathology/Phenotype
  -> Gene
  -> Number of Interactors
  -> No. of Known interactors
@@ -358,6 +429,7 @@ The output consists of sublist(s) per each line. Each sublist represents one pat
     required = file_parser.add_argument_group('Required arguments')
     optional = file_parser.add_argument_group('Optional arguments')
 
+    required.add_argument('--inPrimAC', metavar = "Input File", dest = "inPrimAC", help = 'Uniprot Primary Accession File generated by the uniprot parser', required = True)
     required.add_argument('--inCandidateFile', metavar = "Input File", dest = "inCandidateFile", nargs = '+', help = 'Input File Name (Patient meta data file in .xlsx format)', required = True)
     required.add_argument('--inCanonicalFile', metavar = "Input File", dest = "inCanonicalFile", help = 'Canonical Transcripts file', required = True)
     required.add_argument('--inInteractome', metavar = "Input File", dest = "inInteractome", help = 'Input File Name (High-quality Interactome (.tsv) produced by Interactome.py)', required = True)
