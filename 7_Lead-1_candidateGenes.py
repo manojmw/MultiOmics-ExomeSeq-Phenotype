@@ -27,6 +27,8 @@ def ENSG_Gene(inCanonicalFile):
     # Check the column headers and grab indexes of our columns of interest
     (ENSG_col, Gene_col) = (-1,-1)
 
+    logging.info("Processing data from Canonical Transcripts File")
+
     for i in range(len(Canonical_header_fields)):
         if Canonical_header_fields[i] == 'ENSG':
             ENSG_col = i
@@ -73,6 +75,8 @@ def CandidateGeneParser(inCandidateFile):
     # Initializing an empty data frame to store the data from all files
     meta_data = pd.DataFrame()
 
+    logging.info("Processing data from Candidate Genes File(s)")
+
     # Iterating over the list of files and appending to the DataFrame (meta_data)
     for file in candidate_files:
         data = pd.read_excel(file)
@@ -104,6 +108,8 @@ def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
     # Initializing output list
     candidateENSG_out_list = []
 
+    logging.info("Mapping Candidate Genes to ENSG and identifying Pathologies/Phenotypes")
+
     for data in CandidateGene_data:
         # data[0] -> Candidate Gene
         # data[1] -> pathologyID
@@ -134,6 +140,8 @@ def CountCandidateGenes(candidateENSG_out_list, pathologies_list):
     # associated with each pathology
     pathology_CandidateCount = [0] * len(pathologies_list)
 
+    logging.info("Counting the Candidate Gene(s) associated with each pathology")
+
     for candidateGenedata in candidateENSG_out_list:
         for i in range(len(pathologies_list)):
             if candidateGenedata[1] == pathologies_list[i]:
@@ -163,6 +171,8 @@ def Interacting_Proteins(inInteractome):
 
     # List of all interactings from the Interactome
     All_Interactors_list = []
+
+    logging.info("Processing Interactome File")
 
     for line in Interactome_File:
         line = line.rstrip('\n')
@@ -214,6 +224,8 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
     # Check the column header and grab indexes of our columns of interest
     (UniProt_PrimAC_col, ENSG_col) = (-1, -1)
 
+    logging.info("Processing UniProt Primary Accession File")
+
     for i in range(len(UniprotPrimAC_header_fields)):
         if UniprotPrimAC_header_fields[i] == 'Primary_AC':
             UniProt_PrimAC_col = i
@@ -233,6 +245,8 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 
     # Counter for accessions with single canonical human ENSG
     Count_UniqueENSGs = 0
+
+    logging.info("Counting human ENSGs")
 
     # Parsing the Uniprot Primary Accession file
     for line in UniprotPrimAC_File:
@@ -297,6 +311,8 @@ def Interactors_PValue(args):
 
     for i in range(len(pathologies_list)):
 
+        logging.info("Processing data for Pathology/Phenotype: %s" % pathologies_list[i])
+
         # Initializing a list to store data for each pathology
         Output_eachPatho = []
 
@@ -340,8 +356,10 @@ def Interactors_PValue(args):
 
     # Sorting the p-values for each pathology
     for i in range(len(patho_p_value)):
+        logging.info("Sorting P-values for Pathology/Phenotype: %s" % pathologies_list[i])
         patho_p_value[i].sort(key = lambda x:x[3])
 
+        logging.info("Computing Benjamini-Hochberg corrected P-value for Pathology/Phenotype: %s" % pathologies_list[i])
         # Calculating Benjamini-Hochberg corrected p-values
         for data in patho_p_value[i]:
 
@@ -357,6 +375,8 @@ def Interactors_PValue(args):
             BH_p_value = round((data[3] * len(patho_p_value[i]))/(patho_p_value[i].index(data)+1), 2)
             data[3] = BH_p_value
 
+    logging.info("Preparing Output...")
+
     # Printing header
     header_line = ['pathologyID', 'Gene', 'No_Interactors', 'No_KnownInteractors', 'BH_adjustPvalue']
     print('\t'.join(header for header in header_line))
@@ -364,6 +384,8 @@ def Interactors_PValue(args):
     for eachPathoIndex in range(len(patho_p_value)):
         for sublist in patho_p_value[eachPathoIndex]:
             print(pathologies_list[eachPathoIndex], '\t', '\t'.join(str(value) for value in sublist))
+
+    logging.info("Done 🎉")
 
     return
 
@@ -443,7 +465,6 @@ The output consists of:
 
 if __name__ == "__main__":
     # Logging to the file
-    date = time.strftime("%Y_%m_%d-%H%M%S")
-    Log_Format = "%(levelname)s %(asctime)s - %(message)s \n"
-    logging.basicConfig(filename ='Lead-1_candidateGenes_%s.log' % date, filemode = 'a', format  = Log_Format, level = logging.DEBUG)
+    Log_Format = "%(levelname)s - %(asctime)s - %(message)s \n"
+    logging.basicConfig(stream = sys.stderr, format  = Log_Format, level = logging.DEBUG)
     main()
