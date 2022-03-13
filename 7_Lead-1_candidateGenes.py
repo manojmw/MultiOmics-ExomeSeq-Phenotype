@@ -5,7 +5,7 @@ import pandas as pd
 import scipy.stats as stats
 import logging
 import time
-import snoop
+
 ###########################################################
 
 # Parses tab-seperated canonical transcripts file
@@ -193,6 +193,14 @@ def Interacting_Proteins(inInteractome):
 # Checks the number of interactors for each gene
 # Checks the number of known interactors
 # using the candidateGene_out_list returned by the function: CandidateGene2ENSG
+#
+# Prints to STDOUT in .tsv format
+# The output consists of sublist(s) per each line
+# Each sublist represents one pathology/phenotype and consists of:
+# - Gene
+# - Number of Interactors
+# - No. of Known interactors
+# - Benjamini-Hochberg adjusted P-value
 def Interactors_PValue(args):
 
     # Calling the functions
@@ -203,9 +211,6 @@ def Interactors_PValue(args):
     pathology_CandidateCount = CountCandidateGenes(candidateENSG_out_list, pathologies_list)
 
     total_human_ENSG = 22000 # Approximate count, will be corrected later using Uniprot file
-
-    # # Printing the header for the output
-    # print('Gene', '\t', 'No_of_Interactors', '\t', '\t'.join(pathology + '\tp_value' for pathology in pathologies_list))
 
     # Initializing first output list with p-values
     # each sublist represents one pathology
@@ -270,70 +275,24 @@ def Interactors_PValue(args):
 
             # Benjamini Hochberg corrected p-value = p-value*Total number of tests/Rank of p-value
 
-            BH_p_value = (data[3] * len(patho_p_value[i]))/(patho_p_value[i].index(data)+1)
-            data.append(BH_p_value)
+            BH_p_value = round((data[3] * len(patho_p_value[i]))/(patho_p_value[i].index(data)+1), 2)
+            data[3] = BH_p_value
 
-    print(patho_p_value)
+    # Printing the header for the output
+    print('\t'.join(pathology for pathology in pathologies_list))
+
+    for i in range(len(patho_p_value)):
+        # * allows us to unpack the sublists
+        # So that we can access indivdual elements of the sublist
+        # zip to get a list of the first element from the sublists
+        # list because zip in python 3 doesn't return a list
+        # Once we get a list, we iterate and add a tab seperator
+        out_tuple = (list(zip(*patho_p_value))[i])
+        out_tabsep = '\t'.join(str(value) for value in out_tuple)
+        print(out_tabsep)
 
     return
 
-
-###########################################################
-
-# Parses the canidateGene_out_list returned by the function: CandidateGene2ENSG
-# Checks the Number of interactors for each candidate gene
-# using the Interactome_list returned by the function: Interacting_Proteins
-# Checks the number of Interactors that are known candidate genes
-# Returns a list
-
-# def Lead1_CandidateENSG(inCanonicalFile, inCandidateFile, inInteractome):
-#
-#     # Calling the functions
-#     canidateENSG_out_list = CandidateGene2ENSG(inCanonicalFile, inCandidateFile)
-#     Interactome_list = Interacting_Proteins(inInteractome)
-#
-#     # Dictionary for storing the Candidate ENSGs and Interactors
-#     candENSG_Interactors_list = []
-#
-#     for candidateENSG in canidateENSG_out_list:
-#
-#         # List for interacting proteins
-#         Interactors = []
-#
-#         for Proteins in Interactome_list:
-#             # If candidate ENSG is protein A
-#             if (candidateENSG[0] == Proteins[0]):
-#                 # then, get the ENSG of the interacting protein (protein B)
-#                 Interactors.append(Proteins[1])
-#
-#             # If candidate ENSG is protein B
-#             elif (candidateENSG[0] == Proteins[1]):
-#                 # then, get the ENSG of the interacting protein (protein A)
-#                 if not Proteins[0] in Interactors:
-#                     Interactors.append(Proteins[0])
-#
-#         candENSG_Interactors = [candidateENSG[0], candidateENSG[1], candidateENSG[2], str(len(Interactors)), Interactors]
-#         candENSG_Interactors_list.append(candENSG_Interactors)
-#
-#     # Checking the number of interactors that are known candidate genes
-#     for data in candENSG_Interactors_list:
-#
-#         # List for interacting proteins that are known candidate genes
-#         Known_interactor = []
-#
-#         for interactor in data[4]:
-#             for candidateENSG in canidateENSG_out_list:
-#                 # Checking if the interactor is a known ENSG (candidate ENSG)
-#                 if interactor in candidateENSG:
-#                     # Avoid adding the same interactor to the
-#                     # Known_interactor list, especially, if the same known
-#                     # interactor is associated with different pathologies/phenotypes
-#                     if interactor not in Known_interactor:
-#                         Known_interactor.append(interactor)
-#         data.append(Known_interactor)
-#
-#     return candENSG_Interactors_list
-#
 # ###########################################################
 #
 # # Parses the list (candGene_Interactors_list)
@@ -385,12 +344,13 @@ def main():
 -----------------------------------------------------------------------------------------------------------------------
 Program: Parses the Interactome file generated by Interactome.py, checks the number of interactors for each gene. Next,
          parses the patient Candidate Gene file(s) and Canonical Transcripts file. Checks the number of interactors
-         that are known candidate genes and prints to STDOUT in .tsv format
+         that are known candidate genes, calculates P-values and prints to STDOUT in .tsv format
 -----------------------------------------------------------------------------------------------------------------------
-The output consists of following columns in .tsv format:
+The output consists of sublist(s) per each line. Each sublist represents one pathology/phenotype and consists of:
  -> Gene
  -> Number of Interactors
- -> No. of Known interactors associated with each pathology (one pathology per column)
+ -> No. of Known interactors
+ -> Benjamini-Hochberg adjusted P-value
 -----------------------------------------------------------------------------------------------------------------------
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
