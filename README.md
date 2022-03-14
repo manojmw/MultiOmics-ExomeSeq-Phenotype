@@ -12,7 +12,7 @@ This is the main repository containing all the scripts for the project: MultiOmi
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
    - [Machine Learning ScoreComponent-1](#MLScoreComp1)
 - [Arguments](#Arguments)
-- [Input Files and Output](#Input-Files-and-Output)
+- [Output Details](#Output-Details)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
 - [License](#license)
@@ -131,9 +131,9 @@ python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFil
 -h, --help                           Show the help message and exit
 ```
 
-## Input Files and Output
+## Output Details
 
-- For detailed description on input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
+- For detailed description on the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
 
 
 ## Metadata files
