@@ -84,7 +84,8 @@ python 5_ModuleInputFile.py < Interactome_human.tsv
 </br>
 
 - Parses the output (Ex: Interactome_human.tsv) produced by `4_Interactome.py`
-- Produces the input files that can be used for most of the module identification/clustering methods
+- Assigns a weight to each interaction and prints to STDOUT in .tsv format.
+- This can be used as INPUT for most of the module identification/clustering methods
 
 </br>
 
