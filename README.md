@@ -11,7 +11,8 @@ This is the main repository containing all the scripts for the project: MultiOmi
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
    - [Machine Learning ScoreComponent-1](#MLScoreComp1)
-- [Arguments, Input Files and Output](#Arguments-Input-Files-and-Output)
+- [Arguments](#Arguments)
+- [Input Files and Output](#Input-Files-and-Output)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
 - [License](#license)
@@ -116,10 +117,23 @@ python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFil
 - Further, computes Benjamini-Hochberg adjusted P-value and prints to STDOUT in .tsv format
 - This script provides the first scoring component for the Machine Learning Step
 
+## Arguments
+```shell
+--inUniprot                          UniProt Input File name
+--outPrimAC                          UniProt Primary Accession Output File name
+--outSecAC                           UniProt Secondary Accession Output File name
+--outGeneID                          UniProt GeneID Output File name
+--inInteraction                      miTAB 2.5 or 2.7 Input File name (Protein-Protein Interaction File)
+--inCuratedFile                      Curated Output File name(s) (produced by 2_interaction_parser.py)
+--inCanonicalFile                    Canonical Transcripts Input File name
+--inCandidateFile                    Candidate Gene Input Files(s) name
+--inInteractome                      High-Quality Interactome Input File name ((produced by 4_Interactome.py)
+-h, --help                           Show the help message and exit
+```
 
-## Arguments, Input Files and Output
+## Input Files and Output
 
-- For detailed description on arguments, input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
+- For detailed description on input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
 
 
 ## Metadata files
