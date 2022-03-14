@@ -11,7 +11,8 @@ This is the main repository containing all the scripts for the project: MultiOmi
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
    - [Machine Learning ScoreComponent-1](#MLScoreComp1)
-- [Arguments, Input Files and Output](#Arguments-Input-Files-and-Output)
+- [Arguments](#Arguments)
+- [Output Details](#Output-Details)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
 - [License](#license)
@@ -84,7 +85,8 @@ python 5_ModuleInputFile.py < Interactome_human.tsv
 </br>
 
 - Parses the output (Ex: Interactome_human.tsv) produced by `4_Interactome.py`
-- Produces the input files that can be used for most of the module identification/clustering methods
+- Assigns a weight to each interaction and prints to STDOUT in .tsv format.
+- This can be used as INPUT for most of the module identification/clustering methods
 
 </br>
 
@@ -115,10 +117,35 @@ python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFil
 - Further, computes Benjamini-Hochberg adjusted P-value and prints to STDOUT in .tsv format
 - This script provides the first scoring component for the Machine Learning Step
 
+## Arguments
+```shell
+# UniProt Files
+   --inUniprot                          UniProt Input File name
+   --outPrimAC                          UniProt Primary Accession Output File name
+   --outSecAC                           UniProt Secondary Accession Output File name
+   --outGeneID                          UniProt GeneID Output File name
+                                       (same files can be input for some scripts Ex: --inPrimAC, --inSecAC, --inGeneID)
+                                     
+# Protein-Protein Interaction File(s)                                     
+   --inInteraction                      miTAB 2.5 or 2.7 Input File name (Protein-Protein Interaction File)
+   --inCuratedFile                      Curated Output File name(s) (produced by 2_interaction_parser.py)
 
-## Arguments, Input Files and Output
+# Canonical Transcripts File
+   --inCanonicalFile                    Canonical Transcripts Input File name
 
-- For detailed description on arguments, input files and the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
+# Candidate Gene File(s)
+   --inCandidateFile                    Candidate Gene Input Files(s) name (.xlsx)
+
+# Interactome File
+   --inInteractome                      High-Quality Interactome Input File name (produced by 4_Interactome.py)
+
+# Help
+   -h, --help                           Show the help message and exit
+```
+
+## Output Details
+
+- For detailed description on the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
 
 
 ## Metadata files
