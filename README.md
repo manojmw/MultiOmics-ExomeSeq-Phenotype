@@ -126,8 +126,8 @@ python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFil
 --inInteraction                      miTAB 2.5 or 2.7 Input File name (Protein-Protein Interaction File)
 --inCuratedFile                      Curated Output File name(s) (produced by 2_interaction_parser.py)
 --inCanonicalFile                    Canonical Transcripts Input File name
---inCandidateFile                    Candidate Gene Input Files(s) name
---inInteractome                      High-Quality Interactome Input File name ((produced by 4_Interactome.py)
+--inCandidateFile                    Candidate Gene Input Files(s) name (.xlsx)
+--inInteractome                      High-Quality Interactome Input File name (produced by 4_Interactome.py)
 -h, --help                           Show the help message and exit
 ```
 
