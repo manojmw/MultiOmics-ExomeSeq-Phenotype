@@ -119,15 +119,27 @@ python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFil
 
 ## Arguments
 ```shell
+# UniProt Files
 --inUniprot                          UniProt Input File name
 --outPrimAC                          UniProt Primary Accession Output File name
 --outSecAC                           UniProt Secondary Accession Output File name
 --outGeneID                          UniProt GeneID Output File name
+                                     (same files can be input for some scripts Ex: --inPrimAC, --inSecAC, --inGeneID)
+                                     
+# Protein-Protein Interaction File(s)                                     
 --inInteraction                      miTAB 2.5 or 2.7 Input File name (Protein-Protein Interaction File)
 --inCuratedFile                      Curated Output File name(s) (produced by 2_interaction_parser.py)
+
+# Canonical Transcripts File
 --inCanonicalFile                    Canonical Transcripts Input File name
+
+# Candidate Gene File(s)
 --inCandidateFile                    Candidate Gene Input Files(s) name (.xlsx)
+
+# Interactome File
 --inInteractome                      High-Quality Interactome Input File name (produced by 4_Interactome.py)
+
+# Help
 -h, --help                           Show the help message and exit
 ```
 
