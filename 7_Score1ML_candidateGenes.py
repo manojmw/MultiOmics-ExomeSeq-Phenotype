@@ -304,68 +304,86 @@ def Interactors_PValue(args):
     pathology_CandidateCount = CountCandidateGenes(candidateENSG_out_list, pathologies_list)
     Count_UniqueENSGs = Uniprot_ENSG(args.inPrimAC, ENSG_Gene_dict)
 
-    # Initializing first output list with p-values
-    # each sublist represents one pathology
-    patho_p_value = []
+    # Initializing first output list containing distinct lists
+    # Each Sublist contains:
+    # - Gene
+    # - Total number of Interactors
+    # - Known Interactors count, list of Known Interactors & P-value for each pathology
+    Gene_AllPatho_Pvalue = [[] for i in range(len(All_Interactors_list))]
 
-    for i in range(len(pathologies_list)):
+    logging.info("Processing data, Checking Interactors and Computing P-values...")
 
-        logging.info("Processing data, Checking Interactors and Computing P-values for Pathology/Phenotype: %s" % pathologies_list[i])
+    # Checking the number of interactors for each gene
+    for ENSG_index in range(len(All_Interactors_list)):
 
-        # Initializing a list to store data for each pathology
-        Output_eachPatho = []
+        Gene_AllPatho_Pvalue[ENSG_index].append(All_Interactors_list[ENSG_index])
 
-        # Checking the number of interactors for each gene
-        for ENSG in All_Interactors_list:
+        # List of interactors
+        Interactors = []
 
-            # List of interactors
-            Interactors = []
-
-            # List for known interactor
-            Known_Interactors = 0
-
-            for Proteins in Interactome_list:
-                # If Protein_A is the first protein
-                if (ENSG == Proteins[0]):
+        for Proteins in Interactome_list:
+            # If Protein_A is the first protein
+            if (All_Interactors_list[ENSG_index] == Proteins[0]):
+                # Get the interacting protein
+                if not Proteins[1] in Interactors:
+                    Interactors.append(Proteins[1])
+            # If Protein_A is the Second protein
+            elif (All_Interactors_list[ENSG_index] == Proteins[1]):
+                if not Proteins[0] in Interactors:
                     # Get the interacting protein
-                    if not Proteins[1] in Interactors:
-                        Interactors.append(Proteins[1])
-                # If Protein_A is the Second protein
-                elif (ENSG == Proteins[1]):
-                    if not Proteins[0] in Interactors:
-                        # Get the interacting protein
-                        Interactors.append(Proteins[0])
+                    Interactors.append(Proteins[0])
+
+        Gene_AllPatho_Pvalue[ENSG_index].append(len(Interactors))
+
+        for i in range(len(pathologies_list)):
+
+            # List for known interactor(s)
+            Known_Interactors = []
+
+            # Initializing a list to store data for each pathology
+            Output_eachPatho = []
 
             # Checking if the interactor is a known ENSG (candidate ENSG)
             for interactor in Interactors:
                 for candidateENSG in candidateENSG_out_list:
                     if interactor in candidateENSG:
                         if candidateENSG[1] == pathologies_list[i]:
-                            Known_Interactors += 1
+                            Known_Interactors.append(interactor)
 
-            # Applying Fisher's exact test to calculate p-values
-            raw_data = [[Known_Interactors, len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
-            (odd_ratio, p_value) = stats.fisher_exact(raw_data)
+            # If there are no Known Interactors, there is no
+            # point is computing P-value,
+            # So we assign P-value as 1
 
-            Output_eachENSG = [ENSG, len(Interactors), Known_Interactors, p_value]
+            if Known_Interactors:
+                # Applying Fisher's exact test to calculate p-values
+                ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
+                (odd_ratio, p_value) = stats.fisher_exact(ComputePvalue_data)
+            else:
+                p_value = 1
 
-            Output_eachPatho.append(Output_eachENSG)
+            Output_eachPatho = [len(Known_Interactors), Known_Interactors, p_value]
 
-        patho_p_value.append(Output_eachPatho)
+            for data in Output_eachPatho:
+                Gene_AllPatho_Pvalue[ENSG_index].append(data)
 
     logging.info("Computing Benjamini-Hochberg corrected P-values")
     logging.info("Preparing Output...")
 
-    # Printing header
-    header_line = ['pathologyID', 'Gene', 'No_Interactors', 'No_KnownInteractors', 'BH_adjustPvalue']
-    print('\t'.join(header for header in header_line))
-
     # Sorting the p-values for each pathology
-    for pathoIndex in range(len(patho_p_value)):
-        patho_p_value[pathoIndex].sort(key = lambda x:x[3])
+    for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
 
-        # Calculating Benjamini-Hochberg corrected p-values
-        for data in patho_p_value[pathoIndex]:
+        # Storing the data in a variable
+        # This allows us to check if P-value is 1 (later0
+        Gene_AllPathoIndex_data = Gene_AllPatho_Pvalue[Gene_AllPathoIndex]
+
+        # Calculating Benjamini-Hochberg corrected p-value for each pathology
+        for i in range(len(pathologies_list)):
+
+            # lambda x:x[i*4 + 4] -> Gives us access to P-value for each pathology
+            Pvalue_Index = i*4 + 4
+
+            # Sorting based on P-value for each pathology
+            Gene_AllPatho_Pvalue[Gene_AllPathoIndex].sort(key = lambda x:x[Pvalue_Index])
 
             # Rank of p-value -> patho_p_value[i].index(data) + 1
             # (+1 because list index starts from 0)
@@ -373,14 +391,25 @@ def Interactors_PValue(args):
             # Total number of tests -> len(patho_p_value[i])
             # Benjamini Hochberg corrected p-value = p-value*Total number of tests/Rank of p-value
 
-            # Computing Benjamini Hochberg corrected p-value
-            BH_p_value = round((data[3] * len(patho_p_value[pathoIndex]))/(patho_p_value[pathoIndex].index(data)+1), 2)
+            # If P-value is 1, we do not compute
+            # Benjamini Hochberg corrected p-value
+            # Assign Benjamini Hochberg corrected p-value = 1
 
-            # Replacing P-value with Benjamini Hochberg corrected p-value
-            data[3] = BH_p_value
+            if not Gene_AllPathoIndex_data[Pvalue_Index] == 1:
+                BH_p_value = (Gene_AllPathoIndex_data[Pvalue_Index] * len(patho_p_value[pathoIndex]))/(patho_p_value[pathoIndex].index(data)+1)
+            else:
+                BH_p_value = 1
 
-            final_output = [pathologies_list[pathoIndex], ENSG_Gene_dict[data[0]], str(data[1]), str(data[2]), str(data[3])]
-            print('\t'.join(final_output))
+            # Adding Benjamini Hochberg corrected p-value to the sublist
+            # Next to the P-value
+            Gene_AllPatho_Pvalue[Gene_AllPathoIndex].insert(Pvalue_Index+1, BH_p_value)
+
+    # Printing header
+    # a = [patho.expand() for patho in pathologies_list]
+    # print('Gene\t', 'Total_Interactors\t',  ]
+
+    for eachGene_AllPatho_data in Gene_AllPatho_Pvalue:
+        print('\t'.join(str(eachGene_AllPatho_data)))
 
     logging.info("Done 🎉")
 
