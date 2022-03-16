@@ -363,7 +363,10 @@ def Interactors_PValue(args):
 
             # The last item in the sublist is 0
             # This will be replaced by Benjamini-Hochberg corrected P-value
-            Output_eachPatho = [len(Known_Interactors), Known_Interactors, p_value, 0]
+            if Known_Interactors:
+                Output_eachPatho = [len(Known_Interactors), Known_Interactors, p_value, 0]
+            else:
+                Output_eachPatho = [len(Known_Interactors), '', p_value, 0]
 
             for data in Output_eachPatho:
                 Gene_AllPatho_Pvalue[ENSG_index].append(data)
@@ -411,6 +414,9 @@ def Interactors_PValue(args):
     # print('Gene\t', 'Total_Interactors\t',  ]
 
     for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
+        # Getting the Gene name for the ENSG
+        Gene_AllPatho_Pvalue[Gene_AllPathoIndex][0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[Gene_AllPathoIndex][0]]
+        
         print('\t'.join(str(eachGene_AllPatho_data) for eachGene_AllPatho_data in Gene_AllPatho_Pvalue[Gene_AllPathoIndex]))
 
     logging.info("Done 🎉")
