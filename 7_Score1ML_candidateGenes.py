@@ -16,7 +16,8 @@ import time
 # Value -> Gene
 def ENSG_Gene(inCanonicalFile):
 
-    ENSG_Gene_dict = {} # Initializing an empty dictionary
+    # Dictionary to store ENSG & Gene data
+    ENSG_Gene_dict = {}
 
     Canonical_File = open(inCanonicalFile)
 
@@ -94,17 +95,17 @@ def CandidateGeneParser(inCandidateFile):
 #
 # Maps Gene name to ENSG
 # Returns 2 lists:
-# The first list has 3 items (in each sublist:
+# Each sublist of first list contains:
 # - ENSG
 # - pathologyID
-# - Confidence score)
-# The second list contains all the pathologies
+# - Confidence score
+# The second list contains all the pathologies/Phenotypes
 def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
 
     # List of pathologies
     pathologies_list = []
 
-    # Initializing output list
+    # list to store data associated with each candidate gene
     candidateENSG_out_list = []
 
     logging.info("Mapping Candidate Genes to ENSG and identifying Pathologies/Phenotypes")
@@ -165,10 +166,14 @@ def Interacting_Proteins(inInteractome):
     # Input - Interactome file
     Interactome_File = open(inInteractome)
 
-    # Initializing Interactome dictionary
+    # Dictionary to Interacting proteins
+    # from the Interactome
     Interactome_list = []
 
-    # List of all interactings from the Interactome
+    # Keeping count of Self Interactions
+    SelfInteracting_PPICount = 0
+
+    # List of all interactors from the Interactome
     All_Interactors_list = []
 
     logging.info("Processing data from Interactome File: %s" % inInteractome)
@@ -178,15 +183,19 @@ def Interacting_Proteins(inInteractome):
 
         Interactome_fields = line.split('\t')
 
-        Interacting_Proteins = [Interactome_fields[0], Interactome_fields[1]]
+        if Interactome_fields[0] != Interactome_fields[1]:
+            Interacting_Proteins = [Interactome_fields[0], Interactome_fields[1]]
+            Interactome_list.append(Interacting_Proteins)
 
-        Interactome_list.append(Interacting_Proteins)
+            # Storing all the interactors in All_Interactors_list
+            if not Interactome_fields[0] in All_Interactors_list:
+                All_Interactors_list.append(Interactome_fields[0])
+            elif not Interactome_fields[1] in All_Interactors_list:
+                All_Interactors_list.append(Interactome_fields[1])
+        else:
+            SelfInteracting_PPICount += 1
 
-        # Storing all the interactors in All_Interactors_list
-        if not Interactome_fields[0] in All_Interactors_list:
-            All_Interactors_list.append(Interactome_fields[0])
-        elif not Interactome_fields[1] in All_Interactors_list:
-            All_Interactors_list.append(Interactome_fields[1])
+    logging.debug("Total number of Self-Interactions in the Interactome: %d" % SelfInteracting_PPICount)
 
     # Closing the file
     Interactome_File.close()
@@ -309,6 +318,10 @@ def Interactors_PValue(args):
     # - Known Interactors count, list of Known Interactors & P-value for each pathology
     Gene_AllPatho_Pvalue = [[] for i in range(len(All_Interactors_list))]
 
+    # List for keeping the count of number of statistical tests
+    # performed for each pathology
+    eachPatho_TestCount = [0] * len(pathologies_list)
+
     logging.info("Processing data, Checking Interactors and Computing P-values...")
 
     # Checking the number of interactors for each gene
@@ -360,6 +373,7 @@ def Interactors_PValue(args):
                 # Applying Fisher's exact test to calculate p-values
                 ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
                 (odd_ratio, p_value) = stats.fisher_exact(ComputePvalue_data)
+                eachPatho_TestCount[i] += 1
             else:
                 p_value = 1
 
@@ -406,7 +420,7 @@ def Interactors_PValue(args):
             # Assign Benjamini Hochberg corrected p-value = 1
 
             if not Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index] == 1:
-                BH_p_value = (Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index] * len(Gene_AllPatho_Pvalue))/(Gene_AllPathoIndex+1)
+                BH_p_value = (Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index] * eachPatho_TestCount[i])/(Gene_AllPathoIndex+1)
             else:
                 BH_p_value = 1
 
