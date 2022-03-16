@@ -429,7 +429,7 @@ The output (Human-Human Protein Interaction Experiments) consists of five column
     interaction_parser(args)
 
 if __name__ == "__main__":
-    # Logging to the file
+    # Logging to Standard Error
     Log_Format = "%(levelname)s - %(asctime)s - %(message)s \n"
     logging.basicConfig(stream = sys.stderr, format  = Log_Format, level = logging.DEBUG)
     main()
