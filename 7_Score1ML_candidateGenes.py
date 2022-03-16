@@ -416,9 +416,9 @@ def Interactors_PValue(args):
             # Next to the P-value
             Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index+1] = BH_p_value
 
-    # # Printing header
-    # a = [patho.expand() for patho in pathologies_list]
-    # print('Gene\t', 'Total_Interactors\t',  ]
+    # Printing header
+    Patho_header_list = [[patho+'_KnownInteractorsCount', patho+'_KnownInteractorsList', patho+'_Pvalue', patho+'_BHAdjustPvalue'] for patho in pathologies_list]
+    print('Gene\t', 'Total_Interactors\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]))
 
     for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
         print('\t'.join(str(eachGene_AllPatho_data) for eachGene_AllPatho_data in Gene_AllPatho_Pvalue[Gene_AllPathoIndex]))
