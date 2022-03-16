@@ -470,7 +470,7 @@ The output consists of following data for each line :
     Interactors_PValue(args)
 
 if __name__ == "__main__":
-    # Logging to the file
+    # Logging to Standard Error
     Log_Format = "%(levelname)s - %(asctime)s - %(message)s \n"
     logging.basicConfig(stream = sys.stderr, format  = Log_Format, level = logging.DEBUG)
     main()
