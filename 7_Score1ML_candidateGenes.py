@@ -361,7 +361,9 @@ def Interactors_PValue(args):
             else:
                 p_value = 1
 
-            Output_eachPatho = [len(Known_Interactors), Known_Interactors, p_value]
+            # The last item in the sublist is 0
+            # This will be replaced by Benjamini-Hochberg corrected P-value
+            Output_eachPatho = [len(Known_Interactors), Known_Interactors, p_value, 0]
 
             for data in Output_eachPatho:
                 Gene_AllPatho_Pvalue[ENSG_index].append(data)
@@ -372,9 +374,9 @@ def Interactors_PValue(args):
     # Sorting the p-values for each pathology
     for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
 
-        # Storing the data in a variable
-        # This allows us to check if P-value is 1 (later0
-        Gene_AllPathoIndex_data = Gene_AllPatho_Pvalue[Gene_AllPathoIndex]
+        # # Storing the data in a variable
+        # # This allows us to check if P-value is 1 (later0
+        # Gene_AllPathoIndex_data = Gene_AllPatho_Pvalue[Gene_AllPathoIndex]
 
         # Calculating Benjamini-Hochberg corrected p-value for each pathology
         for i in range(len(pathologies_list)):
@@ -383,7 +385,7 @@ def Interactors_PValue(args):
             Pvalue_Index = i*4 + 4
 
             # Sorting based on P-value for each pathology
-            Gene_AllPatho_Pvalue[Gene_AllPathoIndex].sort(key = lambda x:x[Pvalue_Index])
+            Gene_AllPatho_Pvalue.sort(key = lambda x:x[Pvalue_Index])
 
             # Rank of p-value -> patho_p_value[i].index(data) + 1
             # (+1 because list index starts from 0)
@@ -395,21 +397,21 @@ def Interactors_PValue(args):
             # Benjamini Hochberg corrected p-value
             # Assign Benjamini Hochberg corrected p-value = 1
 
-            if not Gene_AllPathoIndex_data[Pvalue_Index] == 1:
-                BH_p_value = (Gene_AllPathoIndex_data[Pvalue_Index] * len(patho_p_value[pathoIndex]))/(patho_p_value[pathoIndex].index(data)+1)
+            if not Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index] == 1:
+                BH_p_value = (Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index] * len(Gene_AllPatho_Pvalue))/(Gene_AllPathoIndex+1)
             else:
                 BH_p_value = 1
 
             # Adding Benjamini Hochberg corrected p-value to the sublist
             # Next to the P-value
-            Gene_AllPatho_Pvalue[Gene_AllPathoIndex].insert(Pvalue_Index+1, BH_p_value)
+            Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index+1] = BH_p_value
 
-    # Printing header
+    # # Printing header
     # a = [patho.expand() for patho in pathologies_list]
     # print('Gene\t', 'Total_Interactors\t',  ]
 
-    for eachGene_AllPatho_data in Gene_AllPatho_Pvalue:
-        print('\t'.join(str(eachGene_AllPatho_data)))
+    for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
+        print('\t'.join(str(eachGene_AllPatho_data) for eachGene_AllPatho_data in Gene_AllPatho_Pvalue[Gene_AllPathoIndex]))
 
     logging.info("Done 🎉")
 
