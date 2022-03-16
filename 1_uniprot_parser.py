@@ -189,7 +189,7 @@ Output File 3 (--outGeneID):      A tab-seperated file (.tsv) with two columns
     uniprot_parser(args)
 
 if __name__ == "__main__":
-    # Logging to the file
+    # Logging 
     Log_Format = "%(levelname)s - %(asctime)s - %(message)s \n"
     logging.basicConfig(stream = sys.stderr, format  = Log_Format, level = logging.DEBUG)
     main()
