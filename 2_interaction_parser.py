@@ -16,7 +16,9 @@ import time
 # Value -> TaxID
 def PrimAC(inPrimAC):
 
-    UniprotPrimAC_dict = {} # Initializing an empty dictionary
+    # Dictionary to store UniProt Primary Accession
+    # and Taxonomy Identifier
+    UniprotPrimAC_dict = {}
 
     UniprotPrimAC_File = open(inPrimAC)
 
@@ -67,7 +69,9 @@ def PrimAC(inPrimAC):
 # Value -> UniProt Primary Accession
 def SecAC(inSecAC):
 
-    UniprotSecAC_dict = {} # Initializing an empty dictionary
+    # Dictionary to store UniProt Secondary Accession and
+    # corresponding UniProt Primary Accession
+    UniprotSecAC_dict = {}
 
     UniprotSecAC_File = open(inSecAC)
 
@@ -129,7 +133,9 @@ def SecAC(inSecAC):
 # Value -> UniProt Primary Accession
 def GeneID(inGeneID):
 
-    GeneID_dict = {} # Initializing an empty dictionary
+    # Dictionary to store GeneID and
+    # corresponding UniProt Primary Accession
+    GeneID_dict = {}
 
     GeneID_File = open(inGeneID)
 
