@@ -312,15 +312,17 @@ def Interactors_PValue(args):
     Count_UniqueENSGs = Uniprot_ENSG(args.inPrimAC, ENSG_Gene_dict)
 
     # Initializing first output list containing distinct lists
+    # i.e. one Sublist per Gene
     # Each Sublist contains:
-    # - Gene
+    # - Gene name
     # - Total number of Interactors
-    # - Known Interactors count, list of Known Interactors & P-value for each pathology
+    # - Known Interactors count, list of Known Interactors, P-value for each pathology and 0
+    # 0 will be later replaced by Benjamini-Hochberg corrected P-value
     Gene_AllPatho_Pvalue = [[] for i in range(len(All_Interactors_list))]
 
     # List for keeping the count of number of statistical tests
     # performed for each pathology
-    eachPatho_TestCount = [0] * len(pathologies_list)
+    Patho_TestCount = [0] * len(pathologies_list)
 
     logging.info("Processing data, Checking Interactors and Computing P-values...")
 
@@ -373,7 +375,7 @@ def Interactors_PValue(args):
                 # Applying Fisher's exact test to calculate p-values
                 ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
                 (odd_ratio, p_value) = stats.fisher_exact(ComputePvalue_data)
-                eachPatho_TestCount[i] += 1
+                Patho_TestCount[i] += 1
             else:
                 p_value = 1
 
@@ -409,10 +411,10 @@ def Interactors_PValue(args):
             # Sorting based on P-value for each pathology
             Gene_AllPatho_Pvalue.sort(key = lambda x:x[Pvalue_Index])
 
-            # Rank of p-value -> patho_p_value[i].index(data) + 1
+            # Rank of p-value -> Gene_AllPathoIndex+1
             # (+1 because list index starts from 0)
-            # p-value -> data[3]
-            # Total number of tests -> len(patho_p_value[i])
+            # p-value -> Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index]
+            # Total number of tests -> Patho_TestCount[i]
             # Benjamini Hochberg corrected p-value = p-value*Total number of tests/Rank of p-value
 
             # If P-value is 1, we do not compute
@@ -420,7 +422,7 @@ def Interactors_PValue(args):
             # Assign Benjamini Hochberg corrected p-value = 1
 
             if not Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index] == 1:
-                BH_p_value = (Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index] * eachPatho_TestCount[i])/(Gene_AllPathoIndex+1)
+                BH_p_value = (Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index] * Patho_TestCount[i])/(Gene_AllPathoIndex+1)
             else:
                 BH_p_value = 1
 
