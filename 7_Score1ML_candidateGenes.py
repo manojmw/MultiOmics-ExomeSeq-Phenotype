@@ -316,8 +316,8 @@ def Interactors_PValue(args):
     # Each Sublist contains:
     # - Gene name
     # - Total number of Interactors
-    # - Known Interactors count, list of Known Interactors, P-value for each pathology and 0
-    # 0 will be later replaced by Benjamini-Hochberg corrected P-value
+    # - Known Interactors count, list of Known Interactors, P-value and 0 for each pathology
+    # 0 will later be replaced by Benjamini-Hochberg corrected P-value
     Gene_AllPatho_Pvalue = [[] for i in range(len(All_Interactors_list))]
 
     # List for keeping the count of number of statistical tests
@@ -405,7 +405,16 @@ def Interactors_PValue(args):
         # Calculating Benjamini-Hochberg corrected p-value for each pathology
         for i in range(len(pathologies_list)):
 
-            # lambda x:x[i*4 + 4] -> Gives us access to P-value for each pathology
+            # Getting the index of P-values
+            # Each sublist of Gene_AllPatho_Pvalue contains:
+            # - Gene
+            # - Total number of Interactors
+            # - Known_Interactors,
+            # - Known Interactors count, list of Known Interactors, P-value and 0 for each pathology
+            # According to this structure of the sublist, every
+            # 5th index in the sublist is a P-value
+            # Since list indexing starts from 0
+            # we use the below equation
             Pvalue_Index = i*4 + 4
 
             # Sorting based on P-value for each pathology
