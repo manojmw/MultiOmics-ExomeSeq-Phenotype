@@ -119,7 +119,7 @@ python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFil
 
 ## Arguments
 
-**Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
+**Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes**
 
 ```shell
 # UniProt Files
