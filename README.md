@@ -118,6 +118,9 @@ python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFil
 - This script provides the first scoring component for the Machine Learning Step
 
 ## Arguments
+
+**Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes**
+
 ```shell
 # UniProt Files
    --inUniprot                          UniProt Input File name
