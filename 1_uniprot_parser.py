@@ -7,7 +7,7 @@ import sys
 
 ###########################################################
 
-# Parses the Uniprot file and extracts the following fields in each record:
+# Parses the Uniprot file and extracts the following fields from each record:
 # - Primary Accession and Secondary Accession(s) from the 'AC' line
 # - Taxonomy Identifier from the 'OX' line
 # - ENST(s), ENSG(s) & GeneID from the 'DR' line
@@ -25,7 +25,7 @@ import sys
 #
 # Output File 3 -> a tab-seperated file with two columns:
 # - GeneID
-# - UniProt Primary AC
+# - Corresponding UniProt Primary AC
 def uniprot_parser(args):
     try:
         with open(args.outPrimAC, 'w') as PrimAC_outfile, open(args.outSecAC, 'w') as SecAC_outfile, open(args.outGeneID, 'w') as GeneID_outfile:
@@ -59,10 +59,10 @@ def uniprot_parser(args):
             # GeneIDs from the DR line
             re_GID = re.compile('^DR\s+GeneID;\s+(\d+);')
 
-            # Open and parse the input file
-
             logging.info("Processing data from UniProt File: %s" % args.inuniprot)
             logging.info("Writing data to output files...")
+
+            # Open and parse the input file
 
             for line in open(args.inuniprot):
                 line = line.rstrip('\r\n') # removing trailing new lines and carriage returns
@@ -73,50 +73,45 @@ def uniprot_parser(args):
                         # Add trailing separator to the previous entries - distingushes each AC
                         ACs += '; '
                     ACs += re_AC.match(line).group(1)
-                elif (re.match(r'^AC\s', line)): # If any AC line is missed -> break the loop
-                    print("Error: Missed the AC line %s\n", line)
-                    break
+                elif (re.match(r'^AC\s', line)):
+                    # If any AC line is missed, Exit the program with an error message
+                    sys.exit("Error: Missed the AC line %s\n", line)
                 elif (re_TaxID.match(line)):
                     if (TaxID != 0):
-                        print("Error: Several OX lines for the protein: \t", ACs)
-                        break
+                        sys.exit("Error: Several OX lines for the protein: \t", ACs)
                     TaxID = re_TaxID.match(line).group(1)
                 elif (re.match(r'^OX\s',line)):
-                    print("Error: Missed the OX line %s\n", line) # If any OX line is missed -> break the loop
-                    break
+                    sys.exit("Error: Missed the OX line %s\n", line)
                 elif (re_ENS.match(line)):
                     ENS_match = re_ENS.match(line)
                     ENSTs.append(ENS_match.group(1))
                     ENSG = ENS_match.group(2)
                     if ENSG not in ENSGs:
                         ENSGs.append(ENSG)
-                elif (re.match(r'^DR\s+Ensembl;', line)): # If any DR line wtih Ensembl IDs is missed -> break the loop
-                    print("Error: Failed to get all the Ensembl Identifiers\n", ACs, line)
-                    break
+                elif (re.match(r'^DR\s+Ensembl;', line)):
+                    sys.exit("Error: Failed to get all the Ensembl Identifiers\n", ACs, line)
                 elif (re_GID.match(line)):
                     GeneIDs.append(re_GID.match(line).group(1))
-                elif (re.match(r'^DR\s+GeneID.*', line)): # If any DR line wtih GeneIDs is missed -> break the loop
-                    print("Error: Missed the GeneIDs \n", ACs, line)
-                    break
-                # Processing the matched records of the protein
+                elif (re.match(r'^DR\s+GeneID.*', line)):
+                    sys.exit("Error: Missed the GeneIDs \n", ACs, line)
+
+                # '//' means End of the record
+                # we Process the retreived data
                 elif (line == '//'):
-                    # ignore entry if bad species; Human = 9606, Mouse = 10090
+                    # ignore entry if bad species; TaxID Human = 9606, TaxID Mouse = 10090
                     if ((TaxID == '9606') or (TaxID == '10090')):
                         try:
                             ACs_split = ACs.split('; ')
                             primary_AC = ACs_split[0] # Grab only the first AC
                             secondary_ACs = ACs_split[1:] # Grab the remaining ACs
                         except:
-                            print('Error: Failed to store Accession IDs for the protein: \t', ACs)
-                            break
+                            sys.exit('Error: Failed to store Accession IDs for the protein: \t', ACs)
                         try:
                             # Processing ENSTs and ENSGs
                             ENSTs = ','.join(ENSTs)
                             ENSGs = ','.join(ENSGs)
                         except:
-                            print('Error: Failed to store Ensembl Identifiers for the protein: \t', ACs)
-                            break
-
+                            sys.exit('Error: Failed to store Ensembl Identifiers for the protein: \t', ACs)
 
                         # Writing to output files
                         primaryAC_line = [primary_AC, TaxID, ENSTs, ENSGs]
@@ -174,6 +169,8 @@ Output File 3 (--outGeneID):      A tab-seperated file (.tsv) with two columns
                                    -> GeneID
                                    -> Corresponding UniProt Primary Accession
 -------------------------------------------------------------------------------------
+
+Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
@@ -189,7 +186,7 @@ Output File 3 (--outGeneID):      A tab-seperated file (.tsv) with two columns
     uniprot_parser(args)
 
 if __name__ == "__main__":
-    # Logging 
+    # Logging
     Log_Format = "%(levelname)s - %(asctime)s - %(message)s \n"
     logging.basicConfig(stream = sys.stderr, format  = Log_Format, level = logging.DEBUG)
     main()
