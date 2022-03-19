@@ -351,7 +351,7 @@ The output (High-quality Human Interactome) consists of five columns in .tsv for
 
 
 if __name__ == "__main__":
-    # Logging to the file
+    # Logging
     Log_Format = "%(levelname)s - %(asctime)s - %(message)s \n"
     logging.basicConfig(stream = sys.stderr, format  = Log_Format, level = logging.DEBUG)
     main()
