@@ -1,19 +1,24 @@
 #!/usr/bin/python
 
+# manojmw
+# 14 Jan, 2022
+
 import re
-import argparse, sys
+import sys, argparse
 import logging
 import time
 
 ###########################################################
 
-# Parses the UniProt Primary Accession file produced by uniprot_parser.py
+# Parses the tab-seperated UniProt Primary Accession
+# file produced by Uniprot_parser.py
+#
 # Required columns are: 'Primary_AC' and 'ENSG' (can be in any order,
 # but they MUST exist)
 #
-# Returns a dictionary
-# Key -> UniProt Primary Accession
-# Value -> TaxID
+# Returns a dictionary:
+# - Key -> UniProt Primary Accession
+# - Value -> TaxID
 def PrimAC(inPrimAC):
 
     # Dictionary to store UniProt Primary Accession
@@ -21,6 +26,8 @@ def PrimAC(inPrimAC):
     UniprotPrimAC_dict = {}
 
     UniprotPrimAC_File = open(inPrimAC)
+
+    logging.info("Processing data from UniProt Primary Accession File: %s" % inPrimAC)
 
     # Grabbing the header line
     UniprotPrimAC_header = UniprotPrimAC_File.readline()
@@ -30,28 +37,27 @@ def PrimAC(inPrimAC):
     UniprotPrimAC_header_fields = UniprotPrimAC_header.split('\t')
 
     # Check the column header and grab indexes of our columns of interest
-    (UniProt_PrimAC_col, TaxID_col) = (-1, -1)
-
-    logging.info("Processing data from UniProt Primary Accession File: %s" % inPrimAC)
+    (UniProt_PrimAC_index, TaxID_index) = (-1, -1)
 
     for i in range(len(UniprotPrimAC_header_fields)):
         if UniprotPrimAC_header_fields[i] == 'Primary_AC':
-            UniProt_PrimAC_col = i
+            UniProt_PrimAC_index = i
         elif UniprotPrimAC_header_fields[i] == 'TaxID':
-            TaxID_col = i
+            TaxID_index = i
 
-    if not UniProt_PrimAC_col >= 0:
-        sys.exit("Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
-    elif not TaxID_col >= 0:
-        sys.exit("Missing required column title 'TaxID' in the file: %s \n" % inPrimAC)
-    # else grabbed the required column indexes -> PROCEED
+    if not UniProt_PrimAC_index >= 0:
+        sys.exit("Error: Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
+    elif not TaxID_index >= 0:
+        sys.exit("Error: Missing required column title 'TaxID' in the file: %s \n" % inPrimAC)
+    # else grabbed the required column indices -> PROCEED
 
+    # Data lines
     for line in UniprotPrimAC_File:
         Primary_AC_fields = line.split('\t')
 
-        # Key -> primary accession
+        # Key -> UniProt primary accession
         # value -> Taxonomy ID
-        UniprotPrimAC_dict[Primary_AC_fields[UniProt_PrimAC_col]] = Primary_AC_fields[TaxID_col]
+        UniprotPrimAC_dict[Primary_AC_fields[UniProt_PrimAC_index]] = Primary_AC_fields[TaxID_index]
 
     # Closing the file
     UniprotPrimAC_File.close()
@@ -60,20 +66,24 @@ def PrimAC(inPrimAC):
 
 ###########################################################
 
-# Parses the UniProt Secondary Accession file produced by uniprot_parser.py
+# Parses the tab-seperated UniProt Secondary Accession
+# file produced by Uniprot_parser.py
+#
 # Required columns are: 'Secondary_ACs' and 'Primary_AC' (can be in any order,
 # but they MUST exist)
 #
-# Returns a dictionary
-# Key -> UniProt Secondary Accession
-# Value -> UniProt Primary Accession
+# Returns a dictionary:
+# - Key -> UniProt Secondary Accession
+# - Value -> Corresponding UniProt Primary Accession
 def SecAC(inSecAC):
 
     # Dictionary to store UniProt Secondary Accession and
-    # corresponding UniProt Primary Accession
+    # UniProt Primary Accession
     UniprotSecAC_dict = {}
 
     UniprotSecAC_File = open(inSecAC)
+
+    logging.info("Processing data from UniProt Secondary Accession File: %s" % inSecAC)
 
     # Grabbing the header line
     UniprotSecAC_header = UniprotSecAC_File.readline()
@@ -83,29 +93,28 @@ def SecAC(inSecAC):
     UniprotSecAC_header_fields = UniprotSecAC_header.split('\t')
 
     # Check the column header and grab indexes of our columns of interest
-    (UniprotSecAC_col, UniprotPrimAC_col) = (-1, -1)
-
-    logging.info("Processing data from UniProt Secondary Accession File: %s" % inSecAC)
+    (UniprotSecAC_index, UniprotPrimAC_index) = (-1, -1)
 
     for i in range(len(UniprotSecAC_header_fields)):
         if UniprotSecAC_header_fields[i] == 'Secondary_ACs':
-            UniprotSecAC_col = i
+            UniprotSecAC_index = i
         elif UniprotSecAC_header_fields[i] == 'Primary_AC':
-            UniprotPrimAC_col = i
+            UniprotPrimAC_index = i
 
-    if not UniprotSecAC_col >= 0:
-        sys.exit("Missing required column title 'Secondary_ACs' in the file: %s \n" % inSecAC)
-    elif not UniprotPrimAC_col >= 0:
-        sys.exit("Missing required column title 'Primary_AC' in the file: %s \n" % inSecAC)
-    # else grabbed the required column indexes -> PROCEED
+    if not UniprotSecAC_index >= 0:
+        sys.exit("Error: Missing required column title 'Secondary_ACs' in the file: %s \n" % inSecAC)
+    elif not UniprotPrimAC_index >= 0:
+        sys.exit("Error: Missing required column title 'Primary_AC' in the file: %s \n" % inSecAC)
+    # else grabbed the required column indices -> PROCEED
 
+    # Data lines
     for line in UniprotSecAC_File:
         line = line.rstrip("\n") # removing carriage returns
         Secondary_AC_fields = line.split('\t')
 
         # Key -> Uniprot Secondary_AC
         # Value -> UniProt Primary_AC
-        (SecAC,PrimAC) = (Secondary_AC_fields[UniprotSecAC_col], Secondary_AC_fields[UniprotPrimAC_col])
+        (SecAC,PrimAC) = (Secondary_AC_fields[UniprotSecAC_index], Secondary_AC_fields[UniprotPrimAC_index])
 
         # If the Secondary_AC is associated with multiple Primary_AC, it is considered a bad Secondary_AC
         # No Uniprot Accession is of the type "-1"
@@ -124,20 +133,23 @@ def SecAC(inSecAC):
 
 ###########################################################
 
-# Parses the GeneID file produced by uniprot_parser.py
+# Parses the tab-seperated GeneID file produced by Uniprot_parser.py
+#
 # Required columns are: 'GeneID' and 'Primary_AC' (can be in any order,
 # but they MUST exist)
 #
-# Returns a dictionary
-# Key -> Gene ID
-# Value -> UniProt Primary Accession
+# Returns a dictionary:
+# - Key -> Gene ID
+# - Value -> Corresponding UniProt Primary Accession
 def GeneID(inGeneID):
 
     # Dictionary to store GeneID and
-    # corresponding UniProt Primary Accession
+    # UniProt Primary Accession
     GeneID_dict = {}
 
     GeneID_File = open(inGeneID)
+
+    logging.info("Processing data from GeneID File: %s" % inGeneID)
 
     # Grabbing the header line
     GeneID_File_header = GeneID_File.readline()
@@ -147,29 +159,29 @@ def GeneID(inGeneID):
     GeneID_File_header_fields = GeneID_File_header.split('\t')
 
     # Check the column header and grab indexes of our columns of interest
-    (GeneID_col, UniprotPrimAC_col) = (-1, -1)
-
-    logging.info("Processing data from GeneID File: %s" % inGeneID)
+    (GeneID_index, UniprotPrimAC_index) = (-1, -1)
 
     for i in range(len(GeneID_File_header_fields)):
         if GeneID_File_header_fields[i] == 'GeneID':
-            GeneID_col = i
+            GeneID_index = i
         elif GeneID_File_header_fields[i] == 'Primary_AC':
-            UniprotPrimAC_col = i
+            UniprotPrimAC_index = i
 
-    if not GeneID_col >= 0:
-        sys.exit("Missing required column title 'GeneID' in the file: %s \n" % inGeneID)
-    elif not UniprotPrimAC_col >= 0:
-        sys.exit("Missing required column title 'Primary_AC' in the file: %s \n" % inGeneID)
-    # else grabbed the required column indexes -> PROCEED
+    if not GeneID_index >= 0:
+        sys.exit("Error: Missing required column title 'GeneID' in the file: %s \n" % inGeneID)
+    elif not UniprotPrimAC_index >= 0:
+        sys.exit("Error: Missing required column title 'Primary_AC' in the file: %s \n" % inGeneID)
+    # else grabbed the required column indices -> PROCEED
 
+    # Data lines
     for line in GeneID_File:
-        line = line.rstrip("\n") ##removing carriage returns
+        # removing carriage returns
+        line = line.rstrip("\n")
         GeneID_fields = line.split('\t')
 
         # Key -> GeneID
         # Value -> Uniprot Primary Accession
-        (GeneID,PrimAC) = (GeneID_fields[GeneID_col], GeneID_fields[UniprotPrimAC_col])
+        (GeneID,PrimAC) = (GeneID_fields[GeneID_index], GeneID_fields[UniprotPrimAC_index])
 
         # If the GeneID is associated with multiple Primary_AC, it is considered a bad GeneID
         # No GeneID is of the type "-1"
@@ -188,13 +200,13 @@ def GeneID(inGeneID):
 
 ###########################################################
 
-# Parses miTAB 2.5 or 2.7 file
-# Process it using the dictionaries returned by above functions
+# Parses a miTAB 2.5 or 2.7 file
+# Maps the data to UniProt using the above dictionaries
 #
 # For each interaction, grabs the UniProt Primary Accession of the interacting Proteins
 # Also grabs Interaction Detection Method, PMID and Interaction type
 # Ignores interactions if:
-# - UniProt Primary Accessions if either of the proteins cannot be found OR
+# - UniProt Primary Accessions of either of the proteins cannot be found OR
 # - if PMID is missing OR
 # - if TaxID of both interacting proteins is not '9606' i.e. human
 #
@@ -207,7 +219,7 @@ def GeneID(inGeneID):
 # - Interaction Type
 def interaction_parser(args):
 
-    # Calling dictionary functions
+    # Calling functions
     UniprotPrimAC_dict = PrimAC(args.inPrimAC)
     UniprotSecAC_dict = SecAC(args.inSecAC)
     GeneID_dict = GeneID(args.inGeneID)
@@ -218,12 +230,19 @@ def interaction_parser(args):
     found_inSecACFile = 0
     found_inGeneIDFile = 0
 
-    PrimAC_inMainCols = 0 # When PrimAC is identified using first 2 columns of the Interaction file
-    PrimAC_inAltCols = 0 # When PrimAC is identified using AltID columns of the Interaction file
-    PrimAC_foundwithGeneID = 0 # When PrimAC is identified using the GeneIDs
-    PrimAC_foundwithSecAC = 0 # When PrimAC is identified using the Secondary_ACs
+    # When PrimAC is identified using first 2 columns of the Interaction file
+    PrimAC_inMainCols = 0
 
-    # Keeping count of the lines where PrimAC of proteins not found
+    # When PrimAC is identified using AltID columns of the Interaction file
+    PrimAC_inAltCols = 0
+
+    # When PrimAC is identified using the GeneIDs
+    PrimAC_foundwithGeneID = 0
+
+    # When PrimAC is identified using the Secondary_ACs
+    PrimAC_foundwithSecAC = 0
+
+    # Keeping count of the lines where UniProt PrimAC of proteins not found
     notfound_Protein_A_PrimAC = 0
     notfound_Protein_B_PrimAC = 0
 
@@ -235,14 +254,18 @@ def interaction_parser(args):
     # uniprot ids for protein
     re_uniprot = re.compile('^uniprot(kb|/swiss-prot):([A-Z0-9-_]+)$')
     re_uniprot_missed = re.compile('^uniprot')
+
     # if uniprot AC not found, using GeneID to get corresponding Primary_AC
     re_GeneID = re.compile('^entrez gene/locuslink:(\d+)$')
     re_GeneID_missed = re.compile('^entrez gene/locuslink:(\d+)$')
+
     # PSI-MI term parser for Interaction Detection Method and Interaction type
     re_psimi = re.compile('^psi-mi:"(MI:\d+)"')
     re_psimi_missed = re.compile('^psi-mi:')
+
     # Pubmed Identifiers
     re_PMID = re.compile('^pubmed:(\d+)$')
+
     # some pubmed identifiers are unassigned in Intact (pubmed:unassigned)
     re_PMID_unassigned = re.compile('^pubmed:unassigned')
     re_PMID_missed = re.compile('^pubmed:')
@@ -257,7 +280,7 @@ def interaction_parser(args):
 
     logging.info("Preparing Output...")
 
-    # Parsing the interaction file
+    # Data lines
     for line in interaction_file:
         line = line.rstrip('\n')
         line_fields = line.split('\t')
@@ -284,7 +307,7 @@ def interaction_parser(args):
                     PrimAC_inMainCols += 1
                     continue
             elif (re_uniprot_missed.match(line_fields[protindex])):
-                sys.exit("ID is a uniprot Accession but failed to grab it for the line:\n" + line)
+                sys.exit("Error: ID is a uniprot Accession but failed to grab it for the line:\n" + line)
             elif (re_GeneID.match(line_fields[protindex])):
                 ID = re_GeneID.match(line_fields[protindex]).group(1)
                 # Check if it exists in the dictionary and isn't bad ie "-1"
@@ -295,7 +318,7 @@ def interaction_parser(args):
                     PrimAC_foundwithGeneID += 1
                     continue
             elif (re_GeneID_missed.match(line_fields[protindex])):
-                sys.exit("ID is a GeneID but failed to grab it for the line:\n" + line)
+                sys.exit("Error: ID is a GeneID but failed to grab it for the line:\n" + line)
 
             # Uniprot AC not found/not primary_AC and GeneID not found,
             # then, look in Alternate ID columns of the interaction_file
@@ -321,7 +344,7 @@ def interaction_parser(args):
                         PrimAC_foundwithSecAC += 1
                         break
                 elif (re_uniprot_missed.match(altID)):
-                    sys.exit("altID "+altID+" is Uniprot Accession but failed to grab it for line:\n" + line)
+                    sys.exit("Error: AltID "+altID+" is Uniprot Accession but failed to grab it for line:\n" + line)
                 elif (re_GeneID.match(altID)):
                     ID = re_GeneID.match(altID).group(1)
                     # Check if it exists in the dictionary and isn't bad ie "-1"
@@ -332,7 +355,7 @@ def interaction_parser(args):
                         PrimAC_foundwithGeneID += 1
                         break
                 elif (re_GeneID_missed.match(altID)):
-                    sys.exit("altID "+altID+" is a GeneID but failed to grab it for line:\n" + line)
+                    sys.exit("Error: AltID "+altID+" is a GeneID but failed to grab it for line:\n" + line)
                 # else: altID not recognized, look at next altID ie NOOP
 
         if Prots[0] == '':
@@ -345,10 +368,14 @@ def interaction_parser(args):
             continue # to next line
 
         # if we get here both partners were found, grab the remaining data
+
+        # Grab Interaction Detection Method
         if re_psimi.match(line_fields[6]):
             IntDetectMethod = re_psimi.match(line_fields[6]).group(1)
         elif re_psimi_missed.match(line_fields[6]):
-            sys.exit("Failed to grab the Interaction Detection Method for line:\n" + line)
+            sys.exit("Error: Failed to grab the Interaction Detection Method for line:\n" + line)
+
+        # Grab Pubmed Identifier
         # Some Publication Identifier fields include additional fields such as MINT
         # Ex: pubmed:10542231|mint:MINT-5211933, so we split at '|'
         PMID_fields = line_fields[8].split('|')
@@ -358,20 +385,24 @@ def interaction_parser(args):
             elif (re_PMID_unassigned.match(PMID_entry)):
                 continue
             elif (re_PMID_missed.match(PMID_entry)):
-                sys.exit("Failed to grab the Pubmed Id for line:\n" + line)
+                sys.exit("Error: Failed to grab the Pubmed Id for line:\n" + line)
+
+        # Grab Interaction type
         if (re_psimi.match(line_fields[11])):
             Interaction_type = re_psimi.match(line_fields[11]).group(1)
         elif (re_psimi_missed.match(line_fields[11])):
-            sys.exit("Failed to grab the Interaction_type for line:\n" + line)
+            sys.exit("Error: Failed to grab the Interaction_type for line:\n" + line)
+
         # If no PMID, skip line
         if (PMID == ''):
             notfound_PMID += 1
             continue
+
         # We want only Human-Human Interaction experiments
         if (UniprotPrimAC_dict[Prots[0]] != '9606') or (UniprotPrimAC_dict[Prots[1]] != '9606'):
             continue
 
-        # Here we grabbed all the necessary data, print to the file and move on to the next line
+        # Here we grabbed all the necessary data, print to STDOUT and move on to the next line
         if Prots[0] < Prots[1]: # Sorting the PrimAC
             interaction_out_line = [Prots[0], Prots[1], IntDetectMethod, PMID, Interaction_type]
         else:
@@ -414,6 +445,8 @@ The output (Human-Human Protein Interaction Experiments) consists of five column
  -> Pubmed Identifier
  -> Interaction type
  -----------------------------------------------------------------------------------------------------
+
+ Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
