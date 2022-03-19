@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# manojmw
+# 04 Dec, 2021
+
 import re
 import argparse
 import logging
@@ -62,8 +65,7 @@ def uniprot_parser(args):
             logging.info("Processing data from UniProt File: %s" % args.inuniprot)
             logging.info("Writing data to output files...")
 
-            # Open and parse the input file
-
+            # Data lines
             for line in open(args.inuniprot):
                 line = line.rstrip('\r\n') # removing trailing new lines and carriage returns
 
@@ -186,7 +188,7 @@ Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     uniprot_parser(args)
 
 if __name__ == "__main__":
-    # Logging
+    # Logging to Standard Error
     Log_Format = "%(levelname)s - %(asctime)s - %(message)s \n"
     logging.basicConfig(stream = sys.stderr, format  = Log_Format, level = logging.DEBUG)
     main()
