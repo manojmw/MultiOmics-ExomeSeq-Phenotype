@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# manojmw
+# 27 Jan, 2022
+
 import sys, argparse
 import re
 import logging
@@ -7,12 +10,20 @@ import time
 
 ###########################################################
 
-# Parses the output files produced by the interaction_parser.py
-# Required columns are: Protein A UniProt PrimAC, Protein B UniProt PrimAC,
-# Interaction Detection Method, Pubmed Identifier and Interaction type
+# Parses the tab-seperated output files
+# produced by the Interaction_parser.py (No headers)
+#
+# Required columns are:
+# - Protein A UniProt PrimAC (column-1)
+# - Protein B UniProt PrimAC (column-2)
+# - Interaction Detection Method (column-3)
+# - Pubmed Identifier (column-4)
+# - Interaction type (column-5)
 #
 # Processes it by filtering based on Interaction Detection Method and Interaction type
 # Final filtering - Each interaction has at least 2 experiments
+# at least one of the experiments proved by any binary interaction method
+#
 # Returns a list with 5 items (in each sublist):
 # - Protein A UniProt PrimAC,
 # - Protein B UniProt PrimAC,
@@ -21,10 +32,15 @@ import time
 # - Experiment_count
 def UniProtInteractome(inCuratedFile):
 
-    PPI_PMID_dict = {} # Dictionary for PPIs
-    PPI_IntDetMethod_dict = {} # Dictionary for experiments and filtering based on IntDetMethod
+    # Dictionary for storing Interacting
+    # Proteins and Pubmed Identifier
+    PPI_PMID_dict = {}
 
-    # List of User input curated interaction files
+    # Dictionary for storing Interacting
+    # Proteins and Interaction Detection Method
+    PPI_IntDetMethod_dict = {}
+
+    # List of User input curated interaction file(s)
     curatedFiles = inCuratedFile
 
     # there can be multiple files
@@ -34,7 +50,7 @@ def UniProtInteractome(inCuratedFile):
 
         curatedIntFile = open(file)
 
-        # Parsing the file
+        # Data lines
         for line in curatedIntFile:
 
             line = line.rstrip('\n')
@@ -64,7 +80,8 @@ def UniProtInteractome(inCuratedFile):
                 # Check if the Key exists in PPI_PMID_dict
                 # If yes, then store the values (PMIDs) as a list
                 if PPI_PMID_dict.get(Int_key, False):
-                    if PMIDs not in PPI_PMID_dict[Int_key]: # Avoiding duplicate PMIDs
+                    # Avoiding duplicate PMIDs
+                    if PMIDs not in PPI_PMID_dict[Int_key]:
                         PPI_PMID_dict[Int_key].append(PMIDs)
                 else:
                     PPI_PMID_dict[Int_key] = [PMIDs]
@@ -118,36 +135,39 @@ def UniProtInteractome(inCuratedFile):
 # but they MUST exist)
 #
 # Returns a dictionary:
-# Key -> ENSG
-# Value -> Gene
+# - Key -> ENSG
+# - Value -> Gene
 def ENSG_Gene(inCanonicalFile):
 
-    ENSG_Gene_dict = {} # Initializing an empty dictionary
+    # Dictionary for storing ENSG
+    # and Gene data
+    ENSG_Gene_dict = {}
 
     Canonical_File = open(inCanonicalFile)
 
-    Canonical_header_line = Canonical_File.readline() # Grabbing the header line
+    logging.info("Processing data from Canonical Transcripts File: %s" % inCanonicalFile)
+
+    # Grabbing the header line
+    Canonical_header_line = Canonical_File.readline()
 
     Canonical_header_fields = Canonical_header_line.split('\t')
 
     # Check the column headers and grab indexes of our columns of interest
-    (ENSG_col, Gene_col) = (-1,-1)
-
-    logging.info("Processing data from Canonical Transcripts File: %s" % inCanonicalFile)
+    (ENSG_index, Gene_index) = (-1,-1)
 
     for i in range(len(Canonical_header_fields)):
         if Canonical_header_fields[i] == 'ENSG':
-            ENSG_col = i
+            ENSG_index = i
         elif Canonical_header_fields[i] == 'GENE':
-            Gene_col = i
+            Gene_index = i
 
-    if not ENSG_col >= 0:
-        sys.exit("Missing required column title 'ENSG' in the file: %s \n" % inCanonicalFile)
-    elif not Gene_col >= 0:
-        sys.exit("Missing required column title 'GENE' in the file: %s \n" % inCanonicalFile)
+    if not ENSG_index >= 0:
+        sys.exit("Error: Missing required column title 'ENSG' in the file: %s \n" % inCanonicalFile)
+    elif not Gene_index >= 0:
+        sys.exit("Error: Missing required column title 'GENE' in the file: %s \n" % inCanonicalFile)
     # else grabbed the required column indexes -> PROCEED
 
-    # Parsing the Uniprot Primary Accession file
+    # Data lines
     for line in Canonical_File:
         line = line.rstrip('\n')
         CanonicalTranscripts_fields = line.split('\t')
@@ -155,7 +175,7 @@ def ENSG_Gene(inCanonicalFile):
         # Key -> ENSG
         # Value -> Gene
 
-        ENSG_Gene_dict[CanonicalTranscripts_fields[ENSG_col]] = CanonicalTranscripts_fields[Gene_col]
+        ENSG_Gene_dict[CanonicalTranscripts_fields[ENSG_index]] = CanonicalTranscripts_fields[Gene_index]
 
     # Closing the file
     Canonical_File.close()
@@ -164,23 +184,29 @@ def ENSG_Gene(inCanonicalFile):
 
 ###########################################################
 
-# Parses the UniProt Primary Accession file produced by uniprot_parser.py
+# Parses the tab-seperated UniProt Primary Accession file
+# produced by Uniprot_parser.py
+#
 # Required columns are: 'Primary_AC' and 'ENSGs' (can be in any order,
 # but they MUST exist)
 #
 # Parses the dictionary ENSG_Gene_dict
 # returned by the function ENSG_Gene
 # Maps UniProt Primary Accession to ENSG
+#
 # Returns a dictionary:
 # - Key: UniProt Primary Accession
 # - Value: Corresponding ENSG
 
 def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 
-    # Initializing the dictionary
+    # Dictionary for storing UniProt Primary
+    # Accession and ENSG data
     Uniprot_ENSG_dict = {}
 
     UniprotPrimAC_File = open(inPrimAC)
+
+    logging.info("Processing data from Uniprot Primary Accession File: %s" % inPrimAC)
 
     # Grabbing the header line
     UniprotPrimAC_header = UniprotPrimAC_File.readline()
@@ -190,28 +216,26 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
     UniprotPrimAC_header_fields = UniprotPrimAC_header.split('\t')
 
     # Check the column header and grab indexes of our columns of interest
-    (UniProt_PrimAC_col, ENSG_col) = (-1, -1)
-
-    logging.info("Processing data from Uniprot Primary Accession File: %s" % inPrimAC)
+    (UniProt_PrimAC_index, ENSG_index) = (-1, -1)
 
     for i in range(len(UniprotPrimAC_header_fields)):
         if UniprotPrimAC_header_fields[i] == 'Primary_AC':
-            UniProt_PrimAC_col = i
+            UniProt_PrimAC_index = i
         elif UniprotPrimAC_header_fields[i] == 'ENSGs':
-            ENSG_col = i
+            ENSG_index = i
 
-    if not UniProt_PrimAC_col >= 0:
-        sys.exit("Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
-    elif not ENSG_col >= 0:
-        sys.exit("Missing required column title 'ENSG' in the file: %s \n" % inPrimAC)
-    # else grabbed the required column indexes -> PROCEED
+    if not UniProt_PrimAC_index >= 0:
+        sys.exit("Error: Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
+    elif not ENSG_index >= 0:
+        sys.exit("Error: Missing required column title 'ENSG' in the file: %s \n" % inPrimAC)
+    # else grabbed the required column indices -> PROCEED
 
     # Compiling regular expressions###
 
     # Eliminating Mouse ENSGs
     re_ENSMUST = re.compile('^ENSMUSG')
 
-    #Counter for Human Uniprot Primary Accession
+    #Counter for Human Uniprot Primary Accessions
     Count_HumanUniprotPrimAC = 0
 
     # Counter for canonical ENSGs
@@ -226,17 +250,21 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
     # Counter for accessions with multiple canonical human ENSGs
     multiple_CanonicalHumanENSG = 0
 
-    # Parsing the Uniprot Primary Accession file
+    # Data lines
     for line in UniprotPrimAC_File:
         line = line.rstrip('\n')
         UniprotPrimAC_fields = line.split('\t')
 
         # ENSG column  - This is a single string containing comma-seperated ENSGs
         # So we split it into a list that can be accessed later
-        UniProt_ENSGs = UniprotPrimAC_fields[ENSG_col].split(',')
+        UniProt_ENSGs = UniprotPrimAC_fields[ENSG_index].split(',')
 
-        # Initializing empty lists
+        # List for storing Human ENSG(s)
+        # for a given accession
         human_ENSGs = []
+
+        # List to store Human ENSG(s)
+        # found in the canonical transcripts file
         canonical_human_ENSGs = []
 
         # Eliminating Mouse ENSGs
@@ -260,8 +288,9 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
         if len(canonical_human_ENSGs) == 0:
             no_CanonicalHumanENSG += 1
         elif len(canonical_human_ENSGs) == 1:
-            Uniprot_ENSG_dict[UniprotPrimAC_fields[UniProt_PrimAC_col]] = ''.join(canonical_human_ENSGs)
+            Uniprot_ENSG_dict[UniprotPrimAC_fields[UniProt_PrimAC_index]] = ''.join(canonical_human_ENSGs)
             single_CanonicalHumanENSG += 1
+        # Also counting accessions with multiple ENSGs
         elif len(canonical_human_ENSGs) > 1:
             multiple_CanonicalHumanENSG += 1
 
@@ -279,17 +308,17 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 
 ###########################################################
 
-# Parses the list - [Interactome_list] returned by the function: UniProtInteractome and
-# the dictionary - {Uniprot_ENSG_dict} returned by the function: Uniprot_ENSG
+# Parses the list - [Uniprot_Interactome_list]
+# returned by the function: UniProtInteractome
+# Also parses the dictionary - {Uniprot_ENSG_dict} returned by the function: Uniprot_ENSG
+# and {ENSG_Gene_dict} returned by the function: ENSG_Gene
 #
-# Maps the UniProt Primary Accessions to ENSG using the dictionary: {ENSG_Gene_dict}
+# Maps the UniProt Primary Accessions to ENSG
+#
 # Prints to STDOUT in .tsv format
-# Output consists of 5 columns:
+# Output consists of 2 columns:
 # - ENSG of Protein A
 # - ENSG of Protein B
-# - Number of Publications associated with the interaction of the above 2 proteins
-# - PMID (or a comma seperated list of PMIDs)
-# - Count of Experiments for each interaction
 def Interactome_Uniprot2ENSG(args):
 
     # Calling the functions
@@ -305,7 +334,7 @@ def Interactome_Uniprot2ENSG(args):
     for data in Uniprot_Interactome_list:
 
         if data[0] in Uniprot_ENSG_dict.keys() and data[1] in Uniprot_ENSG_dict.keys():
-            ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[0]), Uniprot_ENSG_dict.get(data[1]), data[2], data[3], data[4])
+            ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[0]), Uniprot_ENSG_dict.get(data[1]))
             print('\t'.join(ENSG_Interactome_out))
         else:
             lost_Interaction += 1
@@ -322,19 +351,17 @@ def Interactome_Uniprot2ENSG(args):
 def main():
     file_parser = argparse.ArgumentParser(description =
     """
--------------------------------------------------------------------------------------------------------------
-Program: Parses the output file(s) produced by the interaction_parser.py to produce a high-quality interactome,
-         maps the UniProt Primary Accession of interacting proteins to ENSG in the Canonical transcripts file
-         and prints to STDOUT
--------------------------------------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------------------------
+Program: Parses the output file(s) produced by the interaction_parser.py to produce a high-quality
+         interactome, maps the UniProt Primary Accession of interacting proteins to ENSG using the
+         Canonical transcripts file and prints to STDOUT
+--------------------------------------------------------------------------------------------------
 The output (High-quality Human Interactome) consists of five columns in .tsv format:
   -> ENSG of Protein A
   -> ENSG of Protein B
-  -> Number of Publications associated with the interaction of the above 2 proteins
-  -> PMID (or a comma seperated list of PMIDs)
-  -> Count of Experiments for each interaction
---------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
+
+Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
@@ -351,7 +378,7 @@ The output (High-quality Human Interactome) consists of five columns in .tsv for
 
 
 if __name__ == "__main__":
-    # Logging
+    # Logging to Standard Error
     Log_Format = "%(levelname)s - %(asctime)s - %(message)s \n"
     logging.basicConfig(stream = sys.stderr, format  = Log_Format, level = logging.DEBUG)
     main()
