@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# manojmw
+# 17 Feb, 2022
+
 import argparse, sys
 import pandas as pd
 import scipy.stats as stats
@@ -7,13 +10,15 @@ import re
 import logging
 import time
 
+###########################################################
+
 # Parses tab-seperated canonical transcripts file
 # Required columns are: 'ENSG' and 'GENE' (can be in any order,
 # but they MUST exist)
 #
 # Returns a dictionary:
-# Key -> ENSG
-# Value -> Gene
+# - Key -> ENSG
+# - Value -> Gene
 def ENSG_Gene(inCanonicalFile):
 
     # Dictionary to store ENSG & Gene data
@@ -21,14 +26,14 @@ def ENSG_Gene(inCanonicalFile):
 
     Canonical_File = open(inCanonicalFile)
 
+    logging.info("Processing data from Canonical Transcripts File: %s" % inCanonicalFile)
+
     Canonical_header_line = Canonical_File.readline() # Grabbing the header line
 
     Canonical_header_fields = Canonical_header_line.split('\t')
 
     # Check the column headers and grab indexes of our columns of interest
-    (ENSG_col, Gene_col) = (-1,-1)
-
-    logging.info("Processing data from Canonical Transcripts File: %s" % inCanonicalFile)
+    (ENSG_index, Gene_index) = (-1,-1)
 
     for i in range(len(Canonical_header_fields)):
         if Canonical_header_fields[i] == 'ENSG':
@@ -36,13 +41,13 @@ def ENSG_Gene(inCanonicalFile):
         elif Canonical_header_fields[i] == 'GENE':
             Gene_col = i
 
-    if not ENSG_col >= 0:
+    if not ENSG_index >= 0:
         sys.exit("Missing required column title 'ENSG' in the file: %s \n" % inCanonicalFile)
-    elif not Gene_col >= 0:
+    elif not Gene_index >= 0:
         sys.exit("Missing required column title 'GENE' in the file: %s \n" % inCanonicalFile)
     # else grabbed the required column indexes -> PROCEED
 
-    # Parsing the Uniprot Primary Accession file
+    # Data lines
     for line in Canonical_File:
         line = line.rstrip('\n')
         CanonicalTranscripts_fields = line.split('\t')
@@ -50,7 +55,7 @@ def ENSG_Gene(inCanonicalFile):
         # Key -> ENSG
         # Value -> Gene
 
-        ENSG_Gene_dict[CanonicalTranscripts_fields[ENSG_col]] = CanonicalTranscripts_fields[Gene_col]
+        ENSG_Gene_dict[CanonicalTranscripts_fields[ENSG_index]] = CanonicalTranscripts_fields[Gene_index]
 
     # Closing the file
     Canonical_File.close()
@@ -64,7 +69,9 @@ def ENSG_Gene(inCanonicalFile):
 # 'Confidence score' (can be in any order,
 # but they MUST exist)
 #
-# Returns a list with 3 items (in each sublist:
+# Returns a list with sublist(s)
+# One sublist per candidate gene
+# Each sublist contains:
 # - Gene
 # - pathologyID
 # - Confidence score)
@@ -76,29 +83,34 @@ def CandidateGeneParser(inCandidateFile):
     # Initializing an empty data frame to store the data from all files
     meta_data = pd.DataFrame()
 
+    # Data lines
     # Iterating over the list of files and appending to the DataFrame (meta_data)
     for file in candidate_files:
         logging.info("Processing data from Candidate Gene File: %s" % file)
         data = pd.read_excel(file)
         meta_data = pd.concat([meta_data, data])
 
-    # Extract Gene, pathologyID and Confidence score and drop rows with missing values
+    # Extract Gene, pathologyID and Confidence score and drop rows with missing values(na)
     CandidateGene_data = pd.DataFrame(meta_data, columns=['Gene', 'pathologyID', 'Confidence score']).dropna()
 
     return CandidateGene_data.values.tolist()
 
 ###########################################################
 
-# Parses the dictionary (ENSG_Gene_dict) returned
-# by the function: ENSG_Gene and the list (CandidateGene_data)
+# Parses the dictionary {ENSG_Gene_dict} returned
+# by the function: ENSG_Gene
+# Also parses the list [CandidateGene_data]
 # returned by the function: CandidateGeneParser
 #
-# Maps Gene name to ENSG
+# Maps Candidate Gene names to ENSG
+#
 # Returns 2 lists:
-# Each sublist of first list contains:
-# - ENSG
+# The first list contains sublists
+# One sublist per candidate ENSG
+# - ENSG identifier of candidate gene
 # - pathologyID
 # - Confidence score
+#
 # The second list contains all the pathologies/Phenotypes
 def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
 
@@ -110,12 +122,13 @@ def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
 
     logging.info("Mapping Candidate Genes to ENSG and identifying Pathologies/Phenotypes")
 
+    # Data
     for data in CandidateGene_data:
         # data[0] -> Candidate Gene
         # data[1] -> pathologyID
         # data[2] -> Confidence Score
-        # ENSG_Gene_dict: Key -> ENSG; Value -> Gene
 
+        # ENSG_Gene_dict: Key -> ENSG; Value -> Gene
         for ENSG in ENSG_Gene_dict.keys():
             # Check if candidate gene is present in ENSG_Gene_dict
             if data[0] == ENSG_Gene_dict[ENSG]:
@@ -131,9 +144,11 @@ def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
 ###########################################################
 
 # Parses the candidateENSG_out_list & pathologies_list
+#
 # Counts the total number of candidate genes
 # associated with each pathology
-# Returns a list with the total count (for each pathology)
+#
+# Returns a list with the total count candidate genes (for each pathology)
 def CountCandidateGenes(candidateENSG_out_list, pathologies_list):
 
     # List for counting total candidate genes
@@ -142,6 +157,7 @@ def CountCandidateGenes(candidateENSG_out_list, pathologies_list):
 
     logging.info("Counting the Candidate Gene(s) associated with each pathology")
 
+    # Data
     for candidateGenedata in candidateENSG_out_list:
         for i in range(len(pathologies_list)):
             if candidateGenedata[1] == pathologies_list[i]:
@@ -152,19 +168,25 @@ def CountCandidateGenes(candidateENSG_out_list, pathologies_list):
 ###########################################################
 
 # Parses the High-quality Interactome produced by Interactome.py
+#
 # Required columns:
 # First column - ENSG of Protein A
 # Second column - ENSG of Protein B
 #
 # Returns 2 lists:
-# First list contains 2 items (in each sub list):
+# First list contains sublists
+# One sublist per interaction
+# Each sublist contains:
 # - ENSG of Protein A
 # - ENSG of Protein B
+#
 # Second list contains all the interacting proteins from the interactome
 def Interacting_Proteins(inInteractome):
 
     # Input - Interactome file
     Interactome_File = open(inInteractome)
+
+    logging.info("Processing data from Interactome File: %s" % inInteractome)
 
     # Dictionary to Interacting proteins
     # from the Interactome
@@ -176,8 +198,7 @@ def Interacting_Proteins(inInteractome):
     # List of all interactors from the Interactome
     All_Interactors_list = []
 
-    logging.info("Processing data from Interactome File: %s" % inInteractome)
-
+    # Data lines
     for line in Interactome_File:
         line = line.rstrip('\n')
 
@@ -204,15 +225,17 @@ def Interacting_Proteins(inInteractome):
 
 ###########################################################
 
-# Parses the UniProt Primary Accession file produced by uniprot_parser.py
+# Parses the UniProt Primary Accession file produced by Uniprot_parser.py
 # Required columns are: 'Primary_AC' and 'ENSGs' (can be in any order,
 # but they MUST exist)
 #
-# Parses the dictionary ENSG_Gene_dict
+# Also parses the dictionary ENSG_Gene_dict
 # returned by the function ENSG_Gene
+#
 # Maps UniProt Primary Accession to ENSG
-# Returns the count of proteins with unique ENSGs
-# Count corresponds to total genes
+# Returns the count of UniProt accessions with unique ENSGs
+#
+# Count corresponds to total human genes
 # This count is later used for calculating
 # Benjamini-Hochberg adjusted P-values
 def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
@@ -222,6 +245,8 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 
     UniprotPrimAC_File = open(inPrimAC)
 
+    logging.info("Processing data from UniProt Primary Accession File: %s" % inPrimAC)
+
     # Grabbing the header line
     UniprotPrimAC_header = UniprotPrimAC_File.readline()
 
@@ -230,20 +255,18 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
     UniprotPrimAC_header_fields = UniprotPrimAC_header.split('\t')
 
     # Check the column header and grab indexes of our columns of interest
-    (UniProt_PrimAC_col, ENSG_col) = (-1, -1)
-
-    logging.info("Processing data from UniProt Primary Accession File: %s" % inPrimAC)
+    (UniProt_PrimAC_index, ENSG_index) = (-1, -1)
 
     for i in range(len(UniprotPrimAC_header_fields)):
         if UniprotPrimAC_header_fields[i] == 'Primary_AC':
-            UniProt_PrimAC_col = i
+            UniProt_PrimAC_index = i
         elif UniprotPrimAC_header_fields[i] == 'ENSGs':
-            ENSG_col = i
+            ENSG_index = i
 
-    if not UniProt_PrimAC_col >= 0:
-        sys.exit("Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
-    elif not ENSG_col >= 0:
-        sys.exit("Missing required column title 'ENSG' in the file: %s \n" % inPrimAC)
+    if not UniProt_PrimAC_index >= 0:
+        sys.exit("Error: Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
+    elif not ENSG_index >= 0:
+        sys.exit("Error: Missing required column title 'ENSG' in the file: %s \n" % inPrimAC)
     # else grabbed the required column indexes -> PROCEED
 
     # Compiling regular expression
@@ -256,14 +279,14 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 
     logging.info("Counting human ENSGs")
 
-    # Parsing the Uniprot Primary Accession file
+    # Data lines
     for line in UniprotPrimAC_File:
         line = line.rstrip('\n')
         UniprotPrimAC_fields = line.split('\t')
 
         # ENSG column  - This is a single string containing comma-seperated ENSGs
         # So we split it into a list that can be accessed later
-        UniProt_ENSGs = UniprotPrimAC_fields[ENSG_col].split(',')
+        UniProt_ENSGs = UniprotPrimAC_fields[ENSG_index].split(',')
 
         # Initializing empty lists
         human_ENSGs = []
@@ -316,7 +339,7 @@ def Interactors_PValue(args):
     # Each Sublist contains:
     # - Gene name
     # - Total number of Interactors
-    # - Known Interactors count, list of Known Interactors, P-value and 0 for each pathology
+    # - Known Interactors count, list of Known Interactors, P-value and 0 (for each pathology)
     # 0 will later be replaced by Benjamini-Hochberg corrected P-value
     Gene_AllPatho_Pvalue = [[] for i in range(len(All_Interactors_list))]
 
@@ -335,12 +358,12 @@ def Interactors_PValue(args):
         Interactors = []
 
         for Proteins in Interactome_list:
-            # If Protein_A is the first protein
+            # If Protein is the first protein
             if (All_Interactors_list[ENSG_index] == Proteins[0]):
                 # Get the interacting protein
                 if not Proteins[1] in Interactors:
                     Interactors.append(Proteins[1])
-            # If Protein_A is the Second protein
+            # If Protein is the Second protein
             elif (All_Interactors_list[ENSG_index] == Proteins[1]):
                 if not Proteins[0] in Interactors:
                     # Get the interacting protein
@@ -398,32 +421,31 @@ def Interactors_PValue(args):
     # Sorting the p-values for each pathology
     for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
 
-        # # Storing the data in a variable
-        # # This allows us to check if P-value is 1 (later0
-        # Gene_AllPathoIndex_data = Gene_AllPatho_Pvalue[Gene_AllPathoIndex]
-
         # Calculating Benjamini-Hochberg corrected p-value for each pathology
         for i in range(len(pathologies_list)):
 
             # Getting the index of P-values
             # Each sublist of Gene_AllPatho_Pvalue contains:
-            # - Gene
+            # - Gene (ENSG)
             # - Total number of Interactors
-            # - Known_Interactors,
             # - Known Interactors count, list of Known Interactors, P-value and 0 for each pathology
             # According to this structure of the sublist, every
-            # 5th index in the sublist is a P-value
-            # Since list indexing starts from 0
+            # 5th index in the sublist is a P-value (for each pathology)
+            # Since list indexing starts from 0 in python
             # we use the below equation
             Pvalue_Index = i*4 + 4
 
             # Sorting based on P-value for each pathology
             Gene_AllPatho_Pvalue.sort(key = lambda x:x[Pvalue_Index])
 
+            a = Gene_AllPatho_Pvalue[]
+
             # Rank of p-value -> Gene_AllPathoIndex+1
             # (+1 because list index starts from 0)
+            #
             # p-value -> Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index]
             # Total number of tests -> Patho_TestCount[i]
+            #
             # Benjamini Hochberg corrected p-value = p-value*Total number of tests/Rank of p-value
 
             # If P-value is 1, we do not compute
@@ -435,8 +457,8 @@ def Interactors_PValue(args):
             else:
                 BH_p_value = 1
 
-            # Adding Benjamini Hochberg corrected p-value to the sublist
-            # Next to the P-value
+            # Replacing 0 with Benjamini Hochberg corrected p-value
+            # for each pathology
             Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index+1] = BH_p_value
 
     # Printing header
