@@ -37,9 +37,9 @@ def ENSG_Gene(inCanonicalFile):
 
     for i in range(len(Canonical_header_fields)):
         if Canonical_header_fields[i] == 'ENSG':
-            ENSG_col = i
+            ENSG_index = i
         elif Canonical_header_fields[i] == 'GENE':
-            Gene_col = i
+            Gene_index = i
 
     if not ENSG_index >= 0:
         sys.exit("Missing required column title 'ENSG' in the file: %s \n" % inCanonicalFile)
@@ -437,8 +437,6 @@ def Interactors_PValue(args):
 
             # Sorting based on P-value for each pathology
             Gene_AllPatho_Pvalue.sort(key = lambda x:x[Pvalue_Index])
-
-            a = Gene_AllPatho_Pvalue[]
 
             # Rank of p-value -> Gene_AllPathoIndex+1
             # (+1 because list index starts from 0)
