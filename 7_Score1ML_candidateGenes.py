@@ -486,6 +486,8 @@ The output consists of following data for each line :
  -> Total Number of Interactors
  -> Known Interactors, list of Known Interactors, P-value & Benjamini-Hochberg Corrected P-value for each Pathology
 -----------------------------------------------------------------------------------------------------------------------
+
+Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     """,
     formatter_class = argparse.RawDescriptionHelpFormatter)
 
