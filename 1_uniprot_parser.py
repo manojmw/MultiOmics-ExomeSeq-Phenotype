@@ -62,11 +62,12 @@ def uniprot_parser(args):
             # GeneIDs from the DR line
             re_GID = re.compile('^DR\s+GeneID;\s+(\d+);')
 
-            logging.info("Processing data from UniProt File: %s" % args.inuniprot)
+            logging.info("Processing data from UniProt File")
+
             logging.info("Writing data to output files...")
 
             # Data lines
-            for line in open(args.inuniprot):
+            for line in sys.stdin:
                 line = line.rstrip('\r\n') # removing trailing new lines and carriage returns
 
                 # Matching and retrieving the records
@@ -154,9 +155,9 @@ def main():
 
     file_parser = argparse.ArgumentParser(description =
     """
--------------------------------------------------------------------------------------
-Program: Parses a uniprot file, processes it and produces the following output files:
--------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+Program: Parses a uniprot file (STDIN), processes it and produces the following output files:
+---------------------------------------------------------------------------------------------
 Output File 1 (--outPrimaryAC):   A tab-seperated file (.tsv) with four columns
                                    -> UniProt Primary Accession
                                    -> Taxonomy Identifier
@@ -170,7 +171,7 @@ Output File 2 (--outSecondaryAC): A tab-seperated file (.tsv) with two columns
 Output File 3 (--outGeneID):      A tab-seperated file (.tsv) with two columns
                                    -> GeneID
                                    -> Corresponding UniProt Primary Accession
--------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
 
 Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     """,
@@ -179,7 +180,6 @@ Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     required = file_parser.add_argument_group('Required arguments')
     optional = file_parser.add_argument_group('Optional arguments')
 
-    required.add_argument('--inUniprot',  metavar = "Input File", dest = "inuniprot", help = 'Input File Name (Uniprot File)', required = True)
     required.add_argument('--outPrimAC',  metavar = "Output File", dest = "outPrimAC", help = 'Primary Accession File with ENSTs, ENSGs & TaxID', required = True)
     required.add_argument('--outSecAC', metavar = "Output File", dest = "outSecAC", help = 'Secondary Accession File', required = True)
     required.add_argument('--outGeneID', metavar = "Output File", dest = "outGeneID", help = 'GeneID File', required = True)
