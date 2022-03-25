@@ -21,14 +21,21 @@ This is the main repository containing all the scripts for the project: MultiOmi
 
 <a name="uniprotparser"></a>**UniProt Parser**
 
-```console
-python 1_uniprot_parser.py --inUniprot uniprot_sprot.dat --outPrimAC uniprot_main.tsv --outSecAC uniprot_secondary.tsv --outGeneID geneID.tsv
-```    
+- Parses a UniProt file and extracts the required data from each record
+- Populates the OUTPUT files with processed data
 </br>
 
-- This will basically parse a UniProt file (Ex: uniprot_sprot.dat)
-- Extracts the required data from each record
-- Populates the output files with the processed data.
+-> Grab the latest UniProt data with:
+
+```console
+  wget https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz
+```
+</br>
+-> Parse UniProt data to produce output files with:
+
+```console
+gunzip -c uniprot_sprot.dat.gz | python3 1_Uniprot_parser.py --outPrimAC uniprot_main.tsv --outSecAC uniprot_secondary.tsv ---outGeneID geneID.tsv
+```    
 
 </br>
 
@@ -123,12 +130,10 @@ python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFil
 
 ```shell
 # UniProt Files
-   --inUniprot                          UniProt Input File name
-   --outPrimAC                          UniProt Primary Accession Output File name
-   --outSecAC                           UniProt Secondary Accession Output File name
-   --outGeneID                          UniProt GeneID Output File name
-                                       (same files can be input for some scripts Ex: --inPrimAC, --inSecAC, --inGeneID)
-                                     
+   --outPrimAC                          A tab-seperated UniProt Primary Accession Output File name containing UniProt Primary Accession, Taxonomy Identifier, ENST(s) & ENSG(s)
+   --outSecAC                           A tab-seperated UniProt Secondary Accession Output File name containing UniProt Secondary Accession & Corresponding UniProt Primary Accession
+   --outGeneID                          A tab-seperated GeneID Output File name (.tsv) containing GeneID & Corresponding UniProt Primary Accession
+
 # Protein-Protein Interaction File(s)                                     
    --inInteraction                      miTAB 2.5 or 2.7 Input File name (Protein-Protein Interaction File)
    --inCuratedFile                      Curated Output File name(s) (produced by 2_interaction_parser.py)
