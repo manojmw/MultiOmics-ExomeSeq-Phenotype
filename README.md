@@ -7,12 +7,11 @@ This is the main repository containing all the scripts for the project: MultiOmi
    - [UniProt Parser](#uniprotparser)
    - [Protein-Protein Interaction Parser](#ppiparser)
    - [PPI Experiment Count](#ppiexpcount)
-   - [Interactome generator](#interactome)
+   - [Build Interactome](#interactome)
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
    - [Machine Learning ScoreComponent-1](#MLScoreComp1)
 - [Arguments](#Arguments)
-- [Output Details](#Output-Details)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
 - [License](#license)
@@ -28,9 +27,9 @@ This is the main repository containing all the scripts for the project: MultiOmi
 -> Grab the latest UniProt data with:
 
 ```console
-  wget https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz
+wget https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz
 ```
-</br>
+
 -> Parse UniProt data to produce output files with:
 
 ```console
@@ -41,88 +40,101 @@ gunzip -c uniprot_sprot.dat.gz | python3 1_Uniprot_parser.py --outPrimAC uniprot
 
 <a name="ppiparser"></a>**Protein-Protein Interaction Parser**
 
-```console
-python 2_interaction_parser.py --inInteraction intact.txt --inPrimAC uniprot_main.tsv --inSecAC uniprot_secondary.tsv --inGeneID geneID.tsv
-```  
+- Parses a Protein-Protein Interaction (PPI) File (miTAB 2.5 or 2.7)
+- Maps to UniProt using the output files produced by `1_Uniprot_parser.py` and prints to STDOUT in .tsv format
 </br>
 
-- Parses a miTAB 2.5 or 2.7 file (Ex: intact.txt)
-- Maps the data of each protein-protein interaction experiment to the output files produced by `1_uniprot_parser.py`
-- Extracts the UniProt accessions of the interacting proteins as well as other associated data
-- Prints to STDOUT in tab-separated format
+-> Grab the latest PPI data (Ex: BioGRID) with:
+```console
+wget https://downloads.thebiogrid.org/Download/BioGRID/Latest-Release/BIOGRID-ORGANISM-LATEST.mitab.zip
+```  
+-> Unzip with:
+```console
+unzip BIOGRID-ORGANISM-LATEST.mitab
+```
+-> This will produce one miTAB file per Organism (Use BIOGRID-ORGANISM-Homo_sapiens*.mitab.txt for human data)
+-> Parse PPI data with:
+```console
+python3 2_Interaction_parser.py --inInteraction BIOGRID-ORGANISM-Homo_sapiens-4.4.207.mitab.txt --inPrimAC uniprot_main.tsv --inSecAC uniprot_secondary.tsv --inGeneID geneID.tsv > Exp_Biogrid.tsv
+```
 
 </br>
 
 <a name="ppiexpcount"></a>**PPI Experiment Count**
 
-```console
-python 3_check_HumanPPIExp.py < intact.txt
-```                      
-
-</br>
-
-- Parses a miTAB 2.5 or 2.7 file (Ex: intact.txt)
+- Parses a Protein-Protein Interaction File (miTAB 2.5 or 2.7)
 - Prints the count of Human-Human Protein Interaction experiments to STDOUT
-
 </br>
 
-<a name="interactome"></a>**Interactome generator**
-
+-> Provide a STDIN miTAB 2.5 or 2.7 file with:
 ```console
-python 4_Interactome.py --inCuratedFile curatedPPI_BioGRID.tsv curatedPPI_Intact.tsv --inPrimAC uniprot_main.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
-```                      
+python3 3_Count_HumanPPIExp.py < BIOGRID-ORGANISM-Homo_sapiens-4.4.207.mitab.txt
+```                   
 
 </br>
 
-- Parses the UniProt Primary Accession file (Ex: uniprot_main.tsv), canonical transcripts file (Ex: canonicalTranscripts_220221.tsv) & the output files (Ex: curatedPPI_BioGRID.tsv and curatedPPI_Intact.tsv) produced by `2_interaction_parser.py`
-- Builds a high-quality human interactome
-- Further, maps the UniProt accessions to ENSG using the `canonical transcripts file` and prints to STDOUT
-- To produce the `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
-</br></br>
-**Note:** We consider only true binary interactions, and eliminate most of the complex expansion data while building the Interactome.
+<a name="interactome"></a>**Build Interactome**
 
+- High-Quality Interactome Criteria:
+
+  1] Filtering Interactions based on Interaction Detection Method:
+    * We filter out pull down (MI:0096), genetic interference (MI:0254) & unspecified method (MI:0686)
+
+  2] Filtering Interactions based on Interaction Type:
+    * We keep only direct interaction (MI:0407) & physical association (MI:0915)
+
+  3] We try to eliminate most of the SPOKE EXPANSION DATA, and consider only TRUE BINARY INTERACTIONS
+
+  4] Each Interaction has ≥ 2 experiments, of which at least one of them should be proved by any BINARY METHOD
+
+</br>
+
+-> Build High-Quality Human Interactome with:      
+```console
+python3 4_BuildInteractome.py --inExpFile Exp_Biogrid.tsv --inPrimAC uniprot_main.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human.tsv
+```                      
+-> For getting `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
 </br>
 
 <a name="modulefile"></a>**Module Input File Generator**
 
-```console
-python 5_ModuleInputFile.py < Interactome_human.tsv
-```                      
-
-</br>
-
-- Parses the output (Ex: Interactome_human.tsv) produced by `4_Interactome.py`
-- Assigns a weight to each interaction and prints to STDOUT in .tsv format.
+- Parses the output produced by `4_BuildInteractome.py`
+- Assigns a weight to each interaction and prints to STDOUT in .tsv format
 - This can be used as INPUT for most of the module identification/clustering methods
 
+</br>
+-> Generate Module Input File with:
+```console
+python3 5_ModuleInputFile.py < Interactome_human.tsv
+```                      
 </br>
 
 <a name="uniprotensgmapper"></a>**UniProt2ENSG Mapper**
 
-```console
-python 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
-```                      
+- Parses the output files produced by `1_Uniprot_parser.py` and the `canonical transcripts file` (Ex: canonicalTranscripts_220221.tsv)
+- Maps UniProt accession to ENSG and prints to STDOUT
 
 </br>
-
-- Parses the output files produced by `1_uniprot_parser.py` and the `canonical transcripts file` (Ex: canonicalTranscripts_220221.tsv)
-- Maps UniProt accession to ENSG and prints to STDOUT
+-> Run UniProt2ENSG Mapper with:
+```console
+python3 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
+```                      
 
 </br>
 
 <a name="MLScoreComp1"></a>**Machine Learning ScoreComponent-1**
-
-```console
-python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFile candidateGenes.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human.tsv
-```                      
-
-</br>
-
-- Parses the UniProt Primary Accession file (Ex:uniprot_main.tsv), canonical transcripts file (Ex: canonicalTranscripts_220221.tsv), Candidate Genes file (Ex: candidateGenes.xlsx) & Interactome file generated by `Interactome.py`
+- Parses the UniProt Primary Accession file (Ex:uniprot_main.tsv), canonical transcripts file (Ex: canonicalTranscripts_220221.tsv), Candidate Genes file (Ex: candidateGenes.xlsx) & Interactome file generated by `4_BuildInteractome.py`
 - Checks the number of Interactors for each gene
 - Checks the number of Interactors that are known candidate genes and calculates P-values
 - Further, computes Benjamini-Hochberg adjusted P-value and prints to STDOUT in .tsv format
-- This script provides the first scoring component for the Machine Learning Step
+- This script provides the first scoring component for the Machine Learning step
+</br>
+
+```console
+python3 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFile candidateGenes.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human.tsv
+```                      
+
+</br>
 
 ## Arguments
 
@@ -136,24 +148,25 @@ python 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFil
 
 # Protein-Protein Interaction File(s)                                     
    --inInteraction                      miTAB 2.5 or 2.7 Input File name (Protein-Protein Interaction File)
-   --inCuratedFile                      Curated Output File name(s) (produced by 2_interaction_parser.py)
+   --inPrimAC                           Uniprot Primary Accession Input File name produced by 1_Uniprot_parser.py
+   --inSecAC                            Uniprot Secondary Accession Input File name produced by 1_Uniprot_parser.py
+   --inGeneID                           GeneID Input File name produced by 1_Uniprot_parser.py
+
+# Interactome File(s)   
+   --inExpFile                          PPI Experiments Input File name (produced by 2_Interaction_parser.py)
 
 # Canonical Transcripts File
-   --inCanonicalFile                    Canonical Transcripts Input File name
+   --inCanonicalFile                    Canonical Transcripts Input File name (.gz or non .gz)
 
 # Candidate Gene File(s)
    --inCandidateFile                    Candidate Gene Input Files(s) name (.xlsx)
 
 # Interactome File
-   --inInteractome                      High-Quality Interactome Input File name (produced by 4_Interactome.py)
+   --inInteractome                      High-Quality Interactome Input File name (produced by 4_BuildInteractome.py)
 
 # Help
    -h, --help                           Show the help message and exit
 ```
-
-## Output Details
-
-- For detailed description on the output generated, please use the help option with the scripts - `python script.py --help` OR `python script.py -h`
 
 
 ## Metadata files
