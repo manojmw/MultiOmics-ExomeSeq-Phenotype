@@ -1,6 +1,6 @@
 ## Introduction
 
-This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype. Here, I am developing a Multi-Omics method that scores genomic variants responsible for a particular phenotype in the patient (**Note: The project is still in progress and I will add more scripts, such as those that provide scoring component for the Machine Learning step**). At a later stage, I will try to combine all the individual scripts into a single pipeline.
+This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype. Here, I am developing a Multi-Omics method that scores genomic variants might be responsible for a particular phenotype in the patient (**Note: The project is still in progress and I will add more scripts, such as those that provide scoring component for the Machine Learning step**). At a later stage, I will try to combine all the individual scripts into a single pipeline.
 </br>
 
 - [Example Usage](#example-usage-and-details-of-the-scripts)
