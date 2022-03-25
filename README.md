@@ -128,8 +128,6 @@ python3 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonica
 python3 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFile candidateGenes.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human.tsv
 ```                      
 
-</br>
-
 ## Arguments
 
 **Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes**
