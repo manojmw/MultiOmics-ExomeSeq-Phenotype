@@ -22,7 +22,6 @@ This is the main repository containing all the scripts for the project: MultiOmi
 
 - Parses a UniProt file and extracts the required data from each record
 - Populates the OUTPUT files with processed data
-</br>
 
 -> Grab the latest UniProt data with:
 
@@ -42,7 +41,6 @@ gunzip -c uniprot_sprot.dat.gz | python3 1_Uniprot_parser.py --outPrimAC uniprot
 
 - Parses a Protein-Protein Interaction (PPI) File (miTAB 2.5 or 2.7)
 - Maps to UniProt using the output files produced by `1_Uniprot_parser.py` and prints to STDOUT in .tsv format
-</br>
 
 -> Grab the latest PPI data (Ex: BioGRID) with:
 ```console
@@ -64,7 +62,6 @@ python3 2_Interaction_parser.py --inInteraction BIOGRID-ORGANISM-Homo_sapiens-4.
 
 - Parses a Protein-Protein Interaction File (miTAB 2.5 or 2.7)
 - Prints the count of Human-Human Protein Interaction experiments to STDOUT
-</br>
 
 -> Provide a STDIN miTAB 2.5 or 2.7 file with:
 ```console
@@ -77,23 +74,22 @@ python3 3_Count_HumanPPIExp.py < BIOGRID-ORGANISM-Homo_sapiens-4.4.207.mitab.txt
 
 - High-Quality Interactome Criteria:
 
-  1] Filtering Interactions based on Interaction Detection Method:
-    * We filter out pull down (MI:0096), genetic interference (MI:0254) & unspecified method (MI:0686)
+    1] Filtering Interactions based on Interaction Detection Method:
+      - We filter out pull down (MI:0096), genetic interference (MI:0254) & unspecified method (MI:0686)
 
-  2] Filtering Interactions based on Interaction Type:
-    * We keep only direct interaction (MI:0407) & physical association (MI:0915)
+    2] Filtering Interactions based on Interaction Type:
+      - We keep only direct interaction (MI:0407) & physical association (MI:0915)
 
-  3] We try to eliminate most of the SPOKE EXPANSION DATA, and consider only TRUE BINARY INTERACTIONS
+    3] We try to eliminate most of the SPOKE EXPANSION DATA, and consider only TRUE BINARY INTERACTIONS
 
-  4] Each Interaction has ≥ 2 experiments, of which at least one of them should be proved by any BINARY METHOD
-
-</br>
+    4] Each Interaction has ≥ 2 experiments, of which at least one of them should be proved by any BINARY METHOD
 
 -> Build High-Quality Human Interactome with:      
 ```console
 python3 4_BuildInteractome.py --inExpFile Exp_Biogrid.tsv --inPrimAC uniprot_main.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human.tsv
 ```                      
 -> For getting `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
+
 </br>
 
 <a name="modulefile"></a>**Module Input File Generator**
@@ -102,7 +98,6 @@ python3 4_BuildInteractome.py --inExpFile Exp_Biogrid.tsv --inPrimAC uniprot_mai
 - Assigns a weight to each interaction and prints to STDOUT in .tsv format
 - This can be used as INPUT for most of the module identification/clustering methods
 
-</br>
 -> Generate Module Input File with:
 ```console
 python3 5_ModuleInputFile.py < Interactome_human.tsv
@@ -114,7 +109,6 @@ python3 5_ModuleInputFile.py < Interactome_human.tsv
 - Parses the output files produced by `1_Uniprot_parser.py` and the `canonical transcripts file` (Ex: canonicalTranscripts_220221.tsv)
 - Maps UniProt accession to ENSG and prints to STDOUT
 
-</br>
 -> Run UniProt2ENSG Mapper with:
 ```console
 python3 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
