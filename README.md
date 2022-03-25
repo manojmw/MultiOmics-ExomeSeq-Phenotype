@@ -122,8 +122,8 @@ python3 6_Uniprot2ENSG.py --inPrimAC uniprot_main.tsv --inCanonicalFile canonica
 - Checks the number of Interactors that are known candidate genes and calculates P-values
 - Further, computes Benjamini-Hochberg adjusted P-value and prints to STDOUT in .tsv format
 - This script provides the first scoring component for the Machine Learning step
-</br>
 
+-> Run Machine Learning ScoreComponent-1 script with:
 ```console
 python3 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFile candidateGenes.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human.tsv
 ```                      
