@@ -1,6 +1,8 @@
 ## Introduction
 
-This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype. Here, I am developing a Multi-Omics method that scores genomic variants might be responsible for a particular phenotype in the patient (**The project is still in progress and I will add more scripts, such as those that provide scoring component for the Machine Learning step**). At a later stage, I will try to combine all the individual scripts into a single pipeline.
+This is the main repository containing all the scripts for the project: MultiOmics-ExomeSeq-Phenotype. Here, I am developing a Multi-Omics method that scores genomic variants might be responsible for a particular phenotype in the patient (**The project is still in progress and I will add more scripts, such as those that provide scoring component for the Machine Learning step**). 
+</br>
+This repository contains individual scripts. I have integrated these into current **Exome-Seq Secondary Analysis Pipeline**(click here[https://github.com/manojmw/grexome-TIMC-Secondary])
 </br>
 
 - [Example Usage](#example-usage-and-details-of-the-scripts)
