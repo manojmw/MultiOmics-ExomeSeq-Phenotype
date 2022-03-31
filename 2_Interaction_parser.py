@@ -271,7 +271,7 @@ def interaction_parser(args):
     re_PMID_missed = re.compile('^pubmed:')
 
     # User input Protein-protein Interaction file
-    interaction_file = open(args.inInteraction)
+    interaction_file = open(args.inInteraction, encoding="utf-8")
 
     logging.info("Processing data from Protein-Protein Interaction File: %s" % args.inInteraction)
 
