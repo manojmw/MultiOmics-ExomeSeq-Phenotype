@@ -87,7 +87,7 @@ def CandidateGeneParser(inCandidateFile):
     # Iterating over the list of files and appending to the DataFrame (meta_data)
     for file in candidate_files:
         logging.info("Processing data from Candidate Gene File: %s" % file)
-        data = pd.read_excel(file)
+        data = pd.read_excel(file, engine = 'openpyxl')
         meta_data = pd.concat([meta_data, data])
 
     # Extract Gene, pathologyID and Confidence score and drop rows with missing values(na)
