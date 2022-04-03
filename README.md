@@ -34,7 +34,7 @@ wget https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase
 -> Parse UniProt data to produce output files with:
 
 ```console
-gunzip -c uniprot_sprot.dat.gz | python3 1_Uniprot_parser.py --outPrimAC uniprot_main.tsv --outSecAC uniprot_secondary.tsv ---outGeneID geneID.tsv
+gunzip -c uniprot_sprot.dat.gz | python3 1_Uniprot_parser.py --outPrimAC uniprot_main.tsv --outSecAC uniprot_secondary.tsv --outGeneID geneID.tsv
 ```    
 
 </br>
