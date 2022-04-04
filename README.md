@@ -177,10 +177,9 @@ python3 7_Score1ML_candidateGenes.py --inPrimAC uniprot_main.tsv --inCandidateFi
 
 ## Dependencies
 
-* Requires **Python version ≥ 3**
+* Requires **Python version >= 3**
 * External dependencies are kept to minimum in all the scripts. The only required python modules are listed below: </br>
-  - Pandas ([Installation Guide](https://pandas.pydata.org/docs/getting_started/install.html))
-  - SciPy ([Installation Guide](https://scipy.org/install/))
+  - OpenPyXl, SciPy (You can install these with pip/conda. Ex: pip3 install openpyxl scipy OR conda install openpyxl scipy).
 * Most other standard core modules should already be available on your system
 
 ## License
