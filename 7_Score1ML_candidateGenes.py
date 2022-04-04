@@ -4,7 +4,7 @@
 # 17 Feb, 2022
 
 import argparse, sys
-import pandas as pd
+import openpyxl as xl
 import scipy.stats as stats
 import re
 import logging
@@ -65,35 +65,89 @@ def ENSG_Gene(inCanonicalFile):
 ###########################################################
 
 # Parses the candidateGenes file in .xlsx format
-# Required columns are: 'Gene', 'pathologyID' and
-# 'Confidence score' (can be in any order,
-# but they MUST exist)
+# Required columns are: 'Gene' & 'pathologyID' 
+# (can be in any order, but they MUST exist)
 #
 # Returns a list with sublist(s)
 # One sublist per candidate gene
 # Each sublist contains:
 # - Gene
 # - pathologyID
-# - Confidence score)
 def CandidateGeneParser(inCandidateFile):
-
+    
     # Input - List of candidate gene file(s)
     candidate_files = inCandidateFile
 
-    # Initializing an empty data frame to store the data from all files
-    meta_data = pd.DataFrame()
+    ## List to store data from candidate gene files
+    # This list contains sublist
+    # One sublist per gene
+    # Each sublist contains:
+    # - Gene name
+    # - pathologyID
+
+    CandidateGene_data = []
 
     # Data lines
-    # Iterating over the list of files and appending to the DataFrame (meta_data)
     for file in candidate_files:
-        logging.info("Processing data from Candidate Gene File: %s" % file)
-        data = pd.read_excel(file, engine = 'openpyxl')
-        meta_data = pd.concat([meta_data, data])
 
-    # Extract Gene, pathologyID and Confidence score and drop rows with missing values(na)
-    CandidateGene_data = pd.DataFrame(meta_data, columns=['Gene', 'pathologyID', 'Confidence score']).dropna()
+        # Creating a workbook object 
+        wb_obj = xl.load_workbook(file)
 
-    return CandidateGene_data.values.tolist()
+        # Creating a sheet object from the active attribute
+        sheet_obj = wb_obj.active
+
+        # Dictionary to store Candidate Gene and pathology data
+        # Key -> rowindex of pathologyID
+        # Value -> pathologyID
+        Gene_patho_dict = {}
+        
+        # Iterating over col cells and checking if any header 
+        # in the the header line matches our header of interest
+        for header_cols in sheet_obj.iter_cols(1, sheet_obj.max_column):
+            if header_cols[0].value == "pathologyID":
+                for patho_field in header_cols[1:]:
+                    # Skip empty fields
+                    if patho_field.value == None:
+                        pass
+                    else:
+                        Gene_patho_dict[patho_field.row] = patho_field.value
+
+        # Grabbing gene names
+        # Replacing the key (rowindex of pathologyID) in Gene_patho_dict
+        # with a our new key (Gene_identifier)
+        # Gene_identifier -> Gene name & rowindex of Gene name seperated by an '_'
+        # This is to make sure that we do not replace the existsing gene and patho 
+        # if the same gene is associated with a different pathology (in a given file,
+        # row index will be unique)
+        # Using a new for-loop because the keys in Gene_patho_dict will 
+        # not be defined until we exit for loop
+        # If key is not defined, then we cannot replace the old key with
+        # our new Gene_identifier using the same row index
+        for header_cols in sheet_obj.iter_cols(1, sheet_obj.max_column):
+            if header_cols[0].value == "Gene":
+                for Gene_field in header_cols[1:]:
+                    # Skip empty fields
+                    if Gene_field.value == None:
+                        pass
+                    else:
+                        # Replacing the key in Gene_patho_dict with our new key (Gene_identifier)
+                        Gene_patho_dict[Gene_field.value + '_' + str(Gene_field.row)] = Gene_patho_dict.pop(Gene_field.row)
+
+        # List to store Gene name and pathology
+        # We are not using the dictionary for further steps because
+        # As we parse other candidate gene files, if the same gene (key)
+        # is associated with a different pathology, the existing 
+        # gene-pathology pair will be replaced as dictionary cannot 
+        # contain redundant keys
+        for Gene_identifier in Gene_patho_dict:
+            Gene_identifierF = Gene_identifier.split('_')
+            # Store the Gene name
+            Gene_name = Gene_identifierF[0]
+            # List with Gene name and corresponding pathologyID
+            Gene_Pathology = [Gene_name, Gene_patho_dict[Gene_identifier]]
+            CandidateGene_data.append(Gene_Pathology)
+            
+    return CandidateGene_data
 
 ###########################################################
 
@@ -109,7 +163,6 @@ def CandidateGeneParser(inCandidateFile):
 # One sublist per candidate ENSG
 # - ENSG identifier of candidate gene
 # - pathologyID
-# - Confidence score
 #
 # The second list contains all the pathologies/Phenotypes
 def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
@@ -132,8 +185,8 @@ def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
         for ENSG in ENSG_Gene_dict.keys():
             # Check if candidate gene is present in ENSG_Gene_dict
             if data[0] == ENSG_Gene_dict[ENSG]:
-                # Store the ENSG along with other data
-                candidateENSG_out = [ENSG,  data[1],  data[2]]
+                # Store the ENSG along with pathology ID
+                candidateENSG_out = [ENSG,  data[1]]
                 candidateENSG_out_list.append(candidateENSG_out)
 
         if not data[1] in pathologies_list:
@@ -397,7 +450,7 @@ def Interactors_PValue(args):
             if Known_Interactors:
                 # Applying Fisher's exact test to calculate p-values
                 ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
-                (odd_ratio, p_value) = stats.fisher_exact(ComputePvalue_data)
+                (odds_ratio, p_value) = stats.fisher_exact(ComputePvalue_data)
                 Patho_TestCount[i] += 1
             else:
                 p_value = 1
@@ -466,7 +519,7 @@ def Interactors_PValue(args):
     for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
         print('\t'.join(str(eachGene_AllPatho_data) for eachGene_AllPatho_data in Gene_AllPatho_Pvalue[Gene_AllPathoIndex]))
 
-    logging.info("Done 🎉")
+    logging.info("All done, completed successfully!")
 
     return
 
