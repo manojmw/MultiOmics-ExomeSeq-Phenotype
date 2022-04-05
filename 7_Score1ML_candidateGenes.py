@@ -8,7 +8,6 @@ import openpyxl as xl
 import scipy.stats as stats
 import re
 import logging
-import time
 
 ###########################################################
 
@@ -226,14 +225,15 @@ def CountCandidateGenes(candidateENSG_out_list, pathologies_list):
 # First column - ENSG of Protein A
 # Second column - ENSG of Protein B
 #
-# Returns 2 lists:
-# First list contains sublists
-# One sublist per interaction
-# Each sublist contains:
-# - ENSG of Protein A
-# - ENSG of Protein B
+# Returns 2 dictionaries and 1 list:
+# First dictionary contains:
+# - key: Protein A; Value: List of interactors
+# Second dictionary contains:
+# key: Protein B; Value: List of interactors
+# These dictionaries are later used to determine
+# the no. of interactors for a given protein/gene
 #
-# Second list contains all the interacting proteins from the interactome
+# The list contains all the interacting proteins from the interactome
 def Interacting_Proteins(inInteractome):
 
     # Input - Interactome file
@@ -241,9 +241,11 @@ def Interacting_Proteins(inInteractome):
 
     logging.info("Processing data from Interactome File: %s" % inInteractome)
 
-    # Dictionary to Interacting proteins
-    # from the Interactome
-    Interactome_list = []
+    # Dictionaries to store interacting proteins
+    # In ProtA_dict, key -> Protein A; Value -> Protein B
+    # In ProtB_dict, key -> Protein B; Value -> Protein A
+    ProtA_dict = {}
+    ProtB_dict = {}
 
     # Keeping count of Self Interactions
     SelfInteracting_PPICount = 0
@@ -258,8 +260,21 @@ def Interacting_Proteins(inInteractome):
         Interactome_fields = line.split('\t')
 
         if Interactome_fields[0] != Interactome_fields[1]:
-            Interacting_Proteins = [Interactome_fields[0], Interactome_fields[1]]
-            Interactome_list.append(Interacting_Proteins)
+            # Check if the Key(ProtA) exists in ProtA_dict
+            # If yes, then append the interctor to 
+            # the list of values (Interactors)
+            if ProtA_dict.get(Interactome_fields[0], False):
+                ProtA_dict[Interactome_fields[0]].append(Interactome_fields[1])
+            else:
+                ProtA_dict[Interactome_fields[0]] = [Interactome_fields[1]]
+
+            # Check if the Key(ProtB) exists in ProtB_dict
+            # If yes, then append the interctor to 
+            # the list of values (Interactors)
+            if ProtB_dict.get(Interactome_fields[1], False):
+                ProtB_dict[Interactome_fields[1]].append(Interactome_fields[0])
+            else:
+                ProtB_dict[Interactome_fields[1]] = [Interactome_fields[0]]    
 
             # Storing all the interactors in All_Interactors_list
             if not Interactome_fields[0] in All_Interactors_list:
@@ -274,7 +289,7 @@ def Interacting_Proteins(inInteractome):
     # Closing the file
     Interactome_File.close()
 
-    return Interactome_list, All_Interactors_list
+    return ProtA_dict, ProtB_dict, All_Interactors_list
 
 ###########################################################
 
@@ -292,9 +307,6 @@ def Interacting_Proteins(inInteractome):
 # This count is later used for calculating
 # Benjamini-Hochberg adjusted P-values
 def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
-
-    # Initializing the dictionary
-    Uniprot_ENSG_dict = {}
 
     UniprotPrimAC_File = open(inPrimAC)
 
@@ -366,7 +378,7 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 
 ###########################################################
 
-# Parses the Interactome_list & All_Interactors_list returned
+# Parses the dictionaries and list returned
 # by the function: Interacting_Proteins
 # Checks the number of interactors for each gene
 # Checks the number of known interactors
@@ -382,7 +394,7 @@ def Interactors_PValue(args):
     # Calling the functions
     CandidateGene_data = CandidateGeneParser(args.inCandidateFile)
     ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
-    (Interactome_list, All_Interactors_list) = Interacting_Proteins(args.inInteractome)
+    (ProtA_dict, ProtB_dict, All_Interactors_list) = Interacting_Proteins(args.inInteractome)
     (candidateENSG_out_list, pathologies_list) = CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data)
     pathology_CandidateCount = CountCandidateGenes(candidateENSG_out_list, pathologies_list)
     Count_UniqueENSGs = Uniprot_ENSG(args.inPrimAC, ENSG_Gene_dict)
@@ -410,17 +422,18 @@ def Interactors_PValue(args):
         # List of interactors
         Interactors = []
 
-        for Proteins in Interactome_list:
-            # If Protein is the first protein
-            if (All_Interactors_list[ENSG_index] == Proteins[0]):
-                # Get the interacting protein
-                if not Proteins[1] in Interactors:
-                    Interactors.append(Proteins[1])
-            # If Protein is the Second protein
-            elif (All_Interactors_list[ENSG_index] == Proteins[1]):
-                if not Proteins[0] in Interactors:
-                    # Get the interacting protein
-                    Interactors.append(Proteins[0])
+        # If Protein is the first protein
+        if (All_Interactors_list[ENSG_index] in ProtA_dict.keys()):
+            # Get the interacting protein
+            for Interactor in ProtA_dict[All_Interactors_list[ENSG_index]]:
+                if not Interactor in Interactors:
+                    Interactors.append(Interactor)
+        # If Protein is the Second protein
+        elif (All_Interactors_list[ENSG_index] in ProtB_dict.keys()):
+            # Get the interacting protein
+            for Interactor in ProtB_dict[All_Interactors_list[ENSG_index]]:
+                if not Interactor in Interactors:
+                    Interactors.append(Interactor)
 
         Gene_AllPatho_Pvalue[ENSG_index].append(len(Interactors))
 
@@ -519,7 +532,7 @@ def Interactors_PValue(args):
     for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
         print('\t'.join(str(eachGene_AllPatho_data) for eachGene_AllPatho_data in Gene_AllPatho_Pvalue[Gene_AllPathoIndex]))
 
-    logging.info("All done, completed successfully!")
+    # logging.info("All done, completed successfully!")
 
     return
 
