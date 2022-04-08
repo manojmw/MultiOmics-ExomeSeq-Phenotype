@@ -66,87 +66,103 @@ def ENSG_Gene(inCanonicalFile):
 # Parses the candidateGenes file in .xlsx format
 # Required columns are: 'Gene' & 'pathologyID' 
 # (can be in any order, but they MUST exist)
+# Also parses {ENSG_Gene_dict} returned
+# by the function: ENSG_Gene
+# Maps Candidate Gene names to ENSG
 #
-# Returns a list with sublist(s)
-# One sublist per candidate gene
-# Each sublist contains:
-# - Gene
-# - pathologyID
-def CandidateGeneParser(inCandidateFile):
+# Returns a dictionary
+# - Key: ENSG of Candidate Gene
+# - Value: list of pathology(s)
+def CandidateGeneParser(inCandidateFile, ENSG_Gene_dict):
     
     # Input - List of candidate gene file(s)
     candidate_files = inCandidateFile
 
-    ## List to store data from candidate gene files
-    # This list contains sublist
-    # One sublist per gene
-    # Each sublist contains:
-    # - Gene name
-    # - pathologyID
+    # Dictionary to store candidate genes
+    # and associated data
+    # Key: Candidate Gene
+    # Value: list of pathology(s)
+    CandidateGene_dict = {}
 
-    CandidateGene_data = []
+    # Run the below code only if candidate 
+    # gene file(s) is provided, else return
+    # an empty dictionary
+    if candidate_files:
+        # Data lines
+        for file in candidate_files:
 
-    # Data lines
-    for file in candidate_files:
+            # Creating a workbook object 
+            candF_wbobj = xl.load_workbook(file)
 
-        # Creating a workbook object 
-        wb_obj = xl.load_workbook(file)
+            # Creating a sheet object from the active attribute
+            candF_sheetobj = candF_wbobj.active
 
-        # Creating a sheet object from the active attribute
-        sheet_obj = wb_obj.active
-
-        # Dictionary to store Candidate Gene and pathology data
-        # Key -> rowindex of pathologyID
-        # Value -> pathologyID
-        Gene_patho_dict = {}
-        
-        # Iterating over col cells and checking if any header 
-        # in the the header line matches our header of interest
-        for header_cols in sheet_obj.iter_cols(1, sheet_obj.max_column):
-            if header_cols[0].value == "pathologyID":
-                for patho_field in header_cols[1:]:
-                    # Skip empty fields
-                    if patho_field.value == None:
-                        pass
-                    else:
-                        Gene_patho_dict[patho_field.row] = patho_field.value
-
-        # Grabbing gene names
-        # Replacing the key (rowindex of pathologyID) in Gene_patho_dict
-        # with a our new key (Gene_identifier)
-        # Gene_identifier -> Gene name & rowindex of Gene name seperated by an '_'
-        # This is to make sure that we do not replace the existsing gene and patho 
-        # if the same gene is associated with a different pathology (in a given file,
-        # row index will be unique)
-        # Using a new for-loop because the keys in Gene_patho_dict will 
-        # not be defined until we exit for loop
-        # If key is not defined, then we cannot replace the old key with
-        # our new Gene_identifier using the same row index
-        for header_cols in sheet_obj.iter_cols(1, sheet_obj.max_column):
-            if header_cols[0].value == "Gene":
-                for Gene_field in header_cols[1:]:
-                    # Skip empty fields
-                    if Gene_field.value == None:
-                        pass
-                    else:
-                        # Replacing the key in Gene_patho_dict with our new key (Gene_identifier)
-                        Gene_patho_dict[Gene_field.value + '_' + str(Gene_field.row)] = Gene_patho_dict.pop(Gene_field.row)
-
-        # List to store Gene name and pathology
-        # We are not using the dictionary for further steps because
-        # As we parse other candidate gene files, if the same gene (key)
-        # is associated with a different pathology, the existing 
-        # gene-pathology pair will be replaced as dictionary cannot 
-        # contain redundant keys
-        for Gene_identifier in Gene_patho_dict:
-            Gene_identifierF = Gene_identifier.split('_')
-            # Store the Gene name
-            Gene_name = Gene_identifierF[0]
-            # List with Gene name and corresponding pathologyID
-            Gene_Pathology = [Gene_name, Gene_patho_dict[Gene_identifier]]
-            CandidateGene_data.append(Gene_Pathology)
+            # Dictionary to store Candidate Gene and pathology data
+            # Key -> rowindex of pathologyID
+            # Value -> pathologyID
+            Gene_patho_dict = {}
             
-    return CandidateGene_data
+            # Iterating over col cells and checking if any header 
+            # in the the header line matches our header of interest
+            for header_cols in candF_sheetobj.iter_cols(1, candF_sheetobj.max_column):
+                if header_cols[0].value == "pathologyID":
+                    for patho_field in header_cols[1:]:
+                        # Skip empty fields
+                        if patho_field.value == None:
+                            pass
+                        else:
+                            Gene_patho_dict[patho_field.row] = patho_field.value
+
+            # Grabbing gene names
+            # Replacing the key (rowindex of pathologyID) in Gene_patho_dict
+            # with a our new key (Gene_identifier)
+            # Gene_identifier -> Gene name & rowindex of Gene name seperated by an '_'
+            # This is to make sure that we do not replace the existsing gene and patho 
+            # if the same gene is associated with a different pathology (in a given file,
+            # row index will be unique)
+            # Using a new for-loop because the keys in Gene_patho_dict will 
+            # not be defined until we exit for loop
+            # If key is not defined, then we cannot replace the old key with
+            # our new Gene_identifier using the same row index
+            for header_cols in candF_sheetobj.iter_cols(1, candF_sheetobj.max_column):
+                if header_cols[0].value == "Gene":
+                    for Gene_field in header_cols[1:]:
+                        # Skip empty fields
+                        if Gene_field.value == None:
+                            pass
+                        else:
+                            # Replacing the key in Gene_patho_dict with our new key (Gene_identifier)
+                            Gene_patho_dict[Gene_field.value + '_' + str(Gene_field.row)] = Gene_patho_dict.pop(Gene_field.row)
+
+            # List to store Gene name and pathology
+            # We are not using the dictionary for further steps because
+            # As we parse other candidate gene files, if the same gene (key)
+            # is associated with a different pathology, the existing 
+            # gene-pathology pair will be replaced as dictionary cannot 
+            # contain redundant keys
+            for Gene_identifier in Gene_patho_dict:
+                Gene_identifierF = Gene_identifier.split('_')
+
+                # Gene_identifierF[0] -> Gene name
+
+                for ENSG in ENSG_Gene_dict.keys():
+                    if Gene_identifierF[0] == ENSG_Gene_dict[ENSG]:
+                        Gene = ENSG
+                        break
+                
+                Pathology = Gene_patho_dict[Gene_identifier]
+
+                # Check if the Gene exists in CandidateGene_dict
+                # Happens when same gene is associated with different pathology
+                # If Gene exists, then append the new pathology to the list of pathologies
+                if CandidateGene_dict.get(Gene, False):
+                    # Avoid adding same pathology more than once
+                    if not Pathology in CandidateGene_dict[Gene]:
+                        CandidateGene_dict[Gene].append(Pathology)
+                else:
+                    CandidateGene_dict[Gene] = [Pathology]
+            
+    return CandidateGene_dict
 
 ###########################################################
 
@@ -428,6 +444,7 @@ def Interactors_PValue(args):
             for Interactor in ProtA_dict[All_Interactors_list[ENSG_index]]:
                 if not Interactor in Interactors:
                     Interactors.append(Interactor)
+
         # If Protein is the Second protein
         elif (All_Interactors_list[ENSG_index] in ProtB_dict.keys()):
             # Get the interacting protein
@@ -560,10 +577,11 @@ Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     required = file_parser.add_argument_group('Required arguments')
     optional = file_parser.add_argument_group('Optional arguments')
 
-    required.add_argument('--inPrimAC', metavar = "Input File", dest = "inPrimAC", help = 'Uniprot Primary Accession File generated by the uniprot parser', required = True)
-    required.add_argument('--inCandidateFile', metavar = "Input File", dest = "inCandidateFile", nargs = '+', help = 'Input File Name (Patient meta data file in .xlsx format)', required = True)
-    required.add_argument('--inCanonicalFile', metavar = "Input File", dest = "inCanonicalFile", help = 'Canonical Transcripts file', required = True)
-    required.add_argument('--inInteractome', metavar = "Input File", dest = "inInteractome", help = 'Input File Name (High-quality Interactome (.tsv) produced by Interactome.py)', required = True)
+    required.add_argument('--inSample', metavar = "Input File", dest = "inSample", help = 'Sample metadata file', required=True)
+    required.add_argument('--inPrimAC', metavar = "Input File", dest = "inPrimAC", help = 'Uniprot Primary Accession File generated by the UniProt_parser.py')
+    required.add_argument('--inCandidateFile', metavar = "Input File", dest = "inCandidateFile", nargs = '*', help = 'Candidate Genes Input File name(.xlsx)')
+    required.add_argument('--inCanonicalFile', metavar = "Input File", dest = "inCanonicalFile", help = 'Canonical Transcripts file (.gz or non .gz)')
+    required.add_argument('--inInteractome', metavar = "Input File", dest = "inInteractome", help = 'Input File Name (High-quality Human Interactome(.tsv) produced by Build_Interactome.py)')
 
     args = file_parser.parse_args()
     Interactors_PValue(args)
