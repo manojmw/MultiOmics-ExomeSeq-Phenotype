@@ -166,48 +166,36 @@ def CandidateGeneParser(inCandidateFile, ENSG_Gene_dict):
 
 ###########################################################
 
-# Parses the dictionary {ENSG_Gene_dict} returned
-# by the function: ENSG_Gene
-# Also parses the list [CandidateGene_data]
+# Parses the dictionary {CandidateGene_dict}
 # returned by the function: CandidateGeneParser
 #
-# Maps Candidate Gene names to ENSG
-#
-# Returns 2 lists:
-# The first list contains sublists
-# One sublist per candidate ENSG
-# - ENSG identifier of candidate gene
-# - pathologyID
-#
-# The second list contains all the pathologies/Phenotypes
-def CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data):
+# Returns a list containing all the pathologies/Phenotypes
+def getPathologies(inSample):
 
-    # List of pathologies
+    sampleFile = open(inSample)
+
+    # List for storing pathologies
     pathologies_list = []
 
-    # list to store data associated with each candidate gene
-    candidateENSG_out_list = []
+     # Creating a workbook object 
+    sampF_wbobj = xl.load_workbook(sampleFile)
 
-    logging.info("Mapping Candidate Genes to ENSG and identifying Pathologies/Phenotypes")
+    # Creating a sheet object from the active attribute
+    sampF_sheetobj = sampF_wbobj.active
 
-    # Data
-    for data in CandidateGene_data:
-        # data[0] -> Candidate Gene
-        # data[1] -> pathologyID
-        # data[2] -> Confidence Score
+    # Iterating over col cells and checking if any header 
+    # in the the header line matches our header of interest
+    for header_cols in sampF_sheetobj.iter_cols(1, sampF_sheetobj.max_column):
+        if header_cols[0].value == "pathologyID":
+            for patho_field in header_cols[1:]:
+                # Skip empty fields
+                if patho_field.value == None:
+                    pass
+                else:
+                    if not patho_field.value in pathologies_list:
+                        pathologies_list.append(patho_field.value)
 
-        # ENSG_Gene_dict: Key -> ENSG; Value -> Gene
-        for ENSG in ENSG_Gene_dict.keys():
-            # Check if candidate gene is present in ENSG_Gene_dict
-            if data[0] == ENSG_Gene_dict[ENSG]:
-                # Store the ENSG along with pathology ID
-                candidateENSG_out = [ENSG,  data[1]]
-                candidateENSG_out_list.append(candidateENSG_out)
-
-        if not data[1] in pathologies_list:
-            pathologies_list.append(data[1])
-
-    return candidateENSG_out_list, pathologies_list
+    return pathologies_list
 
 ###########################################################
 
