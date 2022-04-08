@@ -6,6 +6,7 @@
 import argparse, sys
 import openpyxl as xl
 import scipy.stats as stats
+import gzip
 import re
 import logging
 
@@ -20,44 +21,57 @@ import logging
 # - Value -> Gene
 def ENSG_Gene(inCanonicalFile):
 
-    # Dictionary to store ENSG & Gene data
+     # Dictionary to store ENSG & Gene data
     ENSG_Gene_dict = {}
 
-    Canonical_File = open(inCanonicalFile)
+    # Excute below code only if Canonical Transcript file is provided
+    if inCanonicalFile:
 
-    logging.info("Processing data from Canonical Transcripts File: %s" % inCanonicalFile)
+        logging.info("Processing data from Canonical Transcripts File: %s" % inCanonicalFile)
 
-    Canonical_header_line = Canonical_File.readline() # Grabbing the header line
+        # Opening canonical transcript file (gzip or non-gzip)
+        try:
+            if inCanonicalFile.endswith('.gz'):
+                Canonical_File = gzip.open(inCanonicalFile, 'rt')
+            else:
+                Canonical_File = open(inCanonicalFile)
+        except IOError:
+            logging.error("At Step 5.2_addInteractome - Failed to read the Canonical transcript file: %s" % inCanonicalFile)
+            sys.exit()
 
-    Canonical_header_fields = Canonical_header_line.split('\t')
+        Canonical_header_line = Canonical_File.readline() # Grabbing the header line
 
-    # Check the column headers and grab indexes of our columns of interest
-    (ENSG_index, Gene_index) = (-1,-1)
+        Canonical_header_fields = Canonical_header_line.split('\t')
 
-    for i in range(len(Canonical_header_fields)):
-        if Canonical_header_fields[i] == 'ENSG':
-            ENSG_index = i
-        elif Canonical_header_fields[i] == 'GENE':
-            Gene_index = i
+        # Check the column headers and grab indexes of our columns of interest
+        (ENSG_index, Gene_index) = (-1,-1)
 
-    if not ENSG_index >= 0:
-        sys.exit("Missing required column title 'ENSG' in the file: %s \n" % inCanonicalFile)
-    elif not Gene_index >= 0:
-        sys.exit("Missing required column title 'GENE' in the file: %s \n" % inCanonicalFile)
-    # else grabbed the required column indexes -> PROCEED
+        for i in range(len(Canonical_header_fields)):
+            if Canonical_header_fields[i] == 'ENSG':
+                ENSG_index = i
+            elif Canonical_header_fields[i] == 'GENE':
+                Gene_index = i
 
-    # Data lines
-    for line in Canonical_File:
-        line = line.rstrip('\n')
-        CanonicalTranscripts_fields = line.split('\t')
+        if not ENSG_index >= 0:
+            logging.error("At Step 5.2_addInteractome - Missing required column title 'ENSG' in the file: %s \n" % inCanonicalFile)
+            sys.exit()
+        elif not Gene_index >= 0:
+            logging.error("At Step 5.2_addInteractome - Missing required column title 'GENE' in the file: %s \n" % inCanonicalFile)
+            sys.exit()
+        # else grabbed the required column indexes -> PROCEED
 
-        # Key -> ENSG
-        # Value -> Gene
+        # Data lines
+        for line in Canonical_File:
+            line = line.rstrip('\n')
+            CanonicalTranscripts_fields = line.split('\t')
 
-        ENSG_Gene_dict[CanonicalTranscripts_fields[ENSG_index]] = CanonicalTranscripts_fields[Gene_index]
+            # Key -> ENSG
+            # Value -> Gene
 
-    # Closing the file
-    Canonical_File.close()
+            ENSG_Gene_dict[CanonicalTranscripts_fields[ENSG_index]] = CanonicalTranscripts_fields[Gene_index]
+
+        # Closing the file
+        Canonical_File.close()
 
     return ENSG_Gene_dict
 
@@ -90,6 +104,8 @@ def CandidateGeneParser(inCandidateFile, ENSG_Gene_dict):
     if candidate_files:
         # Data lines
         for file in candidate_files:
+
+            logging.info("Processing data from Candidate Gene File: %s" % file)
 
             # Creating a workbook object 
             candF_wbobj = xl.load_workbook(file)
@@ -172,7 +188,9 @@ def CandidateGeneParser(inCandidateFile, ENSG_Gene_dict):
 # Returns a list containing all the pathologies/Phenotypes
 def getPathologies(inSample):
 
-    sampleFile = open(inSample)
+    sampleFile = inSample
+
+    logging.info("Processing data from Sample metadata File: %s" % sampleFile)
 
     # List for storing pathologies
     pathologies_list = []
@@ -193,31 +211,30 @@ def getPathologies(inSample):
                     pass
                 else:
                     if not patho_field.value in pathologies_list:
-                        pathologies_list.append(patho_field.value)
+                        pathologies_list.append(patho_field.value)                     
 
     return pathologies_list
 
 ###########################################################
 
-# Parses the candidateENSG_out_list & pathologies_list
+# Parses the CandidateGene_dict & pathologies_list
 #
 # Counts the total number of candidate genes
 # associated with each pathology
 #
 # Returns a list with the total count candidate genes (for each pathology)
-def CountCandidateGenes(candidateENSG_out_list, pathologies_list):
+def CountCandidateGenes(CandidateGene_dict, pathologies_list):
 
     # List for counting total candidate genes
     # associated with each pathology
     pathology_CandidateCount = [0] * len(pathologies_list)
 
-    logging.info("Counting the Candidate Gene(s) associated with each pathology")
-
-    # Data
-    for candidateGenedata in candidateENSG_out_list:
-        for i in range(len(pathologies_list)):
-            if candidateGenedata[1] == pathologies_list[i]:
-                pathology_CandidateCount[i] += 1
+    # Data lines
+    for candidateGene in CandidateGene_dict:
+        for pathology in CandidateGene_dict[candidateGene]:
+            for i in range(len(pathologies_list)):
+                if pathology == pathologies_list[i]:
+                    pathology_CandidateCount[i] += 1
 
     return pathology_CandidateCount
 
@@ -240,58 +257,56 @@ def CountCandidateGenes(candidateENSG_out_list, pathologies_list):
 # The list contains all the interacting proteins from the interactome
 def Interacting_Proteins(inInteractome):
 
-    # Input - Interactome file
-    Interactome_File = open(inInteractome)
-
-    logging.info("Processing data from Interactome File: %s" % inInteractome)
-
     # Dictionaries to store interacting proteins
     # In ProtA_dict, key -> Protein A; Value -> Protein B
     # In ProtB_dict, key -> Protein B; Value -> Protein A
     ProtA_dict = {}
     ProtB_dict = {}
 
-    # Keeping count of Self Interactions
-    SelfInteracting_PPICount = 0
-
     # List of all interactors from the Interactome
     All_Interactors_list = []
 
-    # Data lines
-    for line in Interactome_File:
-        line = line.rstrip('\n')
+    # Excute below code only if Interactome file is provided
+    if inInteractome:
+        
+        # Input - Interactome file
+        Interactome_File = open(inInteractome)
 
-        Interactome_fields = line.split('\t')
+        logging.info("Processing data from Interactome File: %s" % inInteractome)
 
-        if Interactome_fields[0] != Interactome_fields[1]:
-            # Check if the Key(ProtA) exists in ProtA_dict
-            # If yes, then append the interctor to 
-            # the list of values (Interactors)
-            if ProtA_dict.get(Interactome_fields[0], False):
-                ProtA_dict[Interactome_fields[0]].append(Interactome_fields[1])
-            else:
-                ProtA_dict[Interactome_fields[0]] = [Interactome_fields[1]]
+        # Data lines
+        for line in Interactome_File:
+            line = line.rstrip('\n')
 
-            # Check if the Key(ProtB) exists in ProtB_dict
-            # If yes, then append the interctor to 
-            # the list of values (Interactors)
-            if ProtB_dict.get(Interactome_fields[1], False):
-                ProtB_dict[Interactome_fields[1]].append(Interactome_fields[0])
-            else:
-                ProtB_dict[Interactome_fields[1]] = [Interactome_fields[0]]    
+            Interactome_fields = line.split('\t')
 
-            # Storing all the interactors in All_Interactors_list
-            if not Interactome_fields[0] in All_Interactors_list:
-                All_Interactors_list.append(Interactome_fields[0])
-            elif not Interactome_fields[1] in All_Interactors_list:
-                All_Interactors_list.append(Interactome_fields[1])
-        else:
-            SelfInteracting_PPICount += 1
+            if Interactome_fields[0] != Interactome_fields[1]:
+                # Check if the Key(ProtA) exists in ProtA_dict
+                # If yes, then append the interctor to 
+                # the list of values (Interactors)
+                if ProtA_dict.get(Interactome_fields[0], False):
+                    ProtA_dict[Interactome_fields[0]].append(Interactome_fields[1])
+                else:
+                    ProtA_dict[Interactome_fields[0]] = [Interactome_fields[1]]
 
-    logging.debug("Total number of Self-Interactions in the Interactome: %d" % SelfInteracting_PPICount)
+                # Check if the Key(ProtB) exists in ProtB_dict
+                # If yes, then append the interctor to 
+                # the list of values (Interactors)
+                if ProtB_dict.get(Interactome_fields[1], False):
+                    ProtB_dict[Interactome_fields[1]].append(Interactome_fields[0])
+                else:
+                    ProtB_dict[Interactome_fields[1]] = [Interactome_fields[0]]    
 
-    # Closing the file
-    Interactome_File.close()
+                # Storing all the interactors in All_Interactors_list
+                if not Interactome_fields[0] in All_Interactors_list:
+                    All_Interactors_list.append(Interactome_fields[0])
+                elif not Interactome_fields[1] in All_Interactors_list:
+                    All_Interactors_list.append(Interactome_fields[1])
+            # else:
+                # NOOP -> The interaction is a self-interaction
+
+        # Closing the file
+        Interactome_File.close()
 
     return ProtA_dict, ProtB_dict, All_Interactors_list
 
@@ -312,71 +327,77 @@ def Interacting_Proteins(inInteractome):
 # Benjamini-Hochberg adjusted P-values
 def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 
-    UniprotPrimAC_File = open(inPrimAC)
-
-    logging.info("Processing data from UniProt Primary Accession File: %s" % inPrimAC)
-
-    # Grabbing the header line
-    UniprotPrimAC_header = UniprotPrimAC_File.readline()
-
-    UniprotPrimAC_header = UniprotPrimAC_header.rstrip('\n')
-
-    UniprotPrimAC_header_fields = UniprotPrimAC_header.split('\t')
-
-    # Check the column header and grab indexes of our columns of interest
-    (UniProt_PrimAC_index, ENSG_index) = (-1, -1)
-
-    for i in range(len(UniprotPrimAC_header_fields)):
-        if UniprotPrimAC_header_fields[i] == 'Primary_AC':
-            UniProt_PrimAC_index = i
-        elif UniprotPrimAC_header_fields[i] == 'ENSGs':
-            ENSG_index = i
-
-    if not UniProt_PrimAC_index >= 0:
-        sys.exit("Error: Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
-    elif not ENSG_index >= 0:
-        sys.exit("Error: Missing required column title 'ENSG' in the file: %s \n" % inPrimAC)
-    # else grabbed the required column indexes -> PROCEED
-
-    # Compiling regular expression
-
-    # Eliminating Mouse ENSGs
-    re_ENSMUST = re.compile('^ENSMUSG')
-
     # Counter for accessions with single canonical human ENSG
     Count_UniqueENSGs = 0
 
-    logging.info("Counting human ENSGs")
+    # Excute below code only if UniProt file is provided
+    if inPrimAC:
 
-    # Data lines
-    for line in UniprotPrimAC_File:
-        line = line.rstrip('\n')
-        UniprotPrimAC_fields = line.split('\t')
+        UniprotPrimAC_File = open(inPrimAC)
 
-        # ENSG column  - This is a single string containing comma-seperated ENSGs
-        # So we split it into a list that can be accessed later
-        UniProt_ENSGs = UniprotPrimAC_fields[ENSG_index].split(',')
+        logging.info("Processing data from UniProt Primary Accession File: %s" % inPrimAC)
 
-        # Initializing empty lists
-        human_ENSGs = []
-        canonical_human_ENSGs = []
+        # Grabbing the header line
+        UniprotPrimAC_header = UniprotPrimAC_File.readline()
+
+        UniprotPrimAC_header = UniprotPrimAC_header.rstrip('\n')
+
+        UniprotPrimAC_header_fields = UniprotPrimAC_header.split('\t')
+
+        # Check the column header and grab indexes of our columns of interest
+        (UniProt_PrimAC_index, ENSG_index) = (-1, -1)
+
+        for i in range(len(UniprotPrimAC_header_fields)):
+            if UniprotPrimAC_header_fields[i] == 'Primary_AC':
+                UniProt_PrimAC_index = i
+            elif UniprotPrimAC_header_fields[i] == 'ENSGs':
+                ENSG_index = i
+
+        if not UniProt_PrimAC_index >= 0:
+            sys.exit("Error: Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
+        elif not ENSG_index >= 0:
+            sys.exit("Error: Missing required column title 'ENSG' in the file: %s \n" % inPrimAC)
+        # else grabbed the required column indexes -> PROCEED
+
+        # Compiling regular expression
 
         # Eliminating Mouse ENSGs
-        for UniProt_ENSG in UniProt_ENSGs:
-            if not re_ENSMUST.match(UniProt_ENSG):
-                human_ENSGs.append(UniProt_ENSG)
-        if not human_ENSGs:
-            continue
+        re_ENSMUST = re.compile('^ENSMUSG')
 
-        # If ENSG is in the canonical transcripts file
-        # Append it to canonical_human_ENSGs
-        for ENSG in human_ENSGs:
-            if ENSG in ENSG_Gene_dict.keys():
-                canonical_human_ENSGs.append(ENSG)
+        # Counter for accessions with single canonical human ENSG
+        Count_UniqueENSGs = 0
 
-        # Keeping the count of protein with single ENSGs
-        if len(canonical_human_ENSGs) == 1:
-            Count_UniqueENSGs += 1
+        logging.info("Counting human ENSGs")
+
+        # Data lines
+        for line in UniprotPrimAC_File:
+            line = line.rstrip('\n')
+            UniprotPrimAC_fields = line.split('\t')
+
+            # ENSG column  - This is a single string containing comma-seperated ENSGs
+            # So we split it into a list that can be accessed later
+            UniProt_ENSGs = UniprotPrimAC_fields[ENSG_index].split(',')
+
+            # Initializing empty lists
+            human_ENSGs = []
+            canonical_human_ENSGs = []
+
+            # Eliminating Mouse ENSGs
+            for UniProt_ENSG in UniProt_ENSGs:
+                if not re_ENSMUST.match(UniProt_ENSG):
+                    human_ENSGs.append(UniProt_ENSG)
+            if not human_ENSGs:
+                continue
+
+            # If ENSG is in the canonical transcripts file
+            # Append it to canonical_human_ENSGs
+            for ENSG in human_ENSGs:
+                if ENSG in ENSG_Gene_dict.keys():
+                    canonical_human_ENSGs.append(ENSG)
+
+            # Keeping the count of protein with single ENSGs
+            if len(canonical_human_ENSGs) == 1:
+                Count_UniqueENSGs += 1
 
     return Count_UniqueENSGs
 
@@ -396,11 +417,12 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 def Interactors_PValue(args):
 
     # Calling the functions
-    CandidateGene_data = CandidateGeneParser(args.inCandidateFile)
+    # Calling the functions
     ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
+    CandidateGene_dict = CandidateGeneParser(args.inCandidateFile, ENSG_Gene_dict)
+    pathologies_list = getPathologies(args.inSample)
+    pathology_CandidateCount = CountCandidateGenes(CandidateGene_dict, pathologies_list)
     (ProtA_dict, ProtB_dict, All_Interactors_list) = Interacting_Proteins(args.inInteractome)
-    (candidateENSG_out_list, pathologies_list) = CandidateGene2ENSG(ENSG_Gene_dict, CandidateGene_data)
-    pathology_CandidateCount = CountCandidateGenes(candidateENSG_out_list, pathologies_list)
     Count_UniqueENSGs = Uniprot_ENSG(args.inPrimAC, ENSG_Gene_dict)
 
     # Initializing first output list containing distinct lists
@@ -432,15 +454,15 @@ def Interactors_PValue(args):
             for Interactor in ProtA_dict[All_Interactors_list[ENSG_index]]:
                 if not Interactor in Interactors:
                     Interactors.append(Interactor)
-
+                    
         # If Protein is the Second protein
-        elif (All_Interactors_list[ENSG_index] in ProtB_dict.keys()):
+        if (All_Interactors_list[ENSG_index] in ProtB_dict.keys()):
             # Get the interacting protein
             for Interactor in ProtB_dict[All_Interactors_list[ENSG_index]]:
                 if not Interactor in Interactors:
                     Interactors.append(Interactor)
 
-        Gene_AllPatho_Pvalue[ENSG_index].append(len(Interactors))
+        Gene_AllPatho_Pvalue[ENSG_index].append(len(Interactors))            
 
         for i in range(len(pathologies_list)):
 
@@ -452,24 +474,22 @@ def Interactors_PValue(args):
 
             # Checking if the interactor is a known ENSG (candidate ENSG)
             for interactor in Interactors:
-                for candidateENSG in candidateENSG_out_list:
-                    if interactor in candidateENSG:
-                        if candidateENSG[1] == pathologies_list[i]:
+                if interactor in CandidateGene_dict.keys():
+                    for pathology in CandidateGene_dict[interactor]:
+                        if pathology == pathologies_list[i]:
                             Known_Interactors.append(interactor)
 
             # Getting the Gene name for Known Interactors
             for Known_InteractorIndex in range(len(Known_Interactors)):
                 Known_Interactors[Known_InteractorIndex] = ENSG_Gene_dict[Known_Interactors[Known_InteractorIndex]]
 
-            # If there are no Known Interactors, there is no
-            # point is computing P-value,
-            # So we assign P-value as 1
-
             if Known_Interactors:
                 # Applying Fisher's exact test to calculate p-values
                 ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
                 (odds_ratio, p_value) = stats.fisher_exact(ComputePvalue_data)
-                Patho_TestCount[i] += 1
+            # If there are no Known Interactors, 
+            # there is no point is computing P-value,
+            # So we assign P-value as 1
             else:
                 p_value = 1
 
