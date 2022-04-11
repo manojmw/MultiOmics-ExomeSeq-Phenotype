@@ -67,7 +67,7 @@ python3 2_Interaction_parser.py --inInteraction BIOGRID-ORGANISM-Homo_sapiens-4.
 
 -> Provide a STDIN miTAB 2.5 or 2.7 file with:
 ```console
-python3 3_Count_HumanPPIExp.py < BIOGRID-ORGANISM-Homo_sapiens-4.4.207.mitab.txt
+python3 3_Count_HumanPPIExp.py < BIOGRID-ORGANISM-Homo_sapiens-*.mitab.txt
 ```                   
 
 </br>
