@@ -211,7 +211,7 @@ def getPathologies(inSample):
                     pass
                 else:
                     if not patho_field.value in pathologies_list:
-                        pathologies_list.append(patho_field.value)                     
+                        pathologies_list.append(patho_field.value)                                             
 
     return pathologies_list
 
@@ -234,7 +234,7 @@ def CountCandidateGenes(CandidateGene_dict, pathologies_list):
         for pathology in CandidateGene_dict[candidateGene]:
             for i in range(len(pathologies_list)):
                 if pathology == pathologies_list[i]:
-                    pathology_CandidateCount[i] += 1
+                    pathology_CandidateCount[i] += 1              
 
     return pathology_CandidateCount
 
@@ -557,7 +557,7 @@ def Interactors_PValue(args):
     for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
         print('\t'.join(str(eachGene_AllPatho_data) for eachGene_AllPatho_data in Gene_AllPatho_Pvalue[Gene_AllPathoIndex]))
 
-    # logging.info("All done, completed successfully!")
+    logging.info("All done, completed successfully!")
 
     return
 
