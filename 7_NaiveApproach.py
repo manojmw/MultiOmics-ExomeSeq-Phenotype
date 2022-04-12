@@ -7,7 +7,6 @@ import argparse, sys
 import openpyxl as xl
 import scipy.stats as stats
 import gzip
-import re
 import logging
 
 ###########################################################
