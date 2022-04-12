@@ -174,7 +174,7 @@ python3 7_NaiveApproach.py --inSampleFile sample.xlsx --inCandidateFile candidat
    * This metadata file describes the samples. 
    * Required column: </br>
       - pathologyID: the phenotype of each patient/sample, used to define the "cohorts".
-   * Can include other columns (but currently, not used by the scripts) such as:
+   * Optional columns (currently not used by the scripts) such as:
       - sampleID: unique identifier for each sample
       - specimenID: external identifier for each sample, typically related to the BAM or FASTQ filenames.
       - patientID: a more user-friendly identifier for each sample
@@ -185,6 +185,7 @@ python3 7_NaiveApproach.py --inSampleFile sample.xlsx --inCandidateFile candidat
    * Required columns: </br>
       - Gene: name of gene (should be the HGNC name, see www.genenames.org).
       - pathologyID: pathology/phenotype
+   * Optional column (currently not used by the scripts) such as:
       - Confidence score: indicates how confident you are that LOF variants in this gene are causal for this pathology. Value: integers from 1 and 5 (5 meaning the gene is definitely causal, while 1 is a lower-confidence candidate).
 
 
