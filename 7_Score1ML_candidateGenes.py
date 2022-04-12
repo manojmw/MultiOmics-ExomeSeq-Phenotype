@@ -312,97 +312,6 @@ def Interacting_Proteins(inInteractome):
 
 ###########################################################
 
-# Parses the UniProt Primary Accession file produced by Uniprot_parser.py
-# Required columns are: 'Primary_AC' and 'ENSGs' (can be in any order,
-# but they MUST exist)
-#
-# Also parses the dictionary ENSG_Gene_dict
-# returned by the function ENSG_Gene
-#
-# Maps UniProt Primary Accession to ENSG
-# Returns the count of UniProt accessions with unique ENSGs
-#
-# Count corresponds to total human genes
-# This count is later used for calculating
-# Benjamini-Hochberg adjusted P-values
-def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
-
-    # Counter for accessions with single canonical human ENSG
-    Count_UniqueENSGs = 0
-
-    # Excute below code only if UniProt file is provided
-    if inPrimAC:
-
-        UniprotPrimAC_File = open(inPrimAC)
-
-        logging.info("Processing data from UniProt Primary Accession File: %s" % inPrimAC)
-
-        # Grabbing the header line
-        UniprotPrimAC_header = UniprotPrimAC_File.readline()
-
-        UniprotPrimAC_header = UniprotPrimAC_header.rstrip('\n')
-
-        UniprotPrimAC_header_fields = UniprotPrimAC_header.split('\t')
-
-        # Check the column header and grab indexes of our columns of interest
-        (UniProt_PrimAC_index, ENSG_index) = (-1, -1)
-
-        for i in range(len(UniprotPrimAC_header_fields)):
-            if UniprotPrimAC_header_fields[i] == 'Primary_AC':
-                UniProt_PrimAC_index = i
-            elif UniprotPrimAC_header_fields[i] == 'ENSGs':
-                ENSG_index = i
-
-        if not UniProt_PrimAC_index >= 0:
-            sys.exit("Error: Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
-        elif not ENSG_index >= 0:
-            sys.exit("Error: Missing required column title 'ENSG' in the file: %s \n" % inPrimAC)
-        # else grabbed the required column indexes -> PROCEED
-
-        # Compiling regular expression
-
-        # Eliminating Mouse ENSGs
-        re_ENSMUST = re.compile('^ENSMUSG')
-
-        # Counter for accessions with single canonical human ENSG
-        Count_UniqueENSGs = 0
-
-        logging.info("Counting human ENSGs")
-
-        # Data lines
-        for line in UniprotPrimAC_File:
-            line = line.rstrip('\n')
-            UniprotPrimAC_fields = line.split('\t')
-
-            # ENSG column  - This is a single string containing comma-seperated ENSGs
-            # So we split it into a list that can be accessed later
-            UniProt_ENSGs = UniprotPrimAC_fields[ENSG_index].split(',')
-
-            # Initializing empty lists
-            human_ENSGs = []
-            canonical_human_ENSGs = []
-
-            # Eliminating Mouse ENSGs
-            for UniProt_ENSG in UniProt_ENSGs:
-                if not re_ENSMUST.match(UniProt_ENSG):
-                    human_ENSGs.append(UniProt_ENSG)
-            if not human_ENSGs:
-                continue
-
-            # If ENSG is in the canonical transcripts file
-            # Append it to canonical_human_ENSGs
-            for ENSG in human_ENSGs:
-                if ENSG in ENSG_Gene_dict.keys():
-                    canonical_human_ENSGs.append(ENSG)
-
-            # Keeping the count of protein with single ENSGs
-            if len(canonical_human_ENSGs) == 1:
-                Count_UniqueENSGs += 1
-
-    return Count_UniqueENSGs
-
-###########################################################
-
 # Parses the dictionaries and list returned
 # by the function: Interacting_Proteins
 # Checks the number of interactors for each gene
@@ -413,7 +322,7 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 # The output consists of following data foreach line:
 # - Gene Name
 # - Total Number of Interactors
-# - Known Interactors, list of Known_Interactors, P-value & BH Corrected P-value for each Pathology
+# - Known Interactors, list of Known_Interactors & P-value for each Pathology
 def Interactors_PValue(args):
 
     # Calling the functions
@@ -423,20 +332,14 @@ def Interactors_PValue(args):
     pathologies_list = getPathologies(args.inSample)
     pathology_CandidateCount = CountCandidateGenes(CandidateGene_dict, pathologies_list)
     (ProtA_dict, ProtB_dict, All_Interactors_list) = Interacting_Proteins(args.inInteractome)
-    Count_UniqueENSGs = Uniprot_ENSG(args.inPrimAC, ENSG_Gene_dict)
 
     # Initializing first output list containing distinct lists
     # i.e. one Sublist per Gene
     # Each Sublist contains:
     # - Gene name
     # - Total number of Interactors
-    # - Known Interactors count, list of Known Interactors, P-value and 0 (for each pathology)
-    # 0 will later be replaced by Benjamini-Hochberg corrected P-value
+    # - Known Interactors count, list of Known Interactors, P-value (for each pathology)
     Gene_AllPatho_Pvalue = [[] for i in range(len(All_Interactors_list))]
-
-    # List for keeping the count of number of statistical tests
-    # performed for each pathology
-    Patho_TestCount = [0] * len(pathologies_list)
 
     logging.info("Processing data, Checking Interactors and Computing P-values...")
 
@@ -485,20 +388,21 @@ def Interactors_PValue(args):
 
             if Known_Interactors:
                 # Applying Fisher's exact test to calculate p-values
-                ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
+                ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], len(All_Interactors_list)]]
                 (odds_ratio, p_value) = stats.fisher_exact(ComputePvalue_data)
+
             # If there are no Known Interactors, 
             # there is no point is computing P-value,
             # So we assign P-value as 1
             else:
                 p_value = 1
 
-            # The last item in the sublist is 0
-            # This will be replaced by Benjamini-Hochberg corrected P-value
             if Known_Interactors:
-                Output_eachPatho = [len(Known_Interactors), Known_Interactors, p_value, 0]
+                # Storing Known Interactors as a single comma seperated string
+                Known_InteractorsStr = ','.join(Known_Interactor for Known_Interactor in Known_Interactors)
+                Output_eachPatho = [len(Known_Interactors), Known_InteractorsStr, p_value]
             else:
-                Output_eachPatho = [len(Known_Interactors), '', p_value, 0]
+                Output_eachPatho = [len(Known_Interactors), '', p_value]
 
             for data in Output_eachPatho:
                 Gene_AllPatho_Pvalue[ENSG_index].append(data)
@@ -506,52 +410,8 @@ def Interactors_PValue(args):
         # Getting the Gene name for the ENSG
         Gene_AllPatho_Pvalue[ENSG_index][0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[ENSG_index][0]]
 
-    logging.info("Computing Benjamini-Hochberg corrected P-values")
-    logging.info("Preparing Output...")
-
-    # Sorting the p-values for each pathology
-    for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
-
-        # Calculating Benjamini-Hochberg corrected p-value for each pathology
-        for i in range(len(pathologies_list)):
-
-            # Getting the index of P-values
-            # Each sublist of Gene_AllPatho_Pvalue contains:
-            # - Gene (ENSG)
-            # - Total number of Interactors
-            # - Known Interactors count, list of Known Interactors, P-value and 0 for each pathology
-            # According to this structure of the sublist, every
-            # 5th index in the sublist is a P-value (for each pathology)
-            # Since list indexing starts from 0 in python
-            # we use the below equation
-            Pvalue_Index = i*4 + 4
-
-            # Sorting based on P-value for each pathology
-            Gene_AllPatho_Pvalue.sort(key = lambda x:x[Pvalue_Index])
-
-            # Rank of p-value -> Gene_AllPathoIndex+1
-            # (+1 because list index starts from 0)
-            #
-            # p-value -> Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index]
-            # Total number of tests -> Patho_TestCount[i]
-            #
-            # Benjamini Hochberg corrected p-value = p-value*Total number of tests/Rank of p-value
-
-            # If P-value is 1, we do not compute
-            # Benjamini Hochberg corrected p-value
-            # Assign Benjamini Hochberg corrected p-value = 1
-
-            if not Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index] == 1:
-                BH_p_value = (Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index] * Patho_TestCount[i])/(Gene_AllPathoIndex+1)
-            else:
-                BH_p_value = 1
-
-            # Replacing 0 with Benjamini Hochberg corrected p-value
-            # for each pathology
-            Gene_AllPatho_Pvalue[Gene_AllPathoIndex][Pvalue_Index+1] = BH_p_value
-
     # Printing header
-    Patho_header_list = [[patho+'_KnownInteractorsCount', patho+'_KnownInteractorsList', patho+'_Pvalue', patho+'_BHAdjustPvalue'] for patho in pathologies_list]
+    Patho_header_list = [[patho+'_KnownInteractorsCount', patho+'_KnownInteractors', patho+'_Pvalue'] for patho in pathologies_list]
     print('Gene\t', 'Total_Interactors\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]))
 
     for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
@@ -572,10 +432,10 @@ Program: Parses the Interactome file generated by Interactome.py, checks the num
          parses the patient Candidate Gene file(s) and Canonical Transcripts file. Checks the number of interactors
          that are known candidate genes, calculates P-values and prints to STDOUT in .tsv format
 -----------------------------------------------------------------------------------------------------------------------
-The output consists of following data for each line :
+The output consists of following data for each line (one gene per line) :
  -> Gene Name
  -> Total Number of Interactors
- -> Known Interactors, list of Known Interactors, P-value & Benjamini-Hochberg Corrected P-value for each Pathology
+ -> Known Interactors, list of Known Interactors & P-value for each Pathology
 -----------------------------------------------------------------------------------------------------------------------
 
 Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
@@ -586,7 +446,6 @@ Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     optional = file_parser.add_argument_group('Optional arguments')
 
     required.add_argument('--inSampleFile', metavar = "Input File", dest = "inSample", help = 'Sample metadata file', required=True)
-    required.add_argument('--inPrimAC', metavar = "Input File", dest = "inPrimAC", help = 'Uniprot Primary Accession File generated by the UniProt_parser.py')
     required.add_argument('--inCandidateFile', metavar = "Input File", dest = "inCandidateFile", nargs = '*', help = 'Candidate Genes Input File name(.xlsx)')
     required.add_argument('--inCanonicalFile', metavar = "Input File", dest = "inCanonicalFile", help = 'Canonical Transcripts file (.gz or non .gz)')
     required.add_argument('--inInteractome', metavar = "Input File", dest = "inInteractome", help = 'Input File Name (High-quality Human Interactome(.tsv) produced by Build_Interactome.py)')
