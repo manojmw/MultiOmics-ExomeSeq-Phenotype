@@ -27,9 +27,11 @@ import sys
 # - Gene Name (or a comma seperated list of Gene Names)
 def uniprot_parser(UniProtinFile):
 
+    logging.info("Starting to run...")
+
     UniProtinFile = sys.stdin
 
-    logging.info("Processing data from input File: %s" % UniProtinFile)
+    logging.info("Processing data from the Input File")
 
     # Header line
     UniProt_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs', 'Secondary_ACs', 'GeneID', 'GeneName']
@@ -55,7 +57,10 @@ def uniprot_parser(UniProtinFile):
     # end with semi-colon as it is supposed to and even unclosed curly braces
     # Ex: 
     # GN   Name=aadK {ECO:0000303|PubMed:17609790, ECO:0000303|PubMed:8293959,
-    re_GN = re.compile('^GN\s+(Name=\S.*)[,;]$')
+    # Sometimes, GN lines can also start just with 'Synonyms'
+    # Ex:
+    # GN   Synonyms=AO {ECO:0000303|PubMed:27255930}
+    re_GN = re.compile('^GN\s+((Name=\S.*)|(Synonyms=\S.*))[,;]$')
 
     # Organism (TaxID) from the OX line; some lines violate the uniprot spec
     # Grab only TaxID even if additional info comes after the TaxID
@@ -84,9 +89,13 @@ def uniprot_parser(UniProtinFile):
             
         elif (re_GN.match(line)):
             GNLine = re_GN.match(line).group(1)
+            # As per the UniProt documentation, the GN
+            # line is supposed to have a defined pattern
+            # but that's not the case in reality
+            # So we grab everything from the GN line
             try: 
                 # If the GN line contains any additional info other than
-                # Gene Name, each will be seperated by a ;
+                # Gene Name, each will be seperated by a ';'
                 # Ex: GN   Name=Jon99Cii; Synonyms=SER1, SER5, Ser99Da; ORFNames=CG7877;
                 GNList = GNLine.split('; ')
                 if GNList:
@@ -118,7 +127,7 @@ def uniprot_parser(UniProtinFile):
                         if re.match('^Synonyms=(\S.*)', geneinfo):
                             GeneSynoinfo = re.match('^Synonyms=(\S.*)', geneinfo).group(1)
                             GeneSynonyms = []
-                            # There can be multiple synonyms seperated by a ,
+                            # There can be multiple synonyms seperated by a ','
                             # Ex: 
                             # GN   Name=Jon99Cii; Synonyms=SER1, SER5, Ser99Da;
                             try:
@@ -149,7 +158,7 @@ def uniprot_parser(UniProtinFile):
                 if re.match('^Name=(\S.*)', GNLine):
                     GeneName = re.match('^Name=(\S+)', GeneNameLine).group(1)
                     try:
-                        # When Gene Name can contains additional info
+                        # When Gene Name contains additional info
                         GeneNamewithAcID = GeneName.split( '{')
                         GeneName = GeneNamewithAcID[0]
                     except:
