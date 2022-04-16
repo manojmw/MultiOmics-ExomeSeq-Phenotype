@@ -296,12 +296,12 @@ def Uniprot_ENSG(inUniProt, ENSG_Gene_dict):
         elif len(canonical_human_ENSGs) > 1:
             multiple_CanonicalHumanENSG += 1
 
-    logging.debug("Total no. of Human UniProt Primary Accessions: %d " % Count_HumanUniprotPrimAC)
-    logging.debug("Total no. of ENSGs in the Canonical Transcripts file: %d " % len(ENSG_Gene_dict.keys()))
-    logging.debug("Total no. of ENSGs in the UniProt Primary Accession file: %d " % canonical_ENSG_count)
-    logging.debug("No. of UniProt primary accessions without canonical human ENSG: %d " % no_CanonicalHumanENSG)
-    logging.debug("No. of UniProt primary accessions with single canonical human ENSG: %d " % single_CanonicalHumanENSG)
-    logging.debug("No. of UniProt primary accessions with multiple canonical human ENSGs: %d " % multiple_CanonicalHumanENSG)
+    # logging.debug("Total no. of Human UniProt Primary Accessions: %d " % Count_HumanUniprotPrimAC)
+    # logging.debug("Total no. of ENSGs in the Canonical Transcripts file: %d " % len(ENSG_Gene_dict.keys()))
+    # logging.debug("Total no. of ENSGs in the UniProt Primary Accession file: %d " % canonical_ENSG_count)
+    # logging.debug("No. of UniProt primary accessions without canonical human ENSG: %d " % no_CanonicalHumanENSG)
+    # logging.debug("No. of UniProt primary accessions with single canonical human ENSG: %d " % single_CanonicalHumanENSG)
+    # logging.debug("No. of UniProt primary accessions with multiple canonical human ENSGs: %d " % multiple_CanonicalHumanENSG)
 
     # Closing the file
     Uniprot_File.close()
@@ -339,7 +339,7 @@ def Interactome_Uniprot2ENSG(args):
         else:
             lost_Interaction += 1
 
-    logging.debug("Total no. of Interactions lost: %d " % lost_Interaction)
+    # logging.debug("Total no. of Interactions lost: %d " % lost_Interaction)
     logging.info("All done, completed succesfully!")
 
     return

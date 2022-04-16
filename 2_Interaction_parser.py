@@ -39,6 +39,8 @@ import logging
 # - Value -> Corresponding UniProt Primary Accession
 def Build_UniProtDicts(inUniProt):
 
+    logging.info("Starting to run...")
+
     Uniprot_File = open(inUniProt)
 
     logging.info("Processing data from UniProt File: %s" % inUniProt)
@@ -440,15 +442,15 @@ def interaction_parser(args):
         print("\t".join(interaction_out_line))
 
     # Debug counters
-    logging.debug("No. of times Uniprot Primary Accession not found for Protein A: %d" % notfound_Protein_A_PrimAC)
-    logging.debug("No. of times Uniprot Primary Accession not found for Protein B: %d" % notfound_Protein_B_PrimAC)
-    logging.debug("No. of times Pubmed ID not found for the Interaction: %d" % notfound_PMID)
-    logging.debug("No. of times Uniprot Primary Accession identified using the first 2 columns of the Interaction file: %d" % PrimAC_inMainCols)
-    logging.debug("No. of times Uniprot Primary Accession identified using the AltID columns of the Interaction file: %d" % PrimAC_inAltCols)
-    logging.debug("No. of times Uniprot Primary Accession identified using the Alias(es) columns of the Interaction file: %d" % PrimAC_inAliasCols)
-    logging.debug("No. of times Uniprot Primary Accession identified using GeneIDs: %d" % PrimAC_foundwithGeneID)
-    logging.debug("No. of times Uniprot Primary Accession identified using Secondary_AC: %d" % PrimAC_foundwithSecAC)
-    logging.debug("No. of times Uniprot Primary Accession identified using Gene Name: %d" % PrimAC_foundwithGeneName)
+    # logging.debug("No. of times Uniprot Primary Accession not found for Protein A: %d" % notfound_Protein_A_PrimAC)
+    # logging.debug("No. of times Uniprot Primary Accession not found for Protein B: %d" % notfound_Protein_B_PrimAC)
+    # logging.debug("No. of times Pubmed ID not found for the Interaction: %d" % notfound_PMID)
+    # logging.debug("No. of times Uniprot Primary Accession identified using the first 2 columns of the Interaction file: %d" % PrimAC_inMainCols)
+    # logging.debug("No. of times Uniprot Primary Accession identified using the AltID columns of the Interaction file: %d" % PrimAC_inAltCols)
+    # logging.debug("No. of times Uniprot Primary Accession identified using the Alias(es) columns of the Interaction file: %d" % PrimAC_inAliasCols)
+    # logging.debug("No. of times Uniprot Primary Accession identified using GeneIDs: %d" % PrimAC_foundwithGeneID)
+    # logging.debug("No. of times Uniprot Primary Accession identified using Secondary_AC: %d" % PrimAC_foundwithSecAC)
+    # logging.debug("No. of times Uniprot Primary Accession identified using Gene Name: %d" % PrimAC_foundwithGeneName)
 
     # Closing the file
     interaction_file.close()
