@@ -159,9 +159,9 @@ def Build_UniProtDicts(inUniProt):
         # Populating GeneName_dict
         # Key -> GeneName
         # Value -> Uniprot Primary Accession
-        # GeneIDs field in the inFile can contain 
-        # a single GeneID or a comma-seperated
-        # list of GeneIDs        
+        # GeneNames field in the inFile can contain 
+        # a single Gene Name or a comma-seperated
+        # list of Gene Names        
         try:
             UniProt_GeneNames = UniProt_fields[GeneName_index].split(',')
         except:
@@ -170,14 +170,14 @@ def Build_UniProtDicts(inUniProt):
         for UniProt_GeneName in UniProt_GeneNames:
             (GeneName,PrimAC) = (UniProt_GeneName, UniProt_fields[UniProtPrimAC_index])
 
-            # If the GeneName is associated with multiple Primary_AC, 
-            # it is considered a bad GeneName
-            # No GeneName is of the type "-1"
-            # So, we assign "-1" as the value to this bad GeneName to avoid using it later
+            # If the Gene Name is associated with multiple Primary_AC, 
+            # it is considered a bad Gene Name
+            # No Gene Name is of the type "-1"
+            # So, we assign "-1" as the value to this bad Gene Name to avoid using it later
             if GeneName_dict.get(GeneName, False):
                 if GeneName_dict[GeneName] != "-1":
                     GeneID_dict[GeneName] = "-1"
-                # else: GeneID is already bad => NOOP
+                # else: Gene Name is already bad => NOOP
             else:
                 GeneName_dict[GeneName] = PrimAC        
 
