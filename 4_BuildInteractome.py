@@ -6,7 +6,6 @@
 import sys, argparse
 import re
 import logging
-import time
 
 ###########################################################
 
@@ -30,7 +29,9 @@ import time
 # - Publication_Count,
 # - PMID(s) and
 # - Experiment_count
-def UniProtInteractome(inCuratedFile):
+def UniProtInteractome(inExpFile):
+
+    logging.info("Starting to run...")
 
     # Dictionary for storing Interacting
     # Proteins and Pubmed Identifier
@@ -40,42 +41,42 @@ def UniProtInteractome(inCuratedFile):
     # Proteins and Interaction Detection Method
     PPI_IntDetMethod_dict = {}
 
-    # List of User input curated interaction file(s)
-    curatedFiles = inCuratedFile
+    # List of User input PPI interaction experiments file(s)
+    PPIExpFiles = inExpFile
 
     # there can be multiple files
-    for file in curatedFiles:
+    for file in PPIExpFiles:
 
         logging.info("Processing data from File: %s" % file)
 
-        curatedIntFile = open(file)
+        PPIExpFile = open(file)
 
         # Data lines
-        for line in curatedIntFile:
+        for line in PPIExpFile:
 
             line = line.rstrip('\n')
 
-            curatedPPI_fields = line.split('\t')
+            ExpPPI_fields = line.split('\t')
 
             # Filtering out Interactions based on Interaction Detection Method
-            IntDetMethod = curatedPPI_fields[2]
+            IntDetMethod = ExpPPI_fields[2]
             # MI:0096 -> pull down
             # MI:0254 -> genetic interference
             # MI:0686 -> unspecified method
 
             ###Filtering out Interactions based on Interaction Type
-            IntType = curatedPPI_fields[4].rstrip('\n')
+            IntType = ExpPPI_fields[4].rstrip('\n')
             # MI:0407 -> direct interaction
             # MI:0915 -> physical association
 
             if IntDetMethod not in ['MI:0096', 'MI:0254', 'MI:0686'] and IntType in ['MI:0407', 'MI:0915']:
-                # curatedPPI_fields[0] -> Protein_A_UniprotPrimAC
-                # curatedPPI_fields[1] -> Protein_B_UniprotPrimAC
-                Interactors = curatedPPI_fields[0] + '_' + curatedPPI_fields[1]
+                # ExpPPI_fields[0] -> Protein_A_UniprotPrimAC
+                # ExpPPI_fields[1] -> Protein_B_UniprotPrimAC
+                Interactors = ExpPPI_fields[0] + '_' + ExpPPI_fields[1]
 
                 # Key -> UniProt PrimAC of Protein A & B joined together by an '_'
-                # Value -> Pubmed Identifier (PMID) - curatedPPI_fields[3]
-                (Int_key, PMIDs) = (Interactors, curatedPPI_fields[3])
+                # Value -> Pubmed Identifier (PMID) - ExpPPI_fields[3]
+                (Int_key, PMIDs) = (Interactors, ExpPPI_fields[3])
 
                 # Check if the Key exists in PPI_PMID_dict
                 # If yes, then store the values (PMIDs) as a list
@@ -87,8 +88,8 @@ def UniProtInteractome(inCuratedFile):
                     PPI_PMID_dict[Int_key] = [PMIDs]
 
                 # Key -> UniProt PrimAC of Protein A & B joined together by an '_'
-                # Value -> Interaction Detection Method - curatedPPI_fields[2]
-                (Int_key, IntDetMeth) = (Interactors, curatedPPI_fields[2])
+                # Value -> Interaction Detection Method - ExpPPI_fields[2]
+                (Int_key, IntDetMeth) = (Interactors, ExpPPI_fields[2])
 
                 if PPI_IntDetMethod_dict.get(Int_key, False):
                     PPI_IntDetMethod_dict[Int_key].append(IntDetMeth)
@@ -96,7 +97,7 @@ def UniProtInteractome(inCuratedFile):
                     PPI_IntDetMethod_dict[Int_key] = [IntDetMeth]
 
         # Closing the file
-        curatedIntFile.close()
+        PPIExpFile.close()
 
     # Initializing output list
     Uniprot_Interactome_list = []
@@ -122,7 +123,7 @@ def UniProtInteractome(inCuratedFile):
 
             # Final Quality Control
             # Each interaction has at least 2 experiments
-            if Exp_count >= 2:
+            if (Exp_count >= 1):
                 interaction_out_line = [Protein_A, Protein_B, str(PMID_count), Pubmed_Identifier, str(Exp_count)]
                 Uniprot_Interactome_list.append(interaction_out_line)
 
@@ -198,36 +199,37 @@ def ENSG_Gene(inCanonicalFile):
 # - Key: UniProt Primary Accession
 # - Value: Corresponding ENSG
 
-def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
+def Uniprot_ENSG(inUniProt, ENSG_Gene_dict):
 
     # Dictionary for storing UniProt Primary
     # Accession and ENSG data
     Uniprot_ENSG_dict = {}
 
-    UniprotPrimAC_File = open(inPrimAC)
+    Uniprot_File = open(inUniProt)
 
-    logging.info("Processing data from Uniprot Primary Accession File: %s" % inPrimAC)
+    logging.info("Processing data from Uniprot File: %s" % inUniProt)
 
     # Grabbing the header line
-    UniprotPrimAC_header = UniprotPrimAC_File.readline()
+    Uniprot_header = Uniprot_File.readline()
 
-    UniprotPrimAC_header = UniprotPrimAC_header.rstrip('\n')
+    Uniprot_header = Uniprot_header.rstrip('\n')
 
-    UniprotPrimAC_header_fields = UniprotPrimAC_header.split('\t')
+    Uniprot_header_fields = Uniprot_header.split('\t')
 
     # Check the column header and grab indexes of our columns of interest
     (UniProt_PrimAC_index, ENSG_index) = (-1, -1)
 
-    for i in range(len(UniprotPrimAC_header_fields)):
-        if UniprotPrimAC_header_fields[i] == 'Primary_AC':
+    for i in range(len(Uniprot_header_fields)):
+        if Uniprot_header_fields[i] == 'Primary_AC':
             UniProt_PrimAC_index = i
-        elif UniprotPrimAC_header_fields[i] == 'ENSGs':
+        elif Uniprot_header_fields[i] == 'ENSGs':
             ENSG_index = i
 
+    # Sanity check
     if not UniProt_PrimAC_index >= 0:
-        sys.exit("Error: Missing required column title 'Primary_AC' in the file: %s \n" % inPrimAC)
+        sys.exit("Error: Missing required column title 'Primary_AC' in the file: %s \n" % inUniProt)
     elif not ENSG_index >= 0:
-        sys.exit("Error: Missing required column title 'ENSG' in the file: %s \n" % inPrimAC)
+        sys.exit("Error: Missing required column title 'ENSG' in the file: %s \n" % inUniProt)
     # else grabbed the required column indices -> PROCEED
 
     # Compiling regular expressions###
@@ -251,7 +253,7 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
     multiple_CanonicalHumanENSG = 0
 
     # Data lines
-    for line in UniprotPrimAC_File:
+    for line in Uniprot_File:
         line = line.rstrip('\n')
         UniprotPrimAC_fields = line.split('\t')
 
@@ -302,7 +304,7 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
     logging.debug("No. of UniProt primary accessions with multiple canonical human ENSGs: %d " % multiple_CanonicalHumanENSG)
 
     # Closing the file
-    UniprotPrimAC_File.close()
+    Uniprot_File.close()
 
     return Uniprot_ENSG_dict
 
@@ -322,14 +324,12 @@ def Uniprot_ENSG(inPrimAC, ENSG_Gene_dict):
 def Interactome_Uniprot2ENSG(args):
 
     # Calling the functions
-    Uniprot_Interactome_list = UniProtInteractome(args.inCuratedFile)
+    Uniprot_Interactome_list = UniProtInteractome(args.inExpFile)
     ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
-    Uniprot_ENSG_dict = Uniprot_ENSG(args.inPrimAC, ENSG_Gene_dict)
+    Uniprot_ENSG_dict = Uniprot_ENSG(args.inUniProt, ENSG_Gene_dict)
 
     # Counter for UniProt Primary Accessions of proteins not mapping to ENSG
     lost_Interaction = 0
-
-    logging.info("Mapping UniProt Primary Accessions to ENSG")
 
     for data in Uniprot_Interactome_list:
 
@@ -339,9 +339,8 @@ def Interactome_Uniprot2ENSG(args):
         else:
             lost_Interaction += 1
 
-
     logging.debug("Total no. of Interactions lost: %d " % lost_Interaction)
-    logging.info("Done 🎉")
+    logging.info("All done, completed succesfully!")
 
     return
 
@@ -369,8 +368,8 @@ Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     required = file_parser.add_argument_group('Required arguments')
     optional = file_parser.add_argument_group('Optional arguments')
 
-    required.add_argument('--inCuratedFile', metavar = "Input File", dest = "inCuratedFile", nargs = '+', help = 'Output files produced by interaction_parser.py', required = True)
-    required.add_argument('--inPrimAC', metavar = "Input File", dest = "inPrimAC", help = 'Uniprot Primary Accession File generated by the uniprot parser', required = True)
+    required.add_argument('--inExpFile', metavar = "Input File", dest = "inExpFile", nargs = '+', help = 'Output files produced by interaction_parser.py', required = True)
+    required.add_argument('--inUniProt', metavar = "Input File", dest = "inUniProt", help = 'Uniprot Primary Accession File generated by the uniprot parser', required = True)
     required.add_argument('--inCanonicalFile', metavar = "Input File", dest = "inCanonicalFile", help = 'Canonical Transcripts file', required = True)
 
     args = file_parser.parse_args()
