@@ -255,29 +255,17 @@ def Uniprot_ENSG(inUniProt, ENSG_Gene_dict):
     # Data lines
     for line in Uniprot_File:
         line = line.rstrip('\n')
-        UniprotPrimAC_fields = line.split('\t')
+        Uniprot_fields = line.split('\t')
 
         # ENSG column  - This is a single string containing comma-seperated ENSGs
         # So we split it into a list that can be accessed later
-        UniProt_ENSGs = UniprotPrimAC_fields[ENSG_index].split(',')
-
-        # List for storing Human ENSG(s)
-        # for a given accession
-        human_ENSGs = []
+        UniProt_ENSGs = Uniprot_fields[ENSG_index].split(',')
 
         # List to store Human ENSG(s)
         # found in the canonical transcripts file
         canonical_human_ENSGs = []
 
-        # Eliminating Mouse ENSGs
-        for UniProt_ENSG in UniProt_ENSGs:
-            if not re_ENSMUST.match(UniProt_ENSG):
-                human_ENSGs.append(UniProt_ENSG)
-        if not human_ENSGs:
-            continue
-        Count_HumanUniprotPrimAC += 1
-
-        for ENSG in human_ENSGs:
+        for ENSG in UniProt_ENSGs:
             if ENSG in ENSG_Gene_dict.keys():
                 canonical_human_ENSGs.append(ENSG)
                 canonical_ENSG_count += 1
@@ -290,7 +278,7 @@ def Uniprot_ENSG(inUniProt, ENSG_Gene_dict):
         if len(canonical_human_ENSGs) == 0:
             no_CanonicalHumanENSG += 1
         elif len(canonical_human_ENSGs) == 1:
-            Uniprot_ENSG_dict[UniprotPrimAC_fields[UniProt_PrimAC_index]] = ''.join(canonical_human_ENSGs)
+            Uniprot_ENSG_dict[Uniprot_fields[UniProt_PrimAC_index]] = ''.join(canonical_human_ENSGs)
             single_CanonicalHumanENSG += 1
         # Also counting accessions with multiple ENSGs
         elif len(canonical_human_ENSGs) > 1:
