@@ -85,8 +85,7 @@ def uniprot_parser(UniProtinFile):
             ACs += re_AC.match(line).group(1)
         elif (re.match(r'^AC\s', line)):
             # If any AC line is missed, Exit the program with an error message
-            sys.exit("Error: Missed the AC line %s\n" + line)  
-            
+            sys.exit("Error: Missed the AC line %s\n" + line)       
         elif (re_GN.match(line)):
             GNLine = re_GN.match(line).group(1)
             # As per the UniProt documentation, the GN
@@ -236,7 +235,7 @@ def uniprot_parser(UniProtinFile):
                 except:
                     sys.exit('Error: Failed to store Gene Identifiers for the protein: \t' + ACs)    
 
-                # Writing to the output file
+                # Printing to STDOUT
                 UniProt_outline = [primary_AC, TaxID, ENSTs, ENSGs, secondary_ACs, GeneIDs, GeneNames]
                 print('\t'.join(UniProt_outline))
 
