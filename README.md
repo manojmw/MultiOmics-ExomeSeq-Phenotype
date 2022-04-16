@@ -4,8 +4,9 @@ This is the main repository containing all the scripts for my Master's thesis pr
 </br></br>
 This repository contains individual scripts. I have integrated these into @ntm's current **Exome-Seq Secondary Analysis Pipeline** ([click here](https://github.com/manojmw/grexome-TIMC-Secondary))
 </br>
+</br>
 
-**There have been significant changes to the scripts and are much faster now. I will update the README soon :)**
+**There have been SIGNIFICANT CHANGES to the scripts and are much faster now. I will update the README soon :)**
 
 </br>
 
