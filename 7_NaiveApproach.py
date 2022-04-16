@@ -8,6 +8,7 @@ import openpyxl as xl
 import scipy.stats as stats
 import gzip
 import logging
+import re
 
 ###########################################################
 
@@ -20,7 +21,9 @@ import logging
 # - Value -> Gene
 def ENSG_Gene(inCanonicalFile):
 
-     # Dictionary to store ENSG & Gene data
+    logging.info("Starting to run...")
+
+    # Dictionary to store ENSG & Gene data
     ENSG_Gene_dict = {}
 
     # Excute below code only if Canonical Transcript file is provided
@@ -311,6 +314,95 @@ def Interacting_Proteins(inInteractome):
 
 ###########################################################
 
+ # Parses the UniProt Primary Accession file produced by Uniprot_parser.py
+ # Required columns are: 'Primary_AC' and 'ENSGs' (can be in any order,
+ # but they MUST exist)
+ #
+ # Also parses the dictionary ENSG_Gene_dict
+ # returned by the function ENSG_Gene
+ #
+ # Maps UniProt Primary Accession to ENSG
+ # Returns the count of UniProt accessions with unique ENSGs
+ #
+ # Count corresponds to total human genes
+ # This count is later used for calculating
+ # Benjamini-Hochberg adjusted P-values
+def Uniprot_ENSG(inUniProt, ENSG_Gene_dict):
+
+    # Counter for accessions with single canonical human ENSG
+    Count_UniqueENSGs = 0
+
+    # Excute below code only if UniProt file is provided
+    if inUniProt:
+
+        Uniprot_File = open(inUniProt)
+
+        # Grabbing the header line
+        Uniprot_header = Uniprot_File.readline()
+
+        Uniprot_header = Uniprot_header.rstrip('\n')
+
+        Uniprot_header_fields = Uniprot_header.split('\t')
+
+        # Check the column header and grab indexes of our columns of interest
+        (UniProt_PrimAC_index, ENSG_index) = (-1, -1)
+
+        for i in range(len(Uniprot_header_fields)):
+            if Uniprot_header_fields[i] == 'Primary_AC':
+                UniProt_PrimAC_index = i
+            elif Uniprot_header_fields[i] == 'ENSGs':
+                ENSG_index = i
+
+        if not UniProt_PrimAC_index >= 0:
+            logging.error("At Step 5.2_addInteractome - Missing required column title 'Primary_AC' in the file: %s \n" % inUniProt)
+            sys.exit()
+        elif not ENSG_index >= 0:
+            logging.error("At Step 5.2_addInteractome - Missing required column title 'ENSG' in the file: %s \n" % inUniProt)
+            sys.exit()
+        # else grabbed the required column indexes -> PROCEED
+
+        # Compiling regular expression
+
+        # Eliminating Mouse ENSGs
+        re_ENSMUST = re.compile('^ENSMUSG')
+
+        # Data lines
+        for line in Uniprot_File:
+            line = line.rstrip('\n')
+            UniprotPrimAC_fields = line.split('\t')
+
+            # ENSG column  - This is a single string containing comma-seperated ENSGs
+            # So we split it into a list that can be accessed later
+            UniProt_ENSGs = UniprotPrimAC_fields[ENSG_index].split(',')
+
+            # Initializing empty lists
+            human_ENSGs = []
+            canonical_human_ENSGs = []
+
+            # Eliminating Mouse ENSGs
+            for UniProt_ENSG in UniProt_ENSGs:
+                if not re_ENSMUST.match(UniProt_ENSG):
+                    human_ENSGs.append(UniProt_ENSG)
+            if not human_ENSGs:
+                continue
+
+            # If ENSG is in the canonical transcripts file
+            # Append it to canonical_human_ENSGs
+            for ENSG in human_ENSGs:
+                if ENSG in ENSG_Gene_dict.keys():
+                    canonical_human_ENSGs.append(ENSG)
+
+            # Keeping the count of protein with single ENSGs
+            if len(canonical_human_ENSGs) == 1:
+                Count_UniqueENSGs += 1
+
+    Uniprot_File.close()
+
+    return Count_UniqueENSGs
+
+
+###########################################################
+
 # Parses the dictionaries and list returned
 # by the function: Interacting_Proteins
 # Checks the number of interactors for each gene
@@ -331,6 +423,7 @@ def Interactors_PValue(args):
     pathologies_list = getPathologies(args.inSample)
     pathology_CandidateCount = CountCandidateGenes(CandidateGene_dict, pathologies_list)
     (ProtA_dict, ProtB_dict, All_Interactors_list) = Interacting_Proteins(args.inInteractome)
+    Count_UniqueENSGs = Uniprot_ENSG(args.inUniProt, ENSG_Gene_dict)
 
     # Initializing first output list containing distinct lists
     # i.e. one Sublist per Gene
@@ -364,7 +457,7 @@ def Interactors_PValue(args):
                 if not Interactor in Interactors:
                     Interactors.append(Interactor)
 
-        Gene_AllPatho_Pvalue[ENSG_index].append(len(Interactors))            
+        Gene_AllPatho_Pvalue[ENSG_index].append(len(Interactors))     
 
         for i in range(len(pathologies_list)):
 
@@ -387,7 +480,7 @@ def Interactors_PValue(args):
 
             if Known_Interactors:
                 # Applying Fisher's exact test to calculate p-values
-                ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], len(All_Interactors_list)]]
+                ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
                 (odds_ratio, p_value) = stats.fisher_exact(ComputePvalue_data)
 
             # If there are no Known Interactors, 
@@ -429,7 +522,7 @@ def main():
 -----------------------------------------------------------------------------------------------------------------------
 Program: Parses the Interactome file generated by Interactome.py, checks the number of interactors for each gene. Next,
          parses the patient Candidate Gene file(s) and Canonical Transcripts file. Checks the number of interactors
-         that are known candidate genes, calculates P-values and prints to STDOUT in .tsv format
+         that are known candidate genes, computes P-values and prints to STDOUT in .tsv format
 -----------------------------------------------------------------------------------------------------------------------
 The output consists of following data for each line (one gene per line) :
  -> Gene Name
@@ -445,6 +538,7 @@ Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     optional = file_parser.add_argument_group('Optional arguments')
 
     required.add_argument('--inSampleFile', metavar = "Input File", dest = "inSample", help = 'Sample metadata file', required=True)
+    required.add_argument('--inUniProt', metavar = "Input File", dest = "inUniProt", help = 'Uniprot output File generated by the UniProt_parser.py')
     required.add_argument('--inCandidateFile', metavar = "Input File", dest = "inCandidateFile", nargs = '*', help = 'Candidate Genes Input File name(.xlsx)')
     required.add_argument('--inCanonicalFile', metavar = "Input File", dest = "inCanonicalFile", help = 'Canonical Transcripts file (.gz or non .gz)')
     required.add_argument('--inInteractome', metavar = "Input File", dest = "inInteractome", help = 'Input File Name (High-quality Human Interactome(.tsv) produced by Build_Interactome.py)')
