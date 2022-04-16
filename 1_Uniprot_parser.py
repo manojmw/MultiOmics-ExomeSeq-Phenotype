@@ -94,67 +94,95 @@ def uniprot_parser(UniProtinFile):
             # but that's not the case in reality
             # So we grab everything from the GN line
             # The GN line always ends with a ';' except in some cases where
-            # the records are incomplete and has a bug like
+            # the records are incomplete and has a bug like below (ends with a ',')
             # GN   Name=aadK {ECO:0000303|PubMed:17609790, ECO:0000303|PubMed:8293959,
-            #
-            # If the GN line contains any additional info other than
-            # Gene Name, it will also be seperated by a ';'
-            # Ex: GN   Name=Jon99Cii; Synonyms=SER1, SER5, Ser99Da; ORFNames=CG7877;
-            GNList = GNLine.split('; ')
-            if GNList:
-                for geneinfo in GNList:
-                    # Retrieving only the Gene Name
-                    if re.match('^Name=(\S.*)', geneinfo):
-                        GeneName = re.match('^Name=(\S.*)', geneinfo).group(1)
-                        # Sometimes, Gene Name can contain additional info
-                        # such as pubmed and other accession IDs
-                        # So, we want eliminate these from our
-                        # Gene name
-                        # Ex: GN   Name=dbaA {ECO:0000303|PubMed:23001671};
-                        try:
-                            # So we split at the ' {' and keep only the
-                            # Gene Name
-                            GeneNamewithAcID = GeneName.split(' {')
-                            GeneName = GeneNamewithAcID[0]
-                        except: 
-                            GeneName = GeneName
-                            # There can be multiple 'GN' lines, especially
-                            # when there are many synonyms
-                            # So we check to avoid adding the same gene name again
+            try:
+                # If the GN line contains any additional info other than
+                # Gene Name, it will also be seperated by a '; '
+                # Ex: GN   Name=Jon99Cii; Synonyms=SER1, SER5, Ser99Da; ORFNames=CG7877;
+                GNList = GNLine.split('; ')
+                if GNList:
+                    for geneinfo in GNList:
+                        # Retrieving only the Gene Name
+                        if re.match('^Name=(\S.*)', geneinfo):
+                            GeneNameD = re.match('^Name=(\S.*)', geneinfo).group(1)
+                            # Sometimes, Gene Name can contain additional info
+                            # such as pubmed and other accession IDs
+                            # So, we want eliminate these from our
+                            # Gene name
+                            # Ex: GN   Name=dbaA {ECO:0000303|PubMed:23001671};
+                            try:
+                                # So we split at the ' {' and keep only the
+                                # Gene Name
+                                GeneNamewithAcID = GeneNameD.split(' {')
+                                GeneName = GeneNamewithAcID[0]
+                            except: 
+                                GeneName = GeneNameD
+                                # There can be multiple 'GN' lines, especially
+                                # when there are many synonyms
+                                # So we check to avoid adding the same gene name again
+                                # Ex: 
+                                # GN   Name=Jon99Cii; Synonyms=SER1, SER5, Ser99Da; ORFNames=CG7877;
+                                # GN   Name=Jon99Ciii; Synonyms=SER2, SER5, Ser99Db; ORFNames=CG15519;
+                            if not GeneName in GeneNames:
+                                GeneNames.append(GeneName)   
+                        # retreiving synonyms for Gene Name (if it exists)            
+                        if re.match('^Synonyms=(\S.*)', geneinfo):
+                            GeneSynoinfo = re.match('^Synonyms=(\S.*)', geneinfo).group(1)
+                            GeneSynonyms = []
+                            # There can be multiple synonyms seperated by a ','
                             # Ex: 
-                            # GN   Name=Jon99Cii; Synonyms=SER1, SER5, Ser99Da; ORFNames=CG7877;
-                            # GN   Name=Jon99Ciii; Synonyms=SER2, SER5, Ser99Db; ORFNames=CG15519;
-                        if not GeneName in GeneNames:
-                            GeneNames.append(GeneName)   
-                    # retreiving synonyms for Gene Name (if it exists)            
-                    if re.match('^Synonyms=(\S.*)', geneinfo):
-                        GeneSynomatch = re.match('^Synonyms=(\S.*)', geneinfo).group(1)
-                        GeneSynonyms = []
-                        # There can be multiple synonyms seperated by a ','
-                        # Ex: 
-                        # GN   Name=Jon99Cii; Synonyms=SER1, SER5, Ser99Da;
-                        try:
-                            GeneSynonymList = GeneSynomatch.split(', ')
-                            if GeneSynonymList:
-                                # Like Gene Name, even Gene synonyms can
-                                # can contain additional info such as pubmed and other accession IDs
-                                # So, we want eliminate these and keep only the synonym name
-                                # Ex:
-                                # GN   Name=Sh3bp5; Synonyms=Sab {ECO:0000303|PubMed:10339589};
-                                for synonym in GeneSynonymList:
-                                    try:
-                                        syno_withaddinfo = synonym.split(' {')
-                                        Gsynonym = syno_withaddinfo[0]
-                                        GeneSynonyms.append(Gsynonym)
-                                    except:
-                                        GeneSynonyms.append(synonym)
-                        except:
-                            GeneSynonyms.append(GeneSynomatch)
-                        # Avoid adding the same synonym again especially
-                        # when they occur on multiple 'GN' lines
-                        for synonym in GeneSynonyms:
-                            if not synonym in GeneNames:
-                                GeneNames.append(synonym)       
+                            # GN   Name=Jon99Cii; Synonyms=SER1, SER5, Ser99Da;
+                            try:
+                                # Splitting at ',' can sometimes add additional
+                                # info of synonym to the list as well
+                                # Especially, when more than one additional info
+                                # exists for a given Gene synonym and these are also
+                                # Seperated by a ','. We eliminate this later while 
+                                # adding synonyms to the Gene Names list
+                                #
+                                # Gene name Synonym with one additional info
+                                # Ex: GN   Synonyms=ALI2 {ECO:0000250|UniProtKB:Q80ZD8}
+                                #
+                                # Gene name Synonym with more than one additional info
+                                # seperated by a ','
+                                # Ex: GN   Synonyms=OPCL1 {ECO:0000303|PubMed:18267944, ECO:0000303|PubMed:19704801};
+                                GeneSynonymList = GeneSynoinfo.split(', ')
+                                if GeneSynonymList:
+                                    # Like Gene Name, even Gene synonyms can
+                                    # can contain additional info such as pubmed and other accession IDs
+                                    # So, we want eliminate these and keep only the synonym name
+                                    # Ex:
+                                    # GN   Name=Sh3bp5; Synonyms=Sab {ECO:0000303|PubMed:10339589};
+                                    for synonym in GeneSynonymList:
+                                        try:
+                                            Gsynowithaddinfo = synonym.split(' {')
+                                            Gsynonym = Gsynowithaddinfo[0]
+                                            GeneSynonyms.append(Gsynonym)
+                                        except:
+                                            GeneSynonyms.append(synonym)
+                            except:
+                                GeneSynonyms.append(GeneSynoinfo)
+                            # Avoid adding the same synonym again especially
+                            # when they occur on multiple 'GN' lines
+                            for synonym in GeneSynonyms:
+                                # Eliminating additional info (i.e not a synonym)
+                                if not ':' in synonym:
+                                    if not synonym in GeneNames:
+                                        GeneNames.append(synonym)   
+            except:
+                # if the GN line contains only the Gene name, we do not split 
+                # Ex: GN   Name=APOM; 
+                if re.match('^Name=(\S.*)', GNLine):
+                    GeneNameD = re.match('^Name=(\S+)', GNLine).group(1)
+                    try:
+                        # When Gene Name contains additional info
+                        GeneNamewithAcID = GeneNameD.split(' {')
+                        GeneName = GeneNamewithAcID[0]
+                    except:
+                        GeneName = GeneNameD 
+                    if not GeneName in GeneNames:
+                        GeneNames.append(GeneName)     
         elif (re.match(r'^GN\s+Name.*', line)):
             sys.exit("Error: Missed the Gene Name \n" + ACs + line)  
         elif (re.match(r'^GN\s+Synonyms.*', line)):
