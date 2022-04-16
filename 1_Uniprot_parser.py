@@ -128,13 +128,13 @@ def uniprot_parser(UniProtinFile):
                             GeneNames.append(GeneName)   
                     # retreiving synonyms for Gene Name (if it exists)            
                     if re.match('^Synonyms=(\S.*)', geneinfo):
-                        GeneSynoinfo = re.match('^Synonyms=(\S.*)', geneinfo).group(1)
+                        GeneSynomatch = re.match('^Synonyms=(\S.*)', geneinfo).group(1)
                         GeneSynonyms = []
                         # There can be multiple synonyms seperated by a ','
                         # Ex: 
                         # GN   Name=Jon99Cii; Synonyms=SER1, SER5, Ser99Da;
                         try:
-                            GeneSynonymList = GeneSynoinfo.split(', ')
+                            GeneSynonymList = GeneSynomatch.split(', ')
                             if GeneSynonymList:
                                 # Like Gene Name, even Gene synonyms can
                                 # can contain additional info such as pubmed and other accession IDs
@@ -143,13 +143,13 @@ def uniprot_parser(UniProtinFile):
                                 # GN   Name=Sh3bp5; Synonyms=Sab {ECO:0000303|PubMed:10339589};
                                 for synonym in GeneSynonymList:
                                     try:
-                                        synonym = synonym.split(' {')
-                                        synonym = synonym[0]
-                                        GeneSynonyms.append(synonym)
+                                        syno_withaddinfo = synonym.split(' {')
+                                        Gsynonym = syno_withaddinfo[0]
+                                        GeneSynonyms.append(Gsynonym)
                                     except:
                                         GeneSynonyms.append(synonym)
                         except:
-                            GeneSynonyms.append(GeneSynoinfo)
+                            GeneSynonyms.append(GeneSynomatch)
                         # Avoid adding the same synonym again especially
                         # when they occur on multiple 'GN' lines
                         for synonym in GeneSynonyms:
