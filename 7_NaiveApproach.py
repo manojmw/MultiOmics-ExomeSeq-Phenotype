@@ -8,7 +8,6 @@ import openpyxl as xl
 import scipy.stats as stats
 import gzip
 import logging
-import re
 
 ###########################################################
 
@@ -361,34 +360,20 @@ def Uniprot_ENSG(inUniProt, ENSG_Gene_dict):
             sys.exit()
         # else grabbed the required column indexes -> PROCEED
 
-        # Compiling regular expression
-
-        # Eliminating Mouse ENSGs
-        re_ENSMUST = re.compile('^ENSMUSG')
-
         # Data lines
         for line in Uniprot_File:
             line = line.rstrip('\n')
-            UniprotPrimAC_fields = line.split('\t')
+            Uniprot_fields = line.split('\t')
 
             # ENSG column  - This is a single string containing comma-seperated ENSGs
             # So we split it into a list that can be accessed later
-            UniProt_ENSGs = UniprotPrimAC_fields[ENSG_index].split(',')
-
-            # Initializing empty lists
-            human_ENSGs = []
+            UniProt_ENSGs = Uniprot_fields[ENSG_index].split(',')
+            
             canonical_human_ENSGs = []
-
-            # Eliminating Mouse ENSGs
-            for UniProt_ENSG in UniProt_ENSGs:
-                if not re_ENSMUST.match(UniProt_ENSG):
-                    human_ENSGs.append(UniProt_ENSG)
-            if not human_ENSGs:
-                continue
 
             # If ENSG is in the canonical transcripts file
             # Append it to canonical_human_ENSGs
-            for ENSG in human_ENSGs:
+            for ENSG in UniProt_ENSGs:
                 if ENSG in ENSG_Gene_dict.keys():
                     canonical_human_ENSGs.append(ENSG)
 
