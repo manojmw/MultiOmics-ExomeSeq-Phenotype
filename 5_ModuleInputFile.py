@@ -17,13 +17,11 @@ import logging
 # - Edge weight = 1
 def ModuleInputFile(highqualityPPI):
 
+    logging.info("Starting to run...")
+
     highqualityPPI = sys.stdin
 
     logging.info("Processing data from Input file")
-
-    highqualityPPI.readline() # Skip header
-
-    logging.info("Preparing Output...")
 
     # Parsing the file
     for line in highqualityPPI:
@@ -32,7 +30,7 @@ def ModuleInputFile(highqualityPPI):
 
         print(Interactome_fields[0], "\t", Interactome_fields[1], "\t", 1)
 
-    logging.info("Done 🎉")
+    logging.info("All Done, completed successfully!")
 
     return
 
