@@ -123,7 +123,7 @@ def UniProtInteractome(inExpFile):
 
             # Final Quality Control
             # Each interaction has at least 2 experiments
-            if (Exp_count >= 1):
+            if (Exp_count >= 2):
                 interaction_out_line = [Protein_A, Protein_B, str(PMID_count), Pubmed_Identifier, str(Exp_count)]
                 Uniprot_Interactome_list.append(interaction_out_line)
 
