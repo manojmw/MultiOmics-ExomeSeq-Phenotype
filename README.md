@@ -102,7 +102,7 @@ python3 4_BuildInteractome.py --inExpFile Exp_Biogrid.tsv --inPrimAC uniprot_mai
 <a name="modulefile"></a>**Module Input File Generator**
 
 - Parses the output produced by `4_BuildInteractome.py`
-- Assigns a weight to each interaction and prints to STDOUT in .tsv format
+- Assigns a default edge weight = 1 for each interaction and prints to STDOUT in .tsv format
 - This can be used as INPUT for most of the module identification/clustering methods
 
 -> Generate Module Input File with:
