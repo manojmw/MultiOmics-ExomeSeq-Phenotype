@@ -203,7 +203,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
 
        - Input File description:
 
-            cluster_outputFile.tsv:    Clustering Output File produced by K1 method of MONET tool</br>
+            cluster_outputFile.tsv:    Clustering Output File produced by K1 method of MONET tool
 
 
 
