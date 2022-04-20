@@ -391,6 +391,8 @@ def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, patho
     # and pathology-specific P-values
     IntCluster_dict = {}
 
+    logging.info("Processing data from Interactome Cluster File: %s" % inClusterFile)
+
     Cluster_File = open(inClusterFile)
 
     # Compiling regular expressions
