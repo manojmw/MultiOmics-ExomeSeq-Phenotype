@@ -216,7 +216,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
       - The output produced by this tool need not be processed further and can be directly used for the 5.2_addInteractome.py script
 
   
-- You can use of any clustering methods, but the Cluster File (Please refer to the sample_clusterFile.cls file in the Sample_Input_Files directory of the repository) should contain:
+- You can use one of the above or any other clustering methods, but the Cluster File (please refer to the sample_clusterFile.cls file in the Sample_Input_Files directory of the repository) should be of the format:
 
       - Header: (Ex: #ClustnSee analysis export)</br>
       - Followed by ClusterID (Ex: ClusterID:1||)</br>
