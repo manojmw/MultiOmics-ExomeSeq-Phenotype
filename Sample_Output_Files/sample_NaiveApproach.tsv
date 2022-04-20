@@ -1,9 +1,9 @@
 Gene	 Total_Interactors	 NOA_KnownInteractorsCount	NOA_KnownInteractors	NOA_Pvalue	MMAF_KnownInteractorsCount	MMAF_KnownInteractors	MMAF_Pvalue	Macro_KnownInteractorsCount	Macro_KnownInteractors	Macro_Pvalue	CTRL_KnownInteractorsCount	CTRL_KnownInteractors	CTRL_Pvalue	OMD_KnownInteractorsCount	OMD_KnownInteractors	OMD_Pvalue	Terato_KnownInteractorsCount	Terato_KnownInteractors	Terato_Pvalue	Globo_KnownInteractorsCount	Globo_KnownInteractors	Globo_Pvalue	FCouches_KnownInteractorsCount	FCouches_KnownInteractors	FCouches_Pvalue	Headless_KnownInteractorsCount	Headless_KnownInteractors	Headless_Pvalue	AST_KnownInteractorsCount	AST_KnownInteractors	AST_Pvalue	FF_KnownInteractorsCount	FF_KnownInteractors	FF_Pvalue	POF_KnownInteractorsCount	POF_KnownInteractors	POF_Pvalue	prePRM2_KnownInteractorsCount	prePRM2_KnownInteractors	prePRM2_Pvalue	PreImpA_KnownInteractorsCount	PreImpA_KnownInteractors	PreImpA_Pvalue	Necro_KnownInteractorsCount	Necro_KnownInteractors	Necro_Pvalue	OA_KnownInteractorsCount	OA_KnownInteractors	OA_Pvalue
 SYNJ1	42	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1
 SH3GL1	52	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1
-DECR2	10	1	XXX	0.0795553846935022	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1
+PRRC2A	20	1	MAD2L2	0.14633767596725400	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1
 MCM7	94	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1
-BRAP	43	0		1	1	XXX	0.08338480377919210	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1
+CTNNB1	21	1	AR	0.1527415787597180	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	1	AR	0.10915512096705100	0		1	0		1	0		1	0		1
 FBXO4	13	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1
 FBXL3	10	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1
 FBXW2	23	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1	0		1
