@@ -50,9 +50,9 @@ Program: Parses the output file produced by the K1 method of MONET tool (DREAM C
 -----------------------------------------------------------------------------------------------------------------------------------------------
 Usage:
 
-    % python 6_K1DREAM_ClustersSizeGT2.py < Input file
-                        OR
-    % cat Input file | python 6_K1DREAM_ClustersSizeGT2.py
+    % python3 9_ProcessClusterFile_MONET.py < File                         
+                        OR    
+    % cat File | python3 9_ProcessClusterFile_MONET.py   
 
 The output consists of:
  -> Cluster ID followed by '||'
