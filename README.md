@@ -203,7 +203,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
 
        - Input File description:
 
-            cluster_outputFile.tsv:    Clustering Output File produced by K1 method of MONET tool
+            cluster_outputFile.tsv:    Clustering Output File produced by K1 method of MONET tool</br>
 
 
 
@@ -216,7 +216,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
       - The output produced by this tool need not be processed further and can be directly used for the 5.2_addInteractome.py script
 
   
-- You can use of any clustering methods, but the cluster output file should contain (Please refer to the sample_clusterFile.cls file in the Sample_Input_Files directory of the repository):
+- You can use of any clustering methods, but the Cluster File (Please refer to the sample_clusterFile.cls file in the Sample_Input_Files directory of the repository) should contain:
 
     -> Header: (Ex: #ClustnSee analysis export)</br>
     -> Followed by ClusterID (Ex: ClusterID:1||)</br>
