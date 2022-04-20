@@ -199,7 +199,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
 
        - If you will be using the file produced by this method, then please process it using ProcessClusterFile_MONET.py script using the command:
 
-         % cat cluster_outputFile.tsv | python3 ProcessClusterFile_MONET.py > K1Clustering_clusterFile.cls
+         % cat cluster_outputFile.tsv | python3 9_ProcessClusterFile_MONET.py > K1Clustering_clusterFile.cls
 
        - Input File description:
 
