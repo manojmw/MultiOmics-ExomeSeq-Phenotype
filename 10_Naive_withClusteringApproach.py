@@ -521,10 +521,11 @@ def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, patho
 #       - List of Known Interactors
 #       - Known Interactors P-value
 #       - If a gene is 'PRESENT' in an Enriched Cluster
+#       - ClusterID (if enriched)
+#       - Size of the Cluster
 #       - The Cluster associated P-value
 def Interactors_PValue(args):
 
-    # Calling the functions
     # Calling the functions
     ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
     CandidateGene_dict = CandidateGeneParser(args.inCandidateFile, ENSG_Gene_dict)
@@ -618,17 +619,24 @@ def Interactors_PValue(args):
                     # and add the P-value associated with this cluster for the current pathology
                     if clusterPatho_Pvalue != 1:
                         Output_eachPatho.append('PRESENT')
+                        Output_eachPatho.append(cluster)
+                        # We know that clusterID is the key and value is a dictionary
+                        # containing 2 types of key/value pair (including pathology-specific information)
+                        # So, size of the cluster will be excluding pathology information (i.e pathology key/value pair)
+                        Cluster_size = len(IntCluster_dict[cluster]) - len(pathologies_list)
+                        Output_eachPatho.append(Cluster_size)
                         Output_eachPatho.append(clusterPatho_Pvalue)
                         break
 
             # If the gene is not present in any cluster
             # This can happen as we eliminate clusters with size < 2
-            # So we append an empty string and assign P-value = 1
+            # So we append empty values and assign P-value = 1
             # similar to a gene that is present in a cluster but not 
             # enriched for the current pathology
             if len(Output_eachPatho) == 3:
-                Output_eachPatho.append('')
-                Output_eachPatho.append(1)
+                no_cluster_data = ['', '', 0, 1]
+                for empty_data in no_cluster_data:
+                    Output_eachPatho.append(empty_data)
             else: # len(Output_eachPatho) is 5
                 # The gene was present in one of the clusters that
                 # is enriched for the current pathology
@@ -641,7 +649,7 @@ def Interactors_PValue(args):
         Gene_AllPatho_Pvalue[ENSG_index][0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[ENSG_index][0]]
 
     # Printing header
-    Patho_header_list = [[patho+'_KnownInteractorsCount', patho+'_KnownInteractors', patho+'_Pvalue', patho+'_Enriched_Cluster', patho+'_Enriched_Cluster_Pvalue'] for patho in pathologies_list]
+    Patho_header_list = [[patho+'_KnownInteractorsCount', patho+'_KnownInteractors', patho+'_Pvalue', patho+'_Enriched_Cluster', patho+'_Enriched_Cluster_ID', patho+'_Enriched_Cluster_Size', patho+'_Enriched_Cluster_Pvalue'] for patho in pathologies_list]
     print('Gene\t', 'Total_Interactors\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]))
 
     for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
@@ -670,6 +678,8 @@ The output consists of following data for each line (one gene per line) :
     - List of Known Interactors
     - Known Interactors P-value
     - If a gene is 'PRESENT' in an Enriched Cluster
+    - ClusterID (if enriched)
+    - Size of the Cluster
     - The Cluster associated P-value
 -------------------------------------------------------------------------------------------------------------------------
 
