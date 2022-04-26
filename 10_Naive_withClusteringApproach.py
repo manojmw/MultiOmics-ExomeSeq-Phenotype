@@ -26,8 +26,6 @@ def ENSG_Gene(inCanonicalFile):
     # Dictionary to store ENSG & Gene data
     ENSG_Gene_dict = {}
 
-    logging.info("Processing data from Canonical Transcripts File: %s" % inCanonicalFile)
-
     # Opening canonical transcript file (gzip or non-gzip)
     try:
         if inCanonicalFile.endswith('.gz'):
@@ -99,8 +97,6 @@ def CandidateGeneParser(inCandidateFile, ENSG_Gene_dict):
 
     # Data lines
     for file in candidate_files:
-
-        logging.info("Processing data from Candidate Gene File: %s" % file)
 
         # Creating a workbook object 
         candF_wbobj = xl.load_workbook(file)
@@ -185,8 +181,6 @@ def getPathologies(inSample):
 
     sampleFile = inSample
 
-    logging.info("Processing data from Sample metadata File: %s" % sampleFile)
-
     # List for storing pathologies
     pathologies_list = []
 
@@ -263,8 +257,6 @@ def Interacting_Proteins(inInteractome):
         
     # Input - Interactome file
     Interactome_File = open(inInteractome)
-
-    logging.info("Processing data from Interactome File: %s" % inInteractome)
 
     # Data lines
     for line in Interactome_File:
@@ -391,8 +383,6 @@ def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, patho
     # and pathology-specific P-values
     IntCluster_dict = {}
 
-    logging.info("Processing data from Interactome Cluster File: %s" % inClusterFile)
-
     Cluster_File = open(inClusterFile)
 
     # Compiling regular expressions
@@ -506,6 +496,160 @@ def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, patho
 
 ###########################################################
 
+# Parses a GTEX file
+#
+# Extracts the required data
+
+# Returns a dictionary and a list
+# Dictionary contains"
+# - Key: ENSG (from the Gene ID column)
+# - Value: List of GTEX favourite tissue ratios (calculated) 
+#          and tissue-specific GTEX tpm values
+# List contains newly built GTEX header
+def getGTEX(inGTEXFile):
+
+    GTEXFile = open(inGTEXFile)
+
+    # A list to store favorite tissues
+    # Working on Infertility here
+    favouriteTissues = ['testis', 'ovary']
+
+    favouriteTissIndex = [-1, -1]
+
+    # Dicitionary to store GTEX data
+    GTEX_dict = {}
+
+    for line in GTEXFile:
+
+        line = line.rstrip("\n\r")
+
+        if line.startswith("#"): # Skip Comment lines
+            continue
+
+        elif line.startswith("Gene ID"): # Header line
+
+            # next line is a header line
+            GTEX_header_line = line
+
+            # Sanity Check
+            if not GTEX_header_line.startswith("Gene ID"):
+                logging.error("Line should be GTEX header but can't parse it %s" % GTEX_header_line)
+                sys.exit()
+            else:
+                tissues = GTEX_header_line.split('\t')
+                tissues = tissues[2:]
+
+            # Check the column headers and grab indexes of our columns of interest
+            for i in range(len(tissues)):
+                for fti in range(len(favouriteTissues)):
+                    if tissues[i] == favouriteTissues[fti]:
+                        if favouriteTissIndex[fti] != -1:
+                            logging.error("Found favorite tissue %s twice" % tissues[i])
+                            sys.exit()
+                        else:
+                            favouriteTissIndex[fti] = i
+                            break 
+                tissues[i].replace(" ", "_")
+                tissues[i] = 'GTEX_'+tissues[i]
+
+            
+            # FavTissues Index Sanity Check
+            for fti in range(len(favouriteTissues)):
+                if favouriteTissIndex[fti] == -1:
+                    logging.error("Could not find favorite tissue %s column in header" % favouriteTissues[fti])
+                    sys.exit()
+
+        else:
+            GTEX_data = line.split('\t')
+            if not len(GTEX_data) == len(tissues) + 2:
+                logging.error("Wrong number of fields in the line %s" % line)
+                sys.exit()
+            
+            # Grab ENSG
+            ENSG = GTEX_data.pop(0)
+
+            if ENSG in GTEX_dict:
+                logging.error("ENSG "+ENSG+" present twice in GTEX file %s" % line)
+                sys.exit()
+
+            # The second column is Gene name 
+            # We want to ignore this column
+            # So we remove it from GTEX_data
+            GTEX_data.pop(0)
+
+            # thisGTEX: list of strings holding expression values, one per tissue
+            thisGTEX = [""] * len(tissues)
+
+            # calculated GTEX ratio for each favorite tissue
+            favTissRatios = [""] * len(favouriteTissues)
+
+            # for calculating GTEX_*_RATIO:
+            # sum of all GTEX values
+            sumOfGtex = 0
+
+            # number of defined GTEX values
+            numberOfGtex = 0
+
+            for i in range(len(GTEX_data)):
+                if GTEX_data[i] == '':
+                    thisGTEX[i] = 0
+                    sumOfGtex += 0
+                else:    
+                    thisGTEX[i] = float(GTEX_data[i])
+                    sumOfGtex += float(GTEX_data[i])
+                numberOfGtex += 1
+
+            # favExp / averageExp == favExp / (sumOfGtex / numberOfGtex) == favExp * numberOfGtex / sumOfGtex
+            # so make sure we can divide by sumOfGtex
+            if sumOfGtex == 0:
+                logging.error("Sum of GTEX values is zero for gene "+ENSG+", impossible %s" % line)
+                sys.exit()
+
+            for ti in range(len(favouriteTissIndex)):
+                favTissRatios[ti] = thisGTEX[favouriteTissIndex[ti]] * numberOfGtex / sumOfGtex
+
+            # List to store GTEX_RATIOs first, then favorites, then others
+            toPrint = []
+
+            for favTissRatio in favTissRatios:
+                # print max 2 digits after decimal
+                favTR = round(favTissRatio, 2)
+                toPrint.append(favTR)
+
+            for fti in favouriteTissIndex:
+                toPrint.append(thisGTEX[fti])
+            
+            for i in range(len(tissues)):
+                if i in favouriteTissIndex:
+                    continue
+                else:
+                    toPrint.append(thisGTEX[i])
+            
+            GTEX_dict[ENSG] = toPrint
+    
+    # List to store new GTEX header
+    newGTEXHeader = []
+
+    for ft in favouriteTissues:
+        GTEXRatioheader = "GTEX_"+ft+"_RATIO"
+        newGTEXHeader.append(GTEXRatioheader)
+
+    for fti in favouriteTissIndex:
+        newGTEXHeader.append(tissues[fti])
+    
+    for i in range(len(tissues)):
+        if i in favouriteTissIndex:
+            continue
+        else:
+            newGTEXHeader.append(tissues[i])
+ 
+    GTEXFile.close()
+        
+    return GTEX_dict, newGTEXHeader
+            
+
+###########################################################
+
 # Parses the dictionaries and list returned
 # by the function: Interacting_Proteins
 # Checks the number of interactors for each gene
@@ -524,6 +668,7 @@ def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, patho
 #       - ClusterID (if enriched)
 #       - Size of the Cluster
 #       - The Cluster associated P-value
+# -> GTEX data
 def Interactors_PValue(args):
 
     # Calling the functions
@@ -534,6 +679,7 @@ def Interactors_PValue(args):
     (ProtA_dict, ProtB_dict, All_Interactors_list) = Interacting_Proteins(args.inInteractome)
     Count_UniqueENSGs = Uniprot_ENSG(args.inUniProt, ENSG_Gene_dict)
     IntCluster_dict = Build_ClusterDict(args.inClusterFile, CandidateGene_dict, pathologies_list, pathology_CandidateCount, Count_UniqueENSGs)
+    (GTEX_dict, newGTEXHeader) = getGTEX(args.inGTEXFile)
 
     # Initializing first output list containing distinct lists
     # i.e. one Sublist per Gene
@@ -543,12 +689,22 @@ def Interactors_PValue(args):
     # - Known Interactors count, list of Known Interactors, P-value (for each pathology)
     Gene_AllPatho_Pvalue = [[] for i in range(len(All_Interactors_list))]
 
-    logging.info("Processing data, Checking Interactors and Computing P-values...")
-
     # Checking the number of interactors for each gene
     for ENSG_index in range(len(All_Interactors_list)):
 
         Gene_AllPatho_Pvalue[ENSG_index].append(All_Interactors_list[ENSG_index])
+        
+        Known_Pathology = []
+
+        # Checking if the gene is a known candidate gene for any pathology
+        if All_Interactors_list[ENSG_index] in CandidateGene_dict:
+            for patho in CandidateGene_dict[All_Interactors_list[ENSG_index]]:
+                Known_Pathology.append(patho)
+        
+        # Storing Known Known_Pathologies as a single comma seperated string
+        Known_Pathologystr = ','.join(patho for patho in Known_Pathology)
+
+        Gene_AllPatho_Pvalue[ENSG_index].append(Known_Pathologystr)
 
         # List of interactors
         Interactors = []
@@ -645,12 +801,19 @@ def Interactors_PValue(args):
             for data in Output_eachPatho:
                 Gene_AllPatho_Pvalue[ENSG_index].append(data)
 
+        # Adding GTEX Data
+        if All_Interactors_list[ENSG_index] in GTEX_dict:
+            for GTEX_value in GTEX_dict[All_Interactors_list[ENSG_index]]:
+                Gene_AllPatho_Pvalue[ENSG_index].append(GTEX_value)
+        else: 
+            pass 
+
         # Getting the Gene name for the ENSG
         Gene_AllPatho_Pvalue[ENSG_index][0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[ENSG_index][0]]
 
     # Printing header
-    Patho_header_list = [[patho+'_KnownInteractorsCount', patho+'_KnownInteractors', patho+'_Pvalue', patho+'_Enriched_Cluster', patho+'_Enriched_Cluster_ID', patho+'_Enriched_Cluster_Size', patho+'_Enriched_Cluster_Pvalue'] for patho in pathologies_list]
-    print('Gene\t', 'Total_Interactors\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]))
+    Patho_header_list = [[patho+'_INTERACTORS_COUNT', patho+'_INTERACTORS', patho+'_INTERACTORS_PVALUE', patho+'_ENRICHED_CLUSTER', patho+'_ENRICHED_CLUSTER_ID', patho+'_Enriched_Cluster_Size', patho+'_ENRICHED_CLUSTER_PVALUE'] for patho in pathologies_list]
+    print('GENE\t', 'KNOWN_CANDIDATE_GENE\t', 'TOTAL_INTERACTORS\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]), '\t', '\t'.join(GTEXHeader for GTEXHeader in newGTEXHeader))
 
     for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
         print('\t'.join(str(eachGene_AllPatho_data) for eachGene_AllPatho_data in Gene_AllPatho_Pvalue[Gene_AllPathoIndex]))
@@ -667,8 +830,8 @@ def main():
     """
 --------------------------------------------------------------------------------------------------------------------------
 Program: Parses the Interactome file generated by Interactome.py, checks the number of interactors for each gene. Next,
-         parses the Candidate Gene file(s) and Canonical Transcripts file. Checks the number of interactors that are 
-         known candidate genes, computes P-values. Further, adds cluster specific data and prints to STDOUT in .tsv format
+         parses the Candidate Gene file(s) and Canonical Transcripts file. Adds Interactome and GTEX data and prints 
+         to STDOUT in .tsv format
 --------------------------------------------------------------------------------------------------------------------------
 The output consists of following data for each line (one gene per line) :
  -> Gene Name
@@ -681,6 +844,7 @@ The output consists of following data for each line (one gene per line) :
     - ClusterID (if enriched)
     - Size of the Cluster
     - The Cluster associated P-value
+ -> GTEX data
 -------------------------------------------------------------------------------------------------------------------------
 
 Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
@@ -696,6 +860,7 @@ Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     required.add_argument('--inCanonicalFile', metavar = "Input File", dest = "inCanonicalFile", help = 'Canonical Transcripts file (.gz or non .gz)', required=True)
     required.add_argument('--inInteractome', metavar = "Input File", dest = "inInteractome", help = 'Input File Name (High-quality Human Interactome(.tsv) produced by Build_Interactome.py)', required=True)
     required.add_argument('--inClusterFile', metavar = "Input File", dest = "inClusterFile", help = 'Cluster output file produced by clustering methods (If required, processed by appropriate ProcessClusterFile_*.py script', required=True)
+    required.add_argument('--inGTEXFile', metavar = "Input File", dest = "inGTEXFile", help = 'GTEX Input File name', required=True)
 
     args = file_parser.parse_args()
     Interactors_PValue(args)
