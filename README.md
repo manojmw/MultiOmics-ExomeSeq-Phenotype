@@ -185,12 +185,11 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
 ## Interactome Clustering Methods
 
 - We consider Clusters with a size of >= 2 and 100 (max)
-- If the cluster size exceeds 100, the methods are applied recursively to obtain clusters of desired size.
-- I have tested mainly two types of clustering methods:
+- If the cluster size exceeds 100, the methods are applied recursively (MONET tool automatically does this) to obtain clusters of desired size.
+- I have tested mainly three types of clustering methods:
 
    1] Kernel clustering approach (top ranking method K1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
    
-   </br>
    
    2] Modularity Optimization method (top ranking method M1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
 
@@ -220,6 +219,8 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
 
   
 - You can use one of the above or any other clustering methods, but the Cluster File (please refer to the sample_clusterFile.cls file in the Sample_Input_Files directory of the repository) should be of the format:
+
+   </br>
 
       - Header: (Ex: #ClustnSee analysis export)</br>
       - Followed by ClusterID (Ex: ClusterID:1||)</br>
