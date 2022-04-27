@@ -18,7 +18,7 @@ This repository contains individual scripts. I have integrated these into the cu
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
    - [Naïve Approach (Machine Learning Score Component 1)](#NaïveApproach)
-   - [DREAM Challenge: K1 method Output Processing](#ProcessMonet)
+   - [DREAM Challenge: Cluster File Processing](#ProcessMonet)
    - [Naïve with Clustering Approach (Machine Learning Score Component 1 & 2)](#NaïvewithClusteringApproach)
 - [Output](#output)
 - [Interactome Clustering Methods](#Interactome-Clustering-Methods)
