@@ -549,7 +549,7 @@ def getGTEX(inGTEXFile):
                         else:
                             favouriteTissIndex[fti] = i
                             break 
-                tissues[i].replace(" ", "_")
+                tissues[i] = tissues[i].replace(" ", "_")
                 tissues[i] = 'GTEX_'+tissues[i]
 
             
