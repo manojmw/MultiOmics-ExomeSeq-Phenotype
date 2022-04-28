@@ -5,7 +5,7 @@ This is the main repository containing all the scripts for my Master's thesis pr
 This repository contains individual scripts. I have integrated these into the current **Exome-Seq Secondary Analysis Pipeline** ([click here](https://github.com/manojmw/grexome-TIMC-Secondary))
 </br>
 
-**The scripts have changed a bit (additionally adds GTEX data, checks if a gene is already a known candidate gene and also adds ClusterID & Size) I will update the README soon**
+**The scripts have changed a bit (additionally adds GTEX data, checks if a gene is already a known candidate gene and also adds ClusterID & Size). I will update the README soon**
 
 </br>
 
@@ -17,9 +17,9 @@ This repository contains individual scripts. I have integrated these into the cu
    - [Build Interactome (True Binary Interactions with Expansion)](#interactomebinarywithexpansion)
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
-   - [Naïve Approach (Machine Learning Score Component 1)](#NaïveApproach)
+   - [Naïve Approach](#NaïveApproach)
    - [DREAM Challenge: Cluster File Processing](#ProcessMonet)
-   - [Naïve with Clustering Approach (Machine Learning Score Component 1 & 2)](#NaïvewithClusteringApproach)
+   - [Naïve with Clustering Approach](#NaïvewithClusteringApproach)
 - [Output](#output)
 - [Interactome Clustering Methods](#Interactome-Clustering-Methods)
 - [Arguments](#Arguments)
@@ -145,7 +145,7 @@ python3 7_Uniprot2ENSG.py --inUniProt Uniprot_output.tsv --inCanonicalFile canon
 ```                      
 </br>
 
-<a name="NaïveApproach"></a>**Naïve Approach (Machine Learning Score Component 1)**
+<a name="NaïveApproach"></a>**Naïve Approach**
 - Parses the Sample metadata file (.xlsx), UniProt File, Canonical transcripts file, Candidate Gene file(s), Interactome file and GTEX File
 - Checks the number of Interactors for each gene
 - Checks the number of Interactors that are known candidate genes
@@ -168,7 +168,7 @@ python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniProt Uniprot_output
 
 </br>
 
-<a name="NaïvewithClusteringApproach"></a>**Naïve with Clustering Approach (Machine Learning Score Component 1 & 2)**
+<a name="NaïvewithClusteringApproach"></a>**Naïve with Clustering Approach**
 - This script is similar to `8_NaiveApproach.py`, but the output additionally contains Interactome Clustering data
 
 -> Run 10_Naive_withClusteringApproach.py script with:
@@ -253,6 +253,9 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
 
 # Interactome File
    --inInteractome                      High-Quality Interactome Input File name (produced by 4_BuildInteractome_BinaryPPIonly.py/5_BuildInteractome_BinaryPPIwithExpansion.py)
+   
+# GTEX File
+   --inGTEXFile                         GTEX Input File name
 
 # Help
    -h, --help                           Show the help message and exit
@@ -288,7 +291,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
 * External dependencies are kept to minimum in all the scripts. The only required python modules are listed below: </br>
   - OpenPyXl 
   - SciPy
-  - You can install these with pip/conda Ex: pip3 install openpyxl scipy OR conda install openpyxl scipy
+* You can install these with pip/conda Ex: pip3 install openpyxl scipy OR conda install openpyxl scipy
 * Most other standard core modules should already be available on your system
 
 ## License
