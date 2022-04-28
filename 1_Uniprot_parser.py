@@ -31,8 +31,6 @@ def uniprot_parser(UniProtinFile):
 
     UniProtinFile = sys.stdin
 
-    logging.info("Processing data from the Input File")
-
     # Header line
     UniProt_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs', 'Secondary_ACs', 'GeneIDs', 'GeneNames']
     print('\t'.join(UniProt_header))

@@ -21,8 +21,6 @@ def ModuleInputFile(highqualityPPI):
 
     highqualityPPI = sys.stdin
 
-    logging.info("Processing data from Input file")
-
     # Parsing the file
     for line in highqualityPPI:
         line = line.rstrip('\n') # remove carriage returns
