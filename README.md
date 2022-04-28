@@ -233,7 +233,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
 
 ```shell
 # UniProt Files
-   --inUniProt                         A tab-seperated Input File name (produced by 1_Uniprot_parser.py) containing UniProt Primary Accession, Taxonomy Identifier, ENST(s), ENSG(s), UniProt Secondary Accession(s), Gene ID(s) & Gene name(s)
+   --inUniProt                          A tab-seperated Input File name (produced by 1_Uniprot_parser.py) containing UniProt Primary Accession, Taxonomy Identifier, ENST(s), ENSG(s), UniProt Secondary Accession(s), Gene ID(s) & Gene name(s)
 
 # Protein-Protein Interaction File(s)                                     
    --inInteraction                      miTAB 2.5 or 2.7 Input File name (Protein-Protein Interaction File)
