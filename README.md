@@ -76,7 +76,7 @@ python3 Interaction_parser.py --inInteraction BIOGRID-ORGANISM-Homo_sapiens*.mit
 
 -> Provide a STDIN miTAB 2.5 or 2.7 file with:
 ```console
-python3 3_Count_HumanPPIExp.py < BIOGRID-ORGANISM-Homo_sapiens-*.mitab.txt
+python3 3_Count_HumanPPIExp.py < miTAB File
 ```                   
 
 </br>
@@ -146,7 +146,7 @@ python3 7_Uniprot2ENSG.py --inUniProt Uniprot_output.tsv --inCanonicalFile canon
 </br>
 
 <a name="NaïveApproach"></a>**Naïve Approach (Machine Learning Score Component 1)**
-- Parses the Sample metadata file (.xlsx), UniProt File, Canonical transcripts file, Candidate Gene file(s) & Interactome file
+- Parses the Sample metadata file (.xlsx), UniProt File, Canonical transcripts file, Candidate Gene file(s), Interactome file and GTEX File
 - Checks the number of Interactors for each gene
 - Checks the number of Interactors that are known candidate genes
 - Next, applies Fisher's Exact test to compute P-values
@@ -155,7 +155,7 @@ python3 7_Uniprot2ENSG.py --inUniProt Uniprot_output.tsv --inCanonicalFile canon
 
 -> Run 8_NaiveApproach.py script with:
 ```console
-python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniProt Uniprot_output.tsv --inCandidateFile candidateGenes.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human.tsv
+python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniProt Uniprot_output.tsv --inCandidateFile candidateGenes.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human.tsv 
 ```      
 
 </br>
@@ -169,7 +169,7 @@ python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniProt Uniprot_output
 </br>
 
 <a name="NaïvewithClusteringApproach"></a>**Naïve with Clustering Approach (Machine Learning Score Component 1 & 2)**
-- This script is similar to Naive Approach but produces output holding additional Interactome Clustering data
+- This script is similar to `8_NaiveApproach.py`, but the output additionally contains Interactome Clustering data
 
 -> Run 10_Naive_withClusteringApproach.py script with:
 ```console
@@ -222,9 +222,9 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
 
    </br>
 
-      - Header: (Ex: #ClustnSee analysis export)</br>
-      - Followed by ClusterID (Ex: ClusterID:1||)</br>
-      - Followed by Name(ENSG) of the Cluster(s) (Ex: ENSG00000162819)</br>
+      - Header: (Ex: #ClustnSee analysis export)
+      - Followed by ClusterID (Ex: ClusterID:1||)
+      - Followed by Name(ENSG) of the Cluster(s) (Ex: ENSG00000162819)
       - End of a given Cluster is indicated by an empty line
 
 
