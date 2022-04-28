@@ -3,9 +3,6 @@
 This is the main repository containing all the scripts for my Master's thesis project. Here, I am developing a Multi-Omics method to score genomic variants that might be causal for a particular phenotype in the patient. (**Currently in progress, I will add more scripts - such as those that provide scoring component for the Machine Learning step**). 
 </br></br>
 This repository contains individual scripts. I have integrated these into the current **Exome-Seq Secondary Analysis Pipeline** ([click here](https://github.com/manojmw/grexome-TIMC-Secondary))
-</br>
-
-**The scripts have changed a bit (additionally adds GTEX data, checks if a gene is already a known candidate gene and also adds ClusterID & Size). I will update the README soon**
 
 </br>
 
@@ -64,7 +61,7 @@ unzip BIOGRID-ORGANISM-LATEST.mitab
 -> This will produce one miTAB file per Organism (Use BIOGRID-ORGANISM-Homo_sapiens*.mitab.txt for human data)
 -> Parse PPI data with:
 ```console
-python3 Interaction_parser.py --inInteraction BIOGRID-ORGANISM-Homo_sapiens*.mitab.txt --inUniProt Uniprot_output.tsv > Exp_Biogrid.tsv
+python3 Interaction_parser.py --inInteraction BIOGRID-ORGANISM-Homo_sapiens*.mitab.txt --inUniprot Uniprot_output.tsv > Exp_Biogrid.tsv
 ```
 
 </br>
@@ -97,7 +94,7 @@ python3 3_Count_HumanPPIExp.py < miTAB File
 
 -> Build High-Quality Human Interactome with:      
 ```console
-python3 4_BuildInteractome_BinaryPPIonly.py --inExpFile Exp_Biogrid.tsv --inUniProt Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human_binaryonly.tsv
+python3 4_BuildInteractome_BinaryPPIonly.py --inExpFile Exp_Biogrid.tsv --inUniprot Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human_binaryonly.tsv
 ```                      
 -> For getting `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
 
@@ -117,7 +114,7 @@ python3 4_BuildInteractome_BinaryPPIonly.py --inExpFile Exp_Biogrid.tsv --inUniP
 
 -> Build High-Quality Human Interactome with:      
 ```console
-python3 5_BuildInteractome_BinaryPPIwithExpansion.py --inExpFile Exp_Biogrid.tsv --inUniProt Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human_binarywithexpansion.tsv
+python3 5_BuildInteractome_BinaryPPIwithExpansion.py --inExpFile Exp_Biogrid.tsv --inUniprot Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human_binarywithexpansion.tsv
 ```                      
 
 </br>
@@ -257,7 +254,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt
    --inInteractome                      High-Quality Interactome Input File name (produced by 4_BuildInteractome_BinaryPPIonly.py/5_BuildInteractome_BinaryPPIwithExpansion.py)
    
 # GTEX File
-   --inGTEXFile                         GTEX Input File name
+   --inGTEXFile                         GTEX Input File name (.tsv)
 
 # Help
    -h, --help                           Show the help message and exit
