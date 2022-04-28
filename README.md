@@ -141,7 +141,7 @@ python3 6_ModuleInputFile.py < Interactome_human_binaryonly.tsv
 
 -> Run UniProt2ENSG Mapper with:
 ```console
-python3 7_Uniprot2ENSG.py --inUniProt Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
+python3 7_Uniprot2ENSG.py --inUniprot Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
 ```                      
 </br>
 
@@ -150,13 +150,15 @@ python3 7_Uniprot2ENSG.py --inUniProt Uniprot_output.tsv --inCanonicalFile canon
 - Checks the number of Interactors for each gene
 - Checks the number of Interactors that are known candidate genes
 - Next, applies Fisher's Exact test to compute P-values
+- Additionally adds GTEX data
 - Prints to STDOUT in .tsv format
 - This script provides the first scoring component for the Machine Learning step
 
 -> Run 8_NaiveApproach.py script with:
 ```console
-python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniProt Uniprot_output.tsv --inCandidateFile candidateGenes.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human.tsv 
+python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_output.tsv --inCandidateFile candidateGenes.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human.tsv --inGTEXFile E-MTAB-5214-query-results.tpms.tsv
 ```      
+-> You can use the GTEX file provided in this repository. (**Note**: The GTEX file provided in the repository might not be the latest. If you want to retrieve the latest GTEX file, please visit https://www.ebi.ac.uk/gxa/home).  
 
 </br>
 
@@ -173,7 +175,7 @@ python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniProt Uniprot_output
 
 -> Run 10_Naive_withClusteringApproach.py script with:
 ```console
-python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt Uniprot_out.tsv --inCandidateFile candidateGenes_*.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human --inClusterFile K1Clustering_clusterFile.cls
+python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt Uniprot_out.tsv --inCandidateFile candidateGenes_*.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human --inClusterFile K1Clustering_clusterFile.cls --inGTEXFile E-MTAB-5214-query-results.tpms.tsv
 ```
 
 ## Output
