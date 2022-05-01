@@ -173,7 +173,7 @@ python3 7_Uniprot2ENSG.py --inUniprot Uniprot_output.tsv --inCanonicalFile canon
    * Next, applies Fisher's Exact test to compute P-values
    * Additionally adds GTEX data
    * Prints to STDOUT in .tsv format
-- This script provides the first scoring component for the Machine Learning step
+- This script provides one of the scoring components for the Machine Learning step
 
 -> Run 8_NaiveApproach.py script with:
 ```console
@@ -198,6 +198,7 @@ python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_output
 ```console
 python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_out.tsv --inCandidateFile candidateGenes_*.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human --inClusterFile K1Clustering_clusterFile.cls --inGTEXFile E-MTAB-5214-query-results.tpms.tsv
 ```
+- Clustering data provides additional scoring component for the Machine Learning step
 
 ## Output
 
