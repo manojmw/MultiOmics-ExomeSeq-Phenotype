@@ -26,9 +26,6 @@ This repository contains individual scripts. I have integrated these into the cu
 
 ## Example Usage
 
--> For details regarding arguments, please refer to the `Arguments` section
-</br>
-
 <a name="uniprotparser"></a>**UniProt Parser**
 
 - Parses on STDIN a UniProt file and extracts the required data from each record
