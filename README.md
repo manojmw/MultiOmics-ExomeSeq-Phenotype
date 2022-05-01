@@ -145,7 +145,8 @@ python3 7_Uniprot2ENSG.py --inUniprot Uniprot_output.tsv --inCanonicalFile canon
 <a name="NaïveApproach"></a>**Naïve Approach**
 - Parses the Sample metadata file (.xlsx), UniProt File, Canonical transcripts file, Candidate Gene file(s), Interactome file and GTEX File
 - Checks the number of Interactors for each gene
-- Checks the number of Interactors that are known candidate genes
+- Checks the number of Interactors that are known candidates
+- Eliminates Hub/Sticky proteins
 - Next, applies Fisher's Exact test to compute P-values
 - Additionally adds GTEX data
 - Prints to STDOUT in .tsv format
