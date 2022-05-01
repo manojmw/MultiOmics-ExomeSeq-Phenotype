@@ -26,6 +26,9 @@ This repository contains individual scripts. I have integrated these into the cu
 
 ## Example Usage
 
+-> For details regarding arguments, please refer to the `Arguments` section
+</br>
+
 <a name="uniprotparser"></a>**UniProt Parser**
 
 - Parses on STDIN a UniProt file and extracts the required data from each record
@@ -50,19 +53,35 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 - Parses a Protein-Protein Interaction (PPI) File (miTAB 2.5 or 2.7)
 - Maps to UniProt using the output files produced by `1_Uniprot_parser.py` and prints to STDOUT in .tsv format
 
--> Grab the latest PPI data (Ex: BioGRID) with:
+-> Grab the latest BioGRID data with:
 ```console
 wget https://downloads.thebiogrid.org/Download/BioGRID/Latest-Release/BIOGRID-ORGANISM-LATEST.mitab.zip
 ```  
 -> Unzip with:
 ```console
-unzip BIOGRID-ORGANISM-LATEST.mitab
+unzip BIOGRID-ORGANISM-LATEST.mitab.zip
 ```
 -> This will produce one miTAB file per Organism (Use BIOGRID-ORGANISM-Homo_sapiens*.mitab.txt for human data)
+</br>
+-> Grab the latest IntAct data with:
+```console
+wget ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact.zip
+```  
+-> Unzip with:
+```console
+unzip intact.zip
+```
+-> This will produce 2 files (intact.txt & intact_negative.txt). Use intact.txt for further steps
+</br>
 -> Parse PPI data with:
 ```console
 python3 Interaction_parser.py --inInteraction BIOGRID-ORGANISM-Homo_sapiens*.mitab.txt --inUniprot Uniprot_output.tsv > Exp_Biogrid.tsv
 ```
+```console
+python3 Interaction_parser.py --inInteraction intact.txt --inUniprot Uniprot_output.tsv > Exp_Intact.tsv
+```
+
+-> The above example is for the Protein-Protein Interaction data from BioGRID and IntAct. But, you can retrieve PPI data (in miTAB format) from any database and feed it to the script to produce output file.
 
 </br>
 
@@ -97,6 +116,7 @@ python3 3_Count_HumanPPIExp.py < miTAB File
 python3 4_BuildInteractome_BinaryPPIonly.py --inExpFile Exp_Biogrid.tsv --inUniprot Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human_binaryonly.tsv
 ```                      
 -> For getting `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
+-> Build Interactome scripts accepts multiple processed Protein-Protein Interaction experiment file (--inExpFile)
 
 
 </br>
@@ -175,7 +195,7 @@ python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_output
 
 -> Run 10_Naive_withClusteringApproach.py script with:
 ```console
-python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniProt Uniprot_out.tsv --inCandidateFile candidateGenes_*.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human --inClusterFile K1Clustering_clusterFile.cls --inGTEXFile E-MTAB-5214-query-results.tpms.tsv
+python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_out.tsv --inCandidateFile candidateGenes_*.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human --inClusterFile K1Clustering_clusterFile.cls --inGTEXFile E-MTAB-5214-query-results.tpms.tsv
 ```
 
 ## Output
