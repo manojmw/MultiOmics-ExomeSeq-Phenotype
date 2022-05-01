@@ -263,7 +263,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
 # Protein-Protein Interaction File(s)                                     
    --inInteraction                      miTAB 2.5 or 2.7 Input File name (Protein-Protein Interaction File)
 
-# Interactome File(s)   
+# Protein-Protein Interaction Experiment File(s)   
    --inExpFile                          PPI Experiments Input File name (produced by 2_Interaction_parser.py)
 
 # Canonical Transcripts File
@@ -288,7 +288,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
 
 ## Metadata files
 
-- Currently, the scripts use only one metadata file i.e. `candidateGenes.xlsx`. Later, description of other files will be added.
+- Currently, the scripts use 2 metadata files i.e. `samples.xlsx` & `candidateGenes.xlsx`.
 
 1. samples.xlsx: </br>
    * This metadata file describes the samples. 
@@ -315,7 +315,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
 * External dependencies are kept to minimum in all the scripts. The only required python modules are listed below: </br>
   - OpenPyXl 
   - SciPy
-* You can install these with pip/conda Ex: pip3 install openpyxl scipy OR conda install openpyxl scipy
+* You can install these with pip/conda Ex: (pip3 install openpyxl scipy) OR (conda install openpyxl scipy)
 * Most other standard core modules should already be available on your system
 
 ## License
