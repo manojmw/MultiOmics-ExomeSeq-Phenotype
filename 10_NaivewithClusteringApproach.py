@@ -894,14 +894,14 @@ Program: Parses the input files. For a given gene, checks - if the gene is a kno
 --------------------------------------------------------------------------------------------------------------------------
 The output consists of following data for each line (one gene per line) :
  -> Gene Name
- -> If a gene is already a known candidate (adds the patho names comma-separated)
+ -> If a gene is already a known candidate (adds the patho names - comma-separated)
  -> Total Number of Interactors
  -> Following information is added for each Pathology:
     - Known Interactors Count
     - List of Known Interactors
     - Known Interactors P-value
     - If a gene is 'PRESENT' in an Enriched Cluster
-    - ClusterID (if enriched)
+    - ClusterID (if PRESENT)
     - Size of the Cluster
     - The Cluster associated P-value
  -> GTEX data
