@@ -717,6 +717,7 @@ def getGTEX(inGTEXFile):
 #       - Size of the Cluster
 #       - The Cluster associated P-value
 #       - Count of second degree neighbors that are Known candidates
+#       - List of second degree neighbors that are Known candidates
 # -> GTEX data
 def Interactors_PValue(args):
 
@@ -942,6 +943,7 @@ The output consists of following data for each line (one gene per line) :
     - Size of the Cluster
     - The Cluster associated P-value
     - Count of second degree neighbors that are Known candidates
+    - List of second degree neighbors that are Known candidates
  -> GTEX data
 -------------------------------------------------------------------------------------------------------------------------
 
