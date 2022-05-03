@@ -729,23 +729,27 @@ def Interactors_PValue(args):
     IntCluster_dict = Build_ClusterDict(args.inClusterFile, CandidateGene_dict, pathologies_list, pathology_CandidateCount, Count_UniqueENSGs)
     (GTEX_dict, newGTEXHeader) = getGTEX(args.inGTEXFile)
 
-    # Initializing first output list containing distinct lists
-    # i.e. one Sublist per Gene
-    # Each Sublist contains:
-    # - Gene name
-    # - Total number of Interactors
-    # - Known Interactors count, list of Known Interactors, P-value (for each pathology)
-    Gene_AllPatho_Pvalue = [[] for i in range(len(All_Interactors_list))]
+    # Printing header
+    Patho_header_list = [[patho+'_INTERACTORS_COUNT', patho+'_INTERACTORS', patho+'_INTERACTORS_PVALUE', patho+'_ENRICHED_CLUSTER', patho+'_ENRICHED_CLUSTER_ID', patho+'_ENRICHED_CLUSTER_SIZE', patho+'_ENRICHED_CLUSTER_PVALUE'] for patho in pathologies_list]
+    print('GENE\t', 'KNOWN_CANDIDATE_GENE\t', 'TOTAL_INTERACTORS\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]), '\t', '\t'.join(GTEXHeader for GTEXHeader in newGTEXHeader))
+
 
     # Checking the number of interactors for each gene
     for ENSG_index in range(len(All_Interactors_list)):
+
+        # Initializing a list to store data for a 
+        # given query gene
+        # - Gene name
+        # - Total number of Interactors
+        # - Known Interactors count, list of Known Interactors, P-value (for each pathology)
+        Gene_AllPatho_Pvalue = []
 
         # If the protein is a Hub/stciky protein
         # continue to next protein
         if All_Interactors_list[ENSG_index] in HubProteins:
             continue
         else:
-            Gene_AllPatho_Pvalue[ENSG_index].append(All_Interactors_list[ENSG_index])
+            Gene_AllPatho_Pvalue.append(All_Interactors_list[ENSG_index])
             
             Known_Pathology = []
 
@@ -757,7 +761,7 @@ def Interactors_PValue(args):
             # Storing Known Known_Pathologies as a single comma seperated string
             Known_Pathologystr = ','.join(patho for patho in Known_Pathology)
 
-            Gene_AllPatho_Pvalue[ENSG_index].append(Known_Pathologystr)
+            Gene_AllPatho_Pvalue.append(Known_Pathologystr)
 
             # List of interactors for the current protein
             Interactors = []
@@ -782,7 +786,7 @@ def Interactors_PValue(args):
                         if not Interactor in Interactors:
                             Interactors.append(Interactor)
 
-            Gene_AllPatho_Pvalue[ENSG_index].append(len(Interactors))     
+            Gene_AllPatho_Pvalue.append(len(Interactors))     
 
             for i in range(len(pathologies_list)):
 
@@ -858,24 +862,19 @@ def Interactors_PValue(args):
                     pass
 
                 for data in Output_eachPatho:
-                    Gene_AllPatho_Pvalue[ENSG_index].append(data)
+                    Gene_AllPatho_Pvalue.append(data)
 
             # Adding GTEX Data
             if All_Interactors_list[ENSG_index] in GTEX_dict:
                 for GTEX_value in GTEX_dict[All_Interactors_list[ENSG_index]]:
-                    Gene_AllPatho_Pvalue[ENSG_index].append(GTEX_value)
+                    Gene_AllPatho_Pvalue.append(GTEX_value)
             else: 
                 pass 
 
             # Getting the Gene name for the ENSG
-            Gene_AllPatho_Pvalue[ENSG_index][0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[ENSG_index][0]]
+            Gene_AllPatho_Pvalue[0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[0]]
 
-    # Printing header
-    Patho_header_list = [[patho+'_INTERACTORS_COUNT', patho+'_INTERACTORS', patho+'_INTERACTORS_PVALUE', patho+'_ENRICHED_CLUSTER', patho+'_ENRICHED_CLUSTER_ID', patho+'_ENRICHED_CLUSTER_SIZE', patho+'_ENRICHED_CLUSTER_PVALUE'] for patho in pathologies_list]
-    print('GENE\t', 'KNOWN_CANDIDATE_GENE\t', 'TOTAL_INTERACTORS\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]), '\t', '\t'.join(GTEXHeader for GTEXHeader in newGTEXHeader))
-
-    for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
-        print('\t'.join(str(eachGene_AllPatho_data) for eachGene_AllPatho_data in Gene_AllPatho_Pvalue[Gene_AllPathoIndex]))
+            print('\t'.join(str(data) for data in Gene_AllPatho_Pvalue))
 
     logging.info("All done, completed successfully!")
 
