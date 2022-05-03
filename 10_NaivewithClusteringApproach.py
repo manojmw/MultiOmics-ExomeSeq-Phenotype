@@ -706,6 +706,7 @@ def getGTEX(inGTEXFile):
 # Prints to STDOUT in .tsv format
 # The output consists of following data for each line (one gene per line):
 #  -> Gene Name
+#  -> If a gene is already a known candidate (adds the patho names - comma-separated)
 #  -> Total Number of Interactors
 #  -> Following information is added for each Pathology:
 #       - Known Interactors
@@ -715,6 +716,7 @@ def getGTEX(inGTEXFile):
 #       - ClusterID (if enriched)
 #       - Size of the Cluster
 #       - The Cluster associated P-value
+#       - Count of second degree neighbors that are Known candidates
 # -> GTEX data
 def Interactors_PValue(args):
 
@@ -730,18 +732,15 @@ def Interactors_PValue(args):
     (GTEX_dict, newGTEXHeader) = getGTEX(args.inGTEXFile)
 
     # Printing header
-    Patho_header_list = [[patho+'_INTERACTORS_COUNT', patho+'_INTERACTORS', patho+'_INTERACTORS_PVALUE', patho+'_ENRICHED_CLUSTER', patho+'_ENRICHED_CLUSTER_ID', patho+'_ENRICHED_CLUSTER_SIZE', patho+'_ENRICHED_CLUSTER_PVALUE'] for patho in pathologies_list]
+    Patho_header_list = [[patho+'_INTERACTORS_COUNT', patho+'_INTERACTORS', patho+'_INTERACTORS_PVALUE', patho+'_ENRICHED_CLUSTER', patho+'_ENRICHED_CLUSTER_ID', patho+'_ENRICHED_CLUSTER_SIZE', patho+'_ENRICHED_CLUSTER_PVALUE', patho+'_SECOND_DEGREE_INTERACTORS_COUNT', patho+'_SECOND_DEGREE_INTERACTORS'] for patho in pathologies_list]
     print('GENE\t', 'KNOWN_CANDIDATE_GENE\t', 'TOTAL_INTERACTORS\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]), '\t', '\t'.join(GTEXHeader for GTEXHeader in newGTEXHeader))
 
 
     # Checking the number of interactors for each gene
     for ENSG_index in range(len(All_Interactors_list)):
 
-        # Initializing a list to store data for a 
-        # given query gene
-        # - Gene name
-        # - Total number of Interactors
-        # - Known Interactors count, list of Known Interactors, P-value (for each pathology)
+        # Initializing a list to store data for the 
+        # current gene 
         Gene_AllPatho_Pvalue = []
 
         # If the protein is a Hub/stciky protein
@@ -763,7 +762,7 @@ def Interactors_PValue(args):
 
             Gene_AllPatho_Pvalue.append(Known_Pathologystr)
 
-            # List of interactors for the current protein
+            # List of interactors for the current gene
             Interactors = []
 
             # If Protein is the first protein
@@ -796,12 +795,46 @@ def Interactors_PValue(args):
                 # Initializing a list to store data for each pathology
                 Output_eachPatho = []
 
+                # List to store second degree neighbors 
+                # that are known candidates
+                secondDegreeKnownInt = []
+
                 # Checking if the interactor is a known ENSG (candidate ENSG)
                 for interactor in Interactors:
+
+                    # Initializing another list to store second degree
+                    # known interactors as appending it directly
+                    # to the secondDegreeKnownInt does not allow us to access the 
+                    # the list until the the current loop is complete
+                    # So we cannot check if the second degree known interactor was 
+                    # already seen in ProtA_dict which can cause redundancy
+                    secondDegreeKnownIntsub = []
+
                     if interactor in CandidateGene_dict.keys():
                         for pathology in CandidateGene_dict[interactor]:
                             if pathology == pathologies_list[i]:
                                 Known_Interactors.append(interactor)
+
+                    # Checking if the second degree neighbours 
+                    # are known candidates
+                    if interactor in ProtA_dict.keys():
+                        for secondDegreeInt in ProtA_dict[interactor]:
+                            if secondDegreeInt in CandidateGene_dict.keys():
+                                for pathology in CandidateGene_dict[secondDegreeInt]:
+                                    if pathology == pathologies_list[i]:
+                                        secondDegreeKnownIntsub.append(ENSG_Gene_dict[secondDegreeInt])
+                    if interactor in ProtB_dict.keys():
+                        for secondDegreeInt in ProtB_dict[interactor]:
+                            if secondDegreeInt in CandidateGene_dict.keys():
+                                for pathology in CandidateGene_dict[secondDegreeInt]:
+                                    if pathology == pathologies_list[i]:
+                                        secondDegreeKnownIntsub.append(ENSG_Gene_dict[secondDegreeInt])
+
+                    # Now checking known interactors in secondDegreeKnownIntsub
+                    # and adding it to secondDegreeKnownInt to avoid redundancy
+                    for seconddegInt in secondDegreeKnownIntsub:
+                        if not seconddegInt in secondDegreeKnownInt:
+                            secondDegreeKnownInt.append(seconddegInt)
 
                 # Getting the Gene name for Known Interactors
                 for Known_InteractorIndex in range(len(Known_Interactors)):
@@ -861,6 +894,11 @@ def Interactors_PValue(args):
                     # is enriched for the current pathology
                     pass
 
+                # Adding second degree known interactors data
+                Output_eachPatho.append(len(secondDegreeKnownInt))
+                secondDegreeKnownIntstr = ','.join(Known_Interactor for Known_Interactor in secondDegreeKnownInt)
+                Output_eachPatho.append(secondDegreeKnownIntstr)
+
                 for data in Output_eachPatho:
                     Gene_AllPatho_Pvalue.append(data)
 
@@ -903,6 +941,7 @@ The output consists of following data for each line (one gene per line) :
     - ClusterID (if PRESENT)
     - Size of the Cluster
     - The Cluster associated P-value
+    - Count of second degree neighbors that are Known candidates
  -> GTEX data
 -------------------------------------------------------------------------------------------------------------------------
 
