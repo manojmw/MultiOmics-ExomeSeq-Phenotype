@@ -5,7 +5,8 @@ This is the main repository containing all the scripts for my Master's thesis pr
 This repository contains individual scripts. I have integrated these into the current **Exome-Seq Secondary Analysis Pipeline** ([click here](https://github.com/manojmw/grexome-TIMC-Secondary))
 
 </br>
-**Now the script additionally checks for known candidates in 2-hop neighborhood. I will update the README and sample OUTPUT files soon**
+
+**Now the script additionally checks for known candidates in 2-hop neighborhood. I will update the README and sample output files soon**
 
 </br>
 
