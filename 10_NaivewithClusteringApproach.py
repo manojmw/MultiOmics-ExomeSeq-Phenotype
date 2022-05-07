@@ -798,7 +798,7 @@ def Interactors_PValue(args):
 
                 # List to store second degree neighbors 
                 # that are known candidates
-                secondDegreeKnownInt = []
+                AllsecondDegreeKnownInt = []
 
                 # Checking if the interactor is a known ENSG (candidate ENSG)
                 for interactor in Interactors:
@@ -809,7 +809,7 @@ def Interactors_PValue(args):
                     # the list until the the current loop is complete
                     # So we cannot check if the second degree known interactor was 
                     # already seen in ProtA_dict which can cause redundancy
-                    secondDegreeKnownIntsub = []
+                    secondDegreeKnownInt = []
 
                     if interactor in CandidateGene_dict.keys():
                         for pathology in CandidateGene_dict[interactor]:
@@ -823,19 +823,19 @@ def Interactors_PValue(args):
                             if secondDegreeInt in CandidateGene_dict.keys():
                                 for pathology in CandidateGene_dict[secondDegreeInt]:
                                     if pathology == pathologies_list[i]:
-                                        secondDegreeKnownIntsub.append(ENSG_Gene_dict[secondDegreeInt])
+                                        secondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
                     if interactor in ProtB_dict.keys():
                         for secondDegreeInt in ProtB_dict[interactor]:
                             if secondDegreeInt in CandidateGene_dict.keys():
                                 for pathology in CandidateGene_dict[secondDegreeInt]:
                                     if pathology == pathologies_list[i]:
-                                        secondDegreeKnownIntsub.append(ENSG_Gene_dict[secondDegreeInt])
+                                        secondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
 
                     # Now checking known interactors in secondDegreeKnownIntsub
                     # and adding it to secondDegreeKnownInt to avoid redundancy
-                    for seconddegInt in secondDegreeKnownIntsub:
-                        if not seconddegInt in secondDegreeKnownInt:
-                            secondDegreeKnownInt.append(seconddegInt)
+                    for seconddegInt in secondDegreeKnownInt:
+                        if not seconddegInt in AllsecondDegreeKnownInt:
+                            AllsecondDegreeKnownInt.append(seconddegInt)
 
                 # Getting the Gene name for Known Interactors
                 for Known_InteractorIndex in range(len(Known_Interactors)):
@@ -895,10 +895,15 @@ def Interactors_PValue(args):
                     # is enriched for the current pathology
                     pass
 
+                # Appending all known interactors in the 
+                # 2-hop neighborhood
+                for Known_Interactor in Known_Interactors:
+                    AllsecondDegreeKnownInt.append(Known_Interactor)
+
                 # Adding second degree known interactors data
-                Output_eachPatho.append(len(secondDegreeKnownInt))
-                secondDegreeKnownIntstr = ','.join(Known_Interactor for Known_Interactor in secondDegreeKnownInt)
-                Output_eachPatho.append(secondDegreeKnownIntstr)
+                Output_eachPatho.append(len(AllsecondDegreeKnownInt))
+                AllsecondDegreeKnownIntstr = ','.join(Known_Interactor for Known_Interactor in AllsecondDegreeKnownInt)
+                Output_eachPatho.append(AllsecondDegreeKnownIntstr)
 
                 for data in Output_eachPatho:
                     Gene_AllPatho_Pvalue.append(data)
