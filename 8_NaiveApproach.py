@@ -574,10 +574,15 @@ def getGTEX(inGTEXFile):
 #
 # Prints to STDOUT in .tsv format
 # The output consists of following data foreach line (one gene per line):
-# - Gene Name
-# - Total Number of Interactors
-# - Known Interactors, list of Known_Interactors & P-value for each Pathology
-# - GTEX data
+# -> Gene Name
+# -> Total Number of Interactors
+# -> For each Pathology:
+#   - Known Interactors
+#   - list of Known_Interactors 
+#   - P-value 
+#   - Count of second degree neighbors that are Known candidates
+#   - List of second degree neighbors that are Known candidates
+# -> GTEX data
 def Interactors_PValue(args):
 
     # Calling the functions
@@ -591,37 +596,38 @@ def Interactors_PValue(args):
     Count_UniqueENSGs = Uniprot_ENSG(args.inUniProt, ENSG_Gene_dict)
     (GTEX_dict, newGTEXHeader) = getGTEX(args.inGTEXFile)
 
-    # Initializing first output list containing distinct lists
-    # i.e. one Sublist per Gene
-    # Each Sublist contains:
-    # - Gene name
-    # - Total number of Interactors
-    # - Known Interactors count, list of Known Interactors, P-value (for each pathology)
-    Gene_AllPatho_Pvalue = [[] for i in range(len(All_Interactors_list))]
+    # Printing header
+    Patho_header_list = [[patho+'_INTERACTORS_COUNT', patho+'_INTERACTORS', patho+'_INTERACTORS_PVALUE', patho+'_SECOND_DEGREE_INTERACTORS_COUNT', patho+'_SECOND_DEGREE_INTERACTORS'] for patho in pathologies_list]
+    print('GENE\t', 'KNOWN_CANDIDATE_GENE\t', 'TOTAL_INTERACTORS\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]), '\t', '\t'.join(GTEXHeader for GTEXHeader in newGTEXHeader))
+
 
     # Checking the number of interactors for each gene
     for ENSG_index in range(len(All_Interactors_list)):
+
+        # Initializing a list to store data for the 
+        # current gene 
+        Gene_AllPatho_Pvalue = []
 
         # If the protein is a Hub/stciky protein
         # continue to next protein
         if All_Interactors_list[ENSG_index] in HubProteins:
             continue
         else:
-            Gene_AllPatho_Pvalue[ENSG_index].append(All_Interactors_list[ENSG_index])
-
+            Gene_AllPatho_Pvalue.append(All_Interactors_list[ENSG_index])
+            
             Known_Pathology = []
 
             # Checking if the gene is a known candidate gene for any pathology
             if All_Interactors_list[ENSG_index] in CandidateGene_dict:
                 for patho in CandidateGene_dict[All_Interactors_list[ENSG_index]]:
                     Known_Pathology.append(patho)
-            
-            # Storing Known Known_Pathologies as a single comma seperated string
+
+             # Storing Known Known_Pathologies as a single comma seperated string
             Known_Pathologystr = ','.join(patho for patho in Known_Pathology)
 
-            Gene_AllPatho_Pvalue[ENSG_index].append(Known_Pathologystr)
+            Gene_AllPatho_Pvalue.append(Known_Pathologystr)
 
-            # List of interactors
+            # List of interactors for the current gene
             Interactors = []
 
             # If Protein is the first protein
@@ -644,7 +650,7 @@ def Interactors_PValue(args):
                         if not Interactor in Interactors:
                             Interactors.append(Interactor)
 
-            Gene_AllPatho_Pvalue[ENSG_index].append(len(Interactors))     
+            Gene_AllPatho_Pvalue.append(len(Interactors))      
 
             for i in range(len(pathologies_list)):
 
@@ -654,12 +660,44 @@ def Interactors_PValue(args):
                 # Initializing a list to store data for each pathology
                 Output_eachPatho = []
 
+                # List to store second degree neighbors 
+                # that are known candidates
+                AllsecondDegreeKnownInt = []
+
                 # Checking if the interactor is a known ENSG (candidate ENSG)
                 for interactor in Interactors:
                     if interactor in CandidateGene_dict.keys():
                         for pathology in CandidateGene_dict[interactor]:
                             if pathology == pathologies_list[i]:
                                 Known_Interactors.append(interactor)
+
+                    # List to store second degree interactors
+                    # seen in ProtA_dict
+                    secondDegreeInt_ProtA_dict = []
+
+                    # Checking if the second degree neighbours 
+                    # are known candidates in ProtA_dict
+                    if interactor in ProtA_dict.keys():
+                        for secondDegreeInt in ProtA_dict[interactor]:
+                            # Add every second degree interactor seen
+                            # in ProtA_dict to secondDegreeInt_ProtA_dict
+                            secondDegreeInt_ProtA_dict.append(secondDegreeInt)
+                            if secondDegreeInt in CandidateGene_dict.keys():
+                                for pathology in CandidateGene_dict[secondDegreeInt]:
+                                    if pathology == pathologies_list[i]:
+                                        AllsecondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
+
+                    # If the interactor is also present in ProtB_dict
+                    if interactor in ProtB_dict.keys():
+                        for secondDegreeInt in ProtB_dict[interactor]:
+                            # But if the second degree interactor was not already
+                            # seen in ProtA_dict for the current interactor
+                            # then check if this second degree interactor is a candidate gene
+                            if not secondDegreeInt in secondDegreeInt_ProtA_dict:
+                                if secondDegreeInt in CandidateGene_dict.keys():
+                                    for pathology in CandidateGene_dict[secondDegreeInt]:
+                                        if pathology == pathologies_list[i]:
+                                            AllsecondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
 
                 # Getting the Gene name for Known Interactors
                 for Known_InteractorIndex in range(len(Known_Interactors)):
@@ -682,26 +720,31 @@ def Interactors_PValue(args):
                     Output_eachPatho = [len(Known_Interactors), Known_InteractorsStr, p_value]
                 else:
                     Output_eachPatho = [len(Known_Interactors), '', p_value]
+                
+                # Appending all known interactors in the 
+                # 2-hop neighborhood
+                for Known_Interactor in Known_Interactors:
+                    AllsecondDegreeKnownInt.append(Known_Interactor)
+
+                # Adding second degree known interactors data
+                Output_eachPatho.append(len(AllsecondDegreeKnownInt))
+                AllsecondDegreeKnownIntstr = ','.join(Known_Interactor for Known_Interactor in AllsecondDegreeKnownInt)
+                Output_eachPatho.append(AllsecondDegreeKnownIntstr)
 
                 for data in Output_eachPatho:
-                    Gene_AllPatho_Pvalue[ENSG_index].append(data)
+                    Gene_AllPatho_Pvalue.append(data)
             
             # Adding GTEX Data
             if All_Interactors_list[ENSG_index] in GTEX_dict:
                 for GTEX_value in GTEX_dict[All_Interactors_list[ENSG_index]]:
-                    Gene_AllPatho_Pvalue[ENSG_index].append(GTEX_value)
+                    Gene_AllPatho_Pvalue.append(GTEX_value)
             else: 
-                pass
-
+                pass 
+            
             # Getting the Gene name for the ENSG
-            Gene_AllPatho_Pvalue[ENSG_index][0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[ENSG_index][0]]
+            Gene_AllPatho_Pvalue[0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[0]]
 
-    # Printing header
-    Patho_header_list = [[patho+'_INTERACTORS_COUNT', patho+'_INTERACTORS', patho+'_INTERACTORS_PVALUE'] for patho in pathologies_list]
-    print('GENE\t', 'KNOWN_CANDIDATE_GENE\t', 'TOTAL_INTERACTORS\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]), '\t', '\t'.join(GTEXHeader for GTEXHeader in newGTEXHeader))
-
-    for Gene_AllPathoIndex in range(len(Gene_AllPatho_Pvalue)):
-        print('\t'.join(str(eachGene_AllPatho_data) for eachGene_AllPatho_data in Gene_AllPatho_Pvalue[Gene_AllPathoIndex]))
+            print('\t'.join(str(data) for data in Gene_AllPatho_Pvalue))
 
     logging.info("All done, completed successfully!")
 
@@ -714,9 +757,8 @@ def main():
     file_parser = argparse.ArgumentParser(description =
     """
 -----------------------------------------------------------------------------------------------------------------------
-Program: Parses the input files. For a given gene, checks - if the gene is a known candidate, the number of interactors, 
-         the number of interactors that are known candidates & eliminates Hub/Sticky proteins.Finally, adds the GTEX 
-         data and prints to STDOUT in .tsv format
+Program: Parses the input files. For a each gene, adds the Interactome data assoicated with each pathology. 
+         Next adds the GTEX data and prints to STDOUT in .tsv format
 -----------------------------------------------------------------------------------------------------------------------
 The output consists of following data for each line (one gene per line) :
  -> Gene Name
@@ -726,6 +768,8 @@ The output consists of following data for each line (one gene per line) :
     - Known Interactors Count
     - List of Known Interactors
     - Known Interactors P-value
+    - Count of second degree neighbors that are Known candidates
+    - List of second degree neighbors that are Known candidates
  -> GTEX data
 -----------------------------------------------------------------------------------------------------------------------
 
