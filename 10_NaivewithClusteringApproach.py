@@ -421,9 +421,13 @@ def Uniprot_ENSG(inUniProt, ENSG_Gene_dict):
 # Key: clusterID as in the inFile
 # Value: Dictionary containing 2 types of key/value pair:
 # -> First type of key/value pair:
-#   - Key: ENSG of the node;  Value: 1
+#   - Key: ENSG of the node;  
+#   - Value: 1
 # -> Second type of key/value pair:
-#   - Key: Pathology name;  P-value for the given cluster
+#   - Key: Pathology name; 
+#   - Value -> List containing P-value & candidate genes
+#              present in the cluster for each pathology
+#              
 def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, pathology_CandidateCount, Count_UniqueENSGs):
 
     # Dictionary to store Clustering data 
@@ -445,9 +449,13 @@ def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, patho
     Clust_ID = ''
     ENSG_nodes = []
 
-    # List for counting total candidate genes in the cluster
-    # associated with each pathology
-    clusterCandidateCount = [0] * len(pathologies_list)
+    # A list containing Distinct lists 
+    # One sublist per pathology
+    # Each sublist contains the count and names of candidate genes
+    # present in the cluster
+    # The first item of each sublist will be count which will be later
+    # be replaced with cluster associated P-Value
+    clusterCandidate = [[0] for i in range(len(pathologies_list))]
 
     # skip header
     Cluster_File.readline()
@@ -476,7 +484,7 @@ def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, patho
                 # Reset the accumulators and move on to the next cluster
                 Clust_ID = ''
                 ENSG_nodes = []
-                clusterCandidateCount = [0] * len(pathologies_list)
+                clusterCandidate = [[0] for i in range(len(pathologies_list))]
                 continue
             elif len(ENSG_nodes) > 100:
                 logging.error("The size of the cluster "+Clust_ID+" in greater than 100. Fix the cluster file" )
@@ -507,16 +515,17 @@ def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, patho
                         for patho in CandidateGene_dict[ENSG]:
                             for i in range(len(pathologies_list)):        
                                 if patho == pathologies_list[i]:
-                                    clusterCandidateCount[i] += 1
+                                    clusterCandidate[i][0] += 1
+                                    clusterCandidate[i].append(ENSG)
 
                 # Applying Fisher's exact test and computing P-values
-                for i in range(len(clusterCandidateCount)):
+                for i in range(len(clusterCandidate)):
 
                     # In the current cluster, if no gene is 
                     # a known candidate gene for the current pathology
                     # then there is no point in computing P-Values for this pathology
                     # So, we assign P-value = 1
-                    if clusterCandidateCount[i] == 0:
+                    if clusterCandidate[i] == 0:
                         cluster_p_value = 1
 
                     # If in the current cluster, gene(s) is a Known candidate
@@ -524,19 +533,22 @@ def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, patho
                     # this pathology
                     else:
                         # Applying Fisher's exact test to calculate p-values
-                        ComputePvalue_cluster = [[clusterCandidateCount[i], len(ENSG_nodes)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
+                        ComputePvalue_cluster = [[clusterCandidate[i][0], len(ENSG_nodes)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
                         (odds_ratio, cluster_p_value) = stats.fisher_exact(ComputePvalue_cluster)
+                        # Replacing the candidate gene count with the P-value
+                        clusterCandidate[i][0] = cluster_p_value
 
                     # Storing Pathology name as the key in IntCluster_dict[Clust_ID]
-                    # Value: P-value
-                    IntCluster_dict[Clust_ID][pathologies_list[i]] = cluster_p_value
+                    # Value: List containing P-value & candidate genes
+                    #        present in the cluster for the current pathology
+                    IntCluster_dict[Clust_ID][pathologies_list[i]] = clusterCandidate[i]
 
                 # Reset the accumulators and move on to the next cluster
                 Clust_ID = ''
                 ENSG_nodes = []
-                clusterCandidateCount = [0] * len(pathologies_list)
+                clusterCandidate = [[0] for i in range(len(pathologies_list))]
                 continue
-
+    
     Cluster_File.close()
 
     return IntCluster_dict
@@ -694,7 +706,6 @@ def getGTEX(inGTEXFile):
         
     return GTEX_dict, newGTEXHeader
             
-
 ###########################################################
 
 # Parses the dictionaries and list returned
@@ -715,6 +726,7 @@ def getGTEX(inGTEXFile):
 #       - If a gene is 'PRESENT' in an Enriched Cluster
 #       - ClusterID (if enriched)
 #       - Size of the Cluster
+#       - List of Candidate genes present in the Cluster
 #       - The Cluster associated P-value
 #       - Count of second degree neighbors that are Known candidates
 #       - List of second degree neighbors that are Known candidates
@@ -733,7 +745,7 @@ def Interactors_PValue(args):
     (GTEX_dict, newGTEXHeader) = getGTEX(args.inGTEXFile)
 
     # Printing header
-    Patho_header_list = [[patho+'_INTERACTORS_COUNT', patho+'_INTERACTORS', patho+'_INTERACTORS_PVALUE', patho+'_ENRICHED_CLUSTER', patho+'_ENRICHED_CLUSTER_ID', patho+'_ENRICHED_CLUSTER_SIZE', patho+'_ENRICHED_CLUSTER_PVALUE', patho+'_SECOND_DEGREE_INTERACTORS_COUNT', patho+'_SECOND_DEGREE_INTERACTORS'] for patho in pathologies_list]
+    Patho_header_list = [[patho+'_INTERACTORS_COUNT', patho+'_INTERACTORS', patho+'_INTERACTORS_PVALUE', patho+'_ENRICHED_CLUSTER', patho+'_ENRICHED_CLUSTER_ID', patho+'_ENRICHED_CLUSTER_SIZE', patho+'_ENRICHED_CLUSTER_CANDIDATE_GENES', patho+'_ENRICHED_CLUSTER_PVALUE', patho+'_SECOND_DEGREE_INTERACTORS_COUNT', patho+'_SECOND_DEGREE_INTERACTORS'] for patho in pathologies_list]
     print('GENE\t', 'KNOWN_CANDIDATE_GENE\t', 'TOTAL_INTERACTORS\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]), '\t', '\t'.join(GTEXHeader for GTEXHeader in newGTEXHeader))
 
 
@@ -802,40 +814,38 @@ def Interactors_PValue(args):
 
                 # Checking if the interactor is a known ENSG (candidate ENSG)
                 for interactor in Interactors:
-
-                    # Initializing another list to store second degree
-                    # known interactors as appending it directly
-                    # to the secondDegreeKnownInt does not allow us to access the 
-                    # the list until the the current loop is complete
-                    # So we cannot check if the second degree known interactor was 
-                    # already seen in ProtA_dict which can cause redundancy
-                    secondDegreeKnownInt = []
-
                     if interactor in CandidateGene_dict.keys():
                         for pathology in CandidateGene_dict[interactor]:
                             if pathology == pathologies_list[i]:
                                 Known_Interactors.append(interactor)
 
+                    # List to store second degree interactors
+                    # seen in ProtA_dict
+                    secondDegreeInt_ProtA_dict = []
+
                     # Checking if the second degree neighbours 
-                    # are known candidates
+                    # are known candidates in ProtA_dict
                     if interactor in ProtA_dict.keys():
                         for secondDegreeInt in ProtA_dict[interactor]:
+                            # Add every second degree interactor seen
+                            # in ProtA_dict to secondDegreeInt_ProtA_dict
+                            secondDegreeInt_ProtA_dict.append(secondDegreeInt)
                             if secondDegreeInt in CandidateGene_dict.keys():
                                 for pathology in CandidateGene_dict[secondDegreeInt]:
                                     if pathology == pathologies_list[i]:
-                                        secondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
+                                        AllsecondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
+
+                    # If the interactor is also present in ProtB_dict
                     if interactor in ProtB_dict.keys():
                         for secondDegreeInt in ProtB_dict[interactor]:
-                            if secondDegreeInt in CandidateGene_dict.keys():
-                                for pathology in CandidateGene_dict[secondDegreeInt]:
-                                    if pathology == pathologies_list[i]:
-                                        secondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
-
-                    # Now checking known interactors in secondDegreeKnownIntsub
-                    # and adding it to secondDegreeKnownInt to avoid redundancy
-                    for seconddegInt in secondDegreeKnownInt:
-                        if not seconddegInt in AllsecondDegreeKnownInt:
-                            AllsecondDegreeKnownInt.append(seconddegInt)
+                            # But if the second degree interactor was not already
+                            # seen in ProtA_dict for the current interactor
+                            # then check if this second degree interactor is a candidate gene
+                            if not secondDegreeInt in secondDegreeInt_ProtA_dict:
+                                if secondDegreeInt in CandidateGene_dict.keys():
+                                    for pathology in CandidateGene_dict[secondDegreeInt]:
+                                        if pathology == pathologies_list[i]:
+                                            AllsecondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
 
                 # Getting the Gene name for Known Interactors
                 for Known_InteractorIndex in range(len(Known_Interactors)):
@@ -865,7 +875,15 @@ def Interactors_PValue(args):
                     if All_Interactors_list[ENSG_index] in IntCluster_dict[cluster]:
                         #  If the gene is present in the cluster, get the P-value
                         #  for this cluster
-                        clusterPatho_Pvalue = IntCluster_dict[cluster].get(pathologies_list[i])
+                        clusterPatho_data = IntCluster_dict[cluster].get(pathologies_list[i])
+
+                        # The first item of the clusterPatho_data will always be a P-value
+                        clusterPatho_Pvalue = clusterPatho_data[0] 
+
+                        # Get the names of candidate genes present in the cluster and store
+                        # it as a single comma-seperated string
+                        clusterPatho_KnownInteractorsstr = ','.join(ENSG_Gene_dict[Known_Interactor] for Known_Interactor in clusterPatho_data[1:])
+
                         # If P-value is not equal to 1 means, the cluster is enriched
                         # for the current pathology
                         # So we say this gene is PRESENT in the enriched cluster
@@ -878,6 +896,7 @@ def Interactors_PValue(args):
                             # So, size of the cluster will be excluding pathology information (i.e pathology key/value pair)
                             Cluster_size = len(IntCluster_dict[cluster]) - len(pathologies_list)
                             Output_eachPatho.append(Cluster_size)
+                            Output_eachPatho.append(clusterPatho_KnownInteractorsstr)
                             Output_eachPatho.append(clusterPatho_Pvalue)
                             break
 
@@ -887,7 +906,7 @@ def Interactors_PValue(args):
                 # similar to a gene that is present in a cluster but not 
                 # enriched for the current pathology
                 if len(Output_eachPatho) == 3:
-                    no_cluster_data = ['', '', 0, 1]
+                    no_cluster_data = ['', '', 0, '', 1]
                     for empty_data in no_cluster_data:
                         Output_eachPatho.append(empty_data)
                 else: # len(Output_eachPatho) is 5
@@ -930,12 +949,12 @@ def Interactors_PValue(args):
 def main():
     file_parser = argparse.ArgumentParser(description =
     """
---------------------------------------------------------------------------------------------------------------------------
-Program: Parses the input files. For a given gene, checks - if the gene is a known candidate, the number of interactors, 
-         the number of interactors that are known candidates & eliminates Hub/Sticky proteins. Next, checks if the gene 
-         is present in an enriched cluster. Finally, adds the GTEX data and prints to STDOUT in .tsv format
---------------------------------------------------------------------------------------------------------------------------
-The output consists of following data for each line (one gene per line) :
+------------------------------------------------------------------------------------------------------------
+Program: Parses the input files. For a each gene, adds the Interactome data assoicated with each pathology. 
+         Next adds the GTEX data and prints to STDOUT in .tsv format
+------------------------------------------------------------------------------------------------------------
+
+The output contains following data for each gene (one gene per line):
  -> Gene Name
  -> If a gene is already a known candidate (adds the patho names - comma-separated)
  -> Total Number of Interactors
@@ -946,11 +965,12 @@ The output consists of following data for each line (one gene per line) :
     - If a gene is 'PRESENT' in an Enriched Cluster
     - ClusterID (if PRESENT)
     - Size of the Cluster
+    - List of Candidate genes present in the Cluster
     - The Cluster associated P-value
     - Count of second degree neighbors that are Known candidates
     - List of second degree neighbors that are Known candidates
  -> GTEX data
--------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
 
 Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     """,
