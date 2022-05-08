@@ -6,15 +6,15 @@
 
 # This directory contains sample input files used by the scripts:
 
-# - Candidate Genes File (should be in .xlsx format)
+1] Candidate Genes File (should be in .xlsx format)
 
-# - Sample_clusterFile.cls (should be in ClustNSee format .cls)
+2] Sample_clusterFile.cls (should be in ClustNSee format .cls)
 
-# - Sample Interaction File (produced by the Interaction_parser)
+3] Sample Interaction File (produced by the Interaction_parser)
 
-# - Sample Uniprot File (produced by the Uniprot_parser.py)
+4] Sample Uniprot File (produced by the Uniprot_parser.py)
 
-# - Samples file (metadata file describing the samples .xlsx)
+5] Samples file (metadata file describing the samples .xlsx)
 
 
 # There is a separate directory in the repository for GTEX data. Unlike above sample files, the GTEX directory 
