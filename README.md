@@ -6,10 +6,6 @@ This repository contains individual scripts. I have integrated these into the cu
 
 </br>
 
-**Now the script additionally checks for known candidates in 2-hop neighborhood. I will update the README and sample output files soon**
-
-</br>
-
 - [Example Usage](#example-usage)
    - [UniProt Parser](#uniprotparser)
    - [Protein-Protein Interaction Parser](#ppiparser)
@@ -174,7 +170,8 @@ python3 7_Uniprot2ENSG.py --inUniprot Uniprot_output.tsv --inCanonicalFile canon
    * Checks the number of Interactors 
    * Checks the number of Interactors that are known candidates
    * Eliminates Hub/Sticky proteins
-   * Next, applies Fisher's Exact test to compute P-values
+   * Applies Fisher's Exact test to compute P-values
+   * Adds the total count & a comma-sepearted list of candidate genes within the 2-hop neighborhood
    * Additionally adds GTEX data
    * Prints to STDOUT in .tsv format
 - This script provides one of the scoring components for the Machine Learning step
@@ -196,7 +193,7 @@ python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_output
 </br>
 
 <a name="NaïvewithClusteringApproach"></a>**Naïve with Clustering Approach**
-- This script is similar to `8_NaiveApproach.py`, but the output additionally contains Interactome Clustering data
+- This script is similar to `8_NaiveApproach.py`, but the output additionally contains the Interactome Clustering data
 
 -> Run 10_Naive_withClusteringApproach.py script with:
 ```console
