@@ -756,22 +756,22 @@ def Interactors_PValue(args):
 def main():
     file_parser = argparse.ArgumentParser(description =
     """
------------------------------------------------------------------------------------------------------------------------
-Program: Parses the input files. For a each gene, adds the Interactome data assoicated with each pathology. 
+----------------------------------------------------------------------------------------------------------------------------
+Program: Parses the input files. For a each gene, adds the Interactome data (Naive approach) assoicated with each pathology. 
          Next adds the GTEX data and prints to STDOUT in .tsv format
------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
 The output consists of following data for each line (one gene per line) :
  -> Gene Name
  -> If a gene is already a known candidate (adds the patho names comma-separated)
  -> Total Number of Interactors
  -> Following information is added for each Pathology:
     - Known Interactors Count
-    - List of Known Interactors
+    - List of Known Interactors (comma-separated)
     - Known Interactors P-value
     - Count of second degree neighbors that are Known candidates
-    - List of second degree neighbors that are Known candidates
+    - List of second degree neighbors that are Known candidates (comma-separated)
  -> GTEX data
------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
 
 Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     """,

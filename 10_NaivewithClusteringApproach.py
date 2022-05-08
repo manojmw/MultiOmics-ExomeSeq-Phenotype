@@ -949,10 +949,10 @@ def Interactors_PValue(args):
 def main():
     file_parser = argparse.ArgumentParser(description =
     """
-------------------------------------------------------------------------------------------------------------
-Program: Parses the input files. For a each gene, adds the Interactome data assoicated with each pathology. 
-         Next adds the GTEX data and prints to STDOUT in .tsv format
-------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
+Program: Parses the input files. For a each gene, adds the Interactome data (both Naive & Clustering approach) 
+         assoicated with each pathology. Next adds the GTEX data and prints to STDOUT in .tsv format
+--------------------------------------------------------------------------------------------------------------
 
 The output contains following data for each gene (one gene per line):
  -> Gene Name
@@ -960,17 +960,17 @@ The output contains following data for each gene (one gene per line):
  -> Total Number of Interactors
  -> Following information is added for each Pathology:
     - Known Interactors Count
-    - List of Known Interactors
+    - List of Known Interactors (comma-separated)
     - Known Interactors P-value
     - If a gene is 'PRESENT' in an Enriched Cluster
     - ClusterID (if PRESENT)
     - Size of the Cluster
-    - List of Candidate genes present in the Cluster
+    - List of Candidate genes present in the Cluster (comma-separated)
     - The Cluster associated P-value
     - Count of second degree neighbors that are Known candidates
-    - List of second degree neighbors that are Known candidates
+    - List of second degree neighbors that are Known candidates (comma-separated)
  -> GTEX data
-------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
 
 Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     """,
