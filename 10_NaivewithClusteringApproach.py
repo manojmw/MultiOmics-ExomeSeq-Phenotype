@@ -439,8 +439,8 @@ def Build_ClusterDict(inClusterFile, CandidateGene_dict, pathologies_list, patho
                 ENSG_nodes = []
                 clusterCandidate = [[0] for i in range(len(pathologies_list))]
                 continue
-            elif len(ENSG_nodes) > 100:
-                logging.error("The size of the cluster "+Clust_ID+" in greater than 100. Fix the cluster file" )
+            elif len(ENSG_nodes) > 130:
+                logging.error("The size of the cluster "+Clust_ID+" in greater than 130. Fix the cluster file" )
                 sys.exit()
                 
             # If the size of the cluster is >= 2 and <=100
