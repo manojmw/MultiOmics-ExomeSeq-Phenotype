@@ -111,6 +111,8 @@ python3 3_Count_HumanPPIExp.py < miTAB File
     3] Here, we try to eliminate most of the EXPANSION DATA, and consider only TRUE BINARY INTERACTIONS
 
     4] Each Interaction has ≥ 2 experiments, of which at least one of them should be proved by any BINARY METHOD
+    
+    5] Eliminate Hub/Sticky proteins
 
 -> Build High-Quality Human Interactome with:      
 ```console
@@ -169,7 +171,6 @@ python3 7_Uniprot2ENSG.py --inUniprot Uniprot_output.tsv --inCanonicalFile canon
    * Checks if the gene is already a known candidate
    * Checks the number of Interactors 
    * Checks the number of Interactors that are known candidates
-   * Eliminates Hub/Sticky proteins
    * Applies Fisher's Exact test to compute P-values
    * Adds the total count & a comma-sepearted list of candidate genes within the 2-hop neighborhood
    * Additionally adds GTEX data
