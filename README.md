@@ -11,7 +11,6 @@ This is the main repository containing all the scripts for my Master's thesis pr
    * Gene
    * Interactome (Both Naive & Clustering)
    * Expression
-   * 
 </br>
 
 **Currently in progress, I am also working on the Machine learning script that would assign a single score to each variant for prioritization**. 
