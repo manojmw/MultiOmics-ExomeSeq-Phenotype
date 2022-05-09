@@ -287,6 +287,100 @@ def Uniprot_ENSG(inUniProt, ENSG_Gene_dict):
 
 ###########################################################
 
+# Parses the Uniprot_Interactome_list returned by 
+# the function UniProtInteractome
+#
+# Required items in each sublist:
+# UniProt Primary Accession of Protein A (first item)
+# UniProt Primary Accession of Protein B (second item)
+#
+# Returns 2 dictionaries
+# First dictionary contains:
+# - key: Protein A; Value: List of interactors
+# Second dictionary contains:
+# - key: Protein B; Value: List of interactors
+def Interactome_dict(Uniprot_Interactome_list):
+
+    # Dictionaries to store interacting proteins
+    # In ProtA_dict, key -> Protein A; Value -> Protein B
+    # In ProtB_dict, key -> Protein B; Value -> Protein A
+    ProtA_dict = {}
+    ProtB_dict = {}
+        
+    # Data lines
+    for data in Uniprot_Interactome_list:
+
+        if data[0] != data[1]: # checking self-interaction
+            # Check if the Key(ProtA) exists in ProtA_dict
+            # If yes, then append the interctor to 
+            # the list of values (Interactors)
+            if ProtA_dict.get(data[0], False):
+                ProtA_dict[data[0]].append(data[1])
+            else:
+                ProtA_dict[data[0]] = [data[1]]
+
+            # Check if the Key(ProtB) exists in ProtB_dict
+            # If yes, then append the interctor to 
+            # the list of values (Interactors)
+            if ProtB_dict.get(data[1], False):
+                ProtB_dict[data[1]].append(data[0])
+            else:
+                ProtB_dict[data[1]] = [data[0]]    
+
+        # else:
+            # NOOP -> The interaction is a self-interaction
+
+    return ProtA_dict, ProtB_dict
+
+
+# Parses the ProtA_dict & ProtB_dict dictionaries
+# returned by the function: Interactome_dict
+#
+# Checks if a protein is hub/sticky protein
+# The criteria for considering a given protein
+# as a hub is if it interacts with > 120 proteins
+# This number is based on the degree distribution
+# of all the proteins in the entire high-quality Interactome
+# before eliminating hub/sticky proteins
+#
+# Returns a list containing Hub/stickey proteins
+def getHubProteins(ProtA_dict, ProtB_dict):
+
+    # List to store hub proteins
+    HubProteins = []
+
+    # Checking the number of Interactors for a 
+    # given protein
+    for protein in ProtA_dict:
+        # Get the no. of Interactors
+        InteractorsCount_ProtA_dict = len(ProtA_dict[protein])
+        # Check if this protein is also
+        # present in ProtB_dict
+        if protein in ProtB_dict:
+            InteractorsCount_ProtB_dict = 0
+            # If present, loop through each interactor to 
+            # make sure that the Interactors
+            # for the current protein in ProtB_dict was not already seen
+            # in the Interactor list of ProtA_dict
+            for interactor in ProtB_dict[protein]:
+                if not interactor in ProtA_dict[protein]:
+                    InteractorsCount_ProtB_dict += 1
+            Total_InteractorsCount = InteractorsCount_ProtA_dict + InteractorsCount_ProtB_dict
+        # if the protien not present in ProtB_dict
+        # simply get the Interactors count from ProtA_dict
+        else:
+            Total_InteractorsCount = InteractorsCount_ProtA_dict
+
+        # If the protein has > 120 Interactors 
+        # it is considered a hub/sticky protein
+        # append it to the HubProteins list
+        if Total_InteractorsCount > 120:
+            HubProteins.append(protein)
+
+    return HubProteins 
+
+###########################################################
+
 # Parses the list - [Uniprot_Interactome_list]
 # returned by the function: UniProtInteractome
 # Also parses the dictionary - {Uniprot_ENSG_dict} returned by the function: Uniprot_ENSG
@@ -304,17 +398,21 @@ def Interactome_Uniprot2ENSG(args):
     Uniprot_Interactome_list = UniProtInteractome(args.inExpFile)
     ENSG_Gene_dict = ENSG_Gene(args.inCanonicalFile)
     Uniprot_ENSG_dict = Uniprot_ENSG(args.inUniProt, ENSG_Gene_dict)
+    (ProtA_dict, ProtB_dict) = Interactome_dict(Uniprot_Interactome_list)
+    HubProteins = getHubProteins(ProtA_dict, ProtB_dict)
 
     # Counter for UniProt Primary Accessions of proteins not mapping to ENSG
-    lost_Interaction = 0
+    # lost_Interaction = 0
 
     for data in Uniprot_Interactome_list:
 
-        if data[0] in Uniprot_ENSG_dict.keys() and data[1] in Uniprot_ENSG_dict.keys():
-            ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[0]), Uniprot_ENSG_dict.get(data[1]))
-            print('\t'.join(ENSG_Interactome_out))
-        else:
-            lost_Interaction += 1
+        # Eliminating hub/sticky proteins
+        if not (data[0] or data[1]) in HubProteins:
+            if data[0] in Uniprot_ENSG_dict.keys() and data[1] in Uniprot_ENSG_dict.keys():
+                ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[0]), Uniprot_ENSG_dict.get(data[1]))
+                print('\t'.join(ENSG_Interactome_out))
+            # else:
+            #     lost_Interaction += 1
 
     # logging.debug("Total no. of Interactions lost: %d " % lost_Interaction)
     logging.info("All done, completed succesfully!")
