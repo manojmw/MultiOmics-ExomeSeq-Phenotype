@@ -2,7 +2,13 @@
 
 This is the main repository containing all the scripts for my Master's thesis project. Here, I am developing a Multi-Omics method to score genomic variants that might be causal for a particular phenotype in the patient. (**Currently in progress, I will add more scripts - such as those that provide scoring component for the Machine Learning step**). 
 </br></br>
-This repository contains individual scripts. I have integrated these into the current **Exome-Seq Secondary Analysis Pipeline** ([click here](https://github.com/manojmw/grexome-TIMC-Secondary))
+- This repository contains individual scripts which work at the Gene level.
+- I have integrated these into the current **Exome-Seq Secondary Analysis Pipeline** ([click here](https://github.com/manojmw/grexome-TIMC-Secondary)) which works at the patient level. The result files produced by this pipeline now contains the following data:
+   * Clinical
+   * Variant
+   * Gene
+   * Interactome (Both Naive & Clustering)
+   * Expression
 
 </br>
 
