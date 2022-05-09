@@ -112,7 +112,7 @@ python3 3_Count_HumanPPIExp.py < miTAB File
 
     4] Each Interaction has ≥ 2 experiments, of which at least one of them should be proved by any BINARY METHOD
     
-    5] Eliminate Hub/Sticky proteins
+    5] Eliminating Hub/Sticky proteins (A protein is considered a hub if it has > 120 interactors. This number is based upon the degree distribution of the entire Interactome before eliminating hub/sticky proteins).
 
 -> Build High-Quality Human Interactome with:      
 ```console
