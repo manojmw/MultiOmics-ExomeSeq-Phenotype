@@ -239,7 +239,7 @@ def CountCandidateGenes(CandidateGene_dict, pathologies_list):
 # First dictionary contains:
 # - key: Protein A; Value: List of interactors
 # Second dictionary contains:
-# key: Protein B; Value: List of interactors
+# - key: Protein B; Value: List of interactors
 # These dictionaries are later used to determine
 # the no. of interactors for a given protein/gene
 #
@@ -247,8 +247,8 @@ def CountCandidateGenes(CandidateGene_dict, pathologies_list):
 def Interacting_Proteins(inInteractome):
 
     # Dictionaries to store interacting proteins
-    # In ProtA_dict, key -> Protein A; Value -> Protein B
-    # In ProtB_dict, key -> Protein B; Value -> Protein A
+    # ProtA_dict - key: Protein A; Value: List of interactors
+    # ProtB_dict - key: Protein B; Value: List of interactors
     ProtA_dict = {}
     ProtB_dict = {}
 
@@ -293,53 +293,6 @@ def Interacting_Proteins(inInteractome):
     Interactome_File.close()
 
     return ProtA_dict, ProtB_dict, All_Interactors_list
-
-###########################################################
-
-# Parses the ProtA_dict & ProtB_dict dictionaries
-# returned by the function: Interacting_Proteins
-#
-# Checks if a protein is hub/sticky protein
-# The criteria for considering a given proteins
-# as a hub is if it interacts with > 120 proteins
-# This number is based on the degree distribution
-# of all the proteins in the entire high-quality Interactome
-#
-# Returns a list containing Hub/stickey proteins
-def getHubProteins(ProtA_dict, ProtB_dict):
-
-    # List to store hub proteins
-    HubProteins = []
-
-    # Checking the number of Interactors for a 
-    # given protein
-    for protein in ProtA_dict:
-        # Get the no. of Interactors
-        InteractorsCount_ProtA_dict = len(ProtA_dict[protein])
-        # Check if this protein is also
-        # present in ProtB_dict
-        if protein in ProtB_dict:
-            InteractorsCount_ProtB_dict = 0
-            # If present, loop through each interactor to 
-            # make sure that the Interactors
-            # for the current protein in ProtB_dict was not already seen
-            # in the Interactor list of ProtA_dict
-            for interactor in ProtB_dict[protein]:
-                if not interactor in ProtA_dict[protein]:
-                    InteractorsCount_ProtB_dict += 1
-            Total_InteractorsCount = InteractorsCount_ProtA_dict + InteractorsCount_ProtB_dict
-        # if the protien not present in ProtB_dict
-        # simply get the Interactors count from ProtA_dict
-        else:
-            Total_InteractorsCount = InteractorsCount_ProtA_dict
-
-        # If the protein has > 120 Interactors 
-        # it is considered a hub/sticky protein
-        # append it to the HubProteins list
-        if Total_InteractorsCount > 120:
-            HubProteins.append(protein)
-
-    return HubProteins
 
 ###########################################################
 
@@ -739,7 +692,6 @@ def Interactors_PValue(args):
     pathologies_list = getPathologies(args.inSample)
     pathology_CandidateCount = CountCandidateGenes(CandidateGene_dict, pathologies_list)
     (ProtA_dict, ProtB_dict, All_Interactors_list) = Interacting_Proteins(args.inInteractome)
-    HubProteins = getHubProteins(ProtA_dict, ProtB_dict)
     Count_UniqueENSGs = Uniprot_ENSG(args.inUniProt, ENSG_Gene_dict)
     IntCluster_dict = Build_ClusterDict(args.inClusterFile, CandidateGene_dict, pathologies_list, pathology_CandidateCount, Count_UniqueENSGs)
     (GTEX_dict, newGTEXHeader) = getGTEX(args.inGTEXFile)
@@ -756,188 +708,177 @@ def Interactors_PValue(args):
         # current gene 
         Gene_AllPatho_Pvalue = []
 
-        # If the protein is a Hub/stciky protein
-        # continue to next protein
-        if All_Interactors_list[ENSG_index] in HubProteins:
-            continue
-        else:
-            Gene_AllPatho_Pvalue.append(All_Interactors_list[ENSG_index])
-            
-            Known_Pathology = []
+        Gene_AllPatho_Pvalue.append(All_Interactors_list[ENSG_index])
+        
+        Known_Pathology = []
 
-            # Checking if the gene is a known candidate gene for any pathology
-            if All_Interactors_list[ENSG_index] in CandidateGene_dict:
-                for patho in CandidateGene_dict[All_Interactors_list[ENSG_index]]:
-                    Known_Pathology.append(patho)
-            
-            # Storing Known Known_Pathologies as a single comma seperated string
-            Known_Pathologystr = ','.join(patho for patho in Known_Pathology)
+        # Checking if the gene is a known candidate gene for any pathology
+        if All_Interactors_list[ENSG_index] in CandidateGene_dict:
+            for patho in CandidateGene_dict[All_Interactors_list[ENSG_index]]:
+                Known_Pathology.append(patho)
+        
+        # Storing Known Known_Pathologies as a single comma seperated string
+        Known_Pathologystr = ','.join(patho for patho in Known_Pathology)
 
-            Gene_AllPatho_Pvalue.append(Known_Pathologystr)
+        Gene_AllPatho_Pvalue.append(Known_Pathologystr)
 
-            # List of interactors for the current gene
-            Interactors = []
+        # List of interactors for the current gene
+        Interactors = []
 
-            # If Protein is the first protein
-            if (All_Interactors_list[ENSG_index] in ProtA_dict.keys()):
-                # Get the interacting protein
-                for Interactor in ProtA_dict[All_Interactors_list[ENSG_index]]:
-                    # Check if the interactor is a hub/sticky protein
-                    # If yes, ignore it
-                    if not Interactor in HubProteins:
-                        if not Interactor in Interactors:
-                            Interactors.append(Interactor)
-                        
-            # If Protein is the Second protein
-            if (All_Interactors_list[ENSG_index] in ProtB_dict.keys()):
-                # Get the interacting protein
-                for Interactor in ProtB_dict[All_Interactors_list[ENSG_index]]:
-                    # Check if the interactor is a hub/sticky protein
-                    # If yes, ignore it
-                    if not Interactor in HubProteins:
-                        if not Interactor in Interactors:
-                            Interactors.append(Interactor)
+        # If Protein is the first protein
+        if (All_Interactors_list[ENSG_index] in ProtA_dict.keys()):
+            # Get the interacting protein
+            for Interactor in ProtA_dict[All_Interactors_list[ENSG_index]]:
+                if not Interactor in Interactors:
+                    Interactors.append(Interactor)
+                    
+        # If Protein is the Second protein
+        if (All_Interactors_list[ENSG_index] in ProtB_dict.keys()):
+            # Get the interacting protein
+            for Interactor in ProtB_dict[All_Interactors_list[ENSG_index]]:
+                if not Interactor in Interactors:
+                    Interactors.append(Interactor)
 
-            Gene_AllPatho_Pvalue.append(len(Interactors))     
+        Gene_AllPatho_Pvalue.append(len(Interactors))     
 
-            for i in range(len(pathologies_list)):
+        for i in range(len(pathologies_list)):
 
-                # List for known interactor(s)
-                Known_Interactors = []
+            # List for known interactor(s)
+            Known_Interactors = []
 
-                # Initializing a list to store data for each pathology
-                Output_eachPatho = []
+            # Initializing a list to store data for each pathology
+            Output_eachPatho = []
 
-                # List to store second degree neighbors 
-                # that are known candidates
-                AllsecondDegreeKnownInt = []
+            # List to store second degree neighbors 
+            # that are known candidates
+            AllsecondDegreeKnownInt = []
 
-                # Checking if the interactor is a known ENSG (candidate ENSG)
-                for interactor in Interactors:
-                    if interactor in CandidateGene_dict.keys():
-                        for pathology in CandidateGene_dict[interactor]:
-                            if pathology == pathologies_list[i]:
-                                Known_Interactors.append(interactor)
+            # Checking if the interactor is a known ENSG (candidate ENSG)
+            for interactor in Interactors:
+                if interactor in CandidateGene_dict.keys():
+                    for pathology in CandidateGene_dict[interactor]:
+                        if pathology == pathologies_list[i]:
+                            Known_Interactors.append(interactor)
 
-                    # List to store second degree interactors
-                    # seen in ProtA_dict
-                    secondDegreeInt_ProtA_dict = []
+                # List to store second degree interactors
+                # seen in ProtA_dict
+                secondDegreeInt_ProtA_dict = []
 
-                    # Checking if the second degree neighbours 
-                    # are known candidates in ProtA_dict
-                    if interactor in ProtA_dict.keys():
-                        for secondDegreeInt in ProtA_dict[interactor]:
-                            # Add every second degree interactor seen
-                            # in ProtA_dict to secondDegreeInt_ProtA_dict
-                            secondDegreeInt_ProtA_dict.append(secondDegreeInt)
+                # Checking if the second degree neighbours 
+                # are known candidates in ProtA_dict
+                if interactor in ProtA_dict.keys():
+                    for secondDegreeInt in ProtA_dict[interactor]:
+                        # Add every second degree interactor seen
+                        # in ProtA_dict to secondDegreeInt_ProtA_dict
+                        secondDegreeInt_ProtA_dict.append(secondDegreeInt)
+                        if secondDegreeInt in CandidateGene_dict.keys():
+                            for pathology in CandidateGene_dict[secondDegreeInt]:
+                                if pathology == pathologies_list[i]:
+                                    AllsecondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
+
+                # If the interactor is also present in ProtB_dict
+                if interactor in ProtB_dict.keys():
+                    for secondDegreeInt in ProtB_dict[interactor]:
+                        # But if the second degree interactor was not already
+                        # seen in ProtA_dict for the current interactor
+                        # then check if this second degree interactor is a candidate gene
+                        if not secondDegreeInt in secondDegreeInt_ProtA_dict:
                             if secondDegreeInt in CandidateGene_dict.keys():
                                 for pathology in CandidateGene_dict[secondDegreeInt]:
                                     if pathology == pathologies_list[i]:
                                         AllsecondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
 
-                    # If the interactor is also present in ProtB_dict
-                    if interactor in ProtB_dict.keys():
-                        for secondDegreeInt in ProtB_dict[interactor]:
-                            # But if the second degree interactor was not already
-                            # seen in ProtA_dict for the current interactor
-                            # then check if this second degree interactor is a candidate gene
-                            if not secondDegreeInt in secondDegreeInt_ProtA_dict:
-                                if secondDegreeInt in CandidateGene_dict.keys():
-                                    for pathology in CandidateGene_dict[secondDegreeInt]:
-                                        if pathology == pathologies_list[i]:
-                                            AllsecondDegreeKnownInt.append(ENSG_Gene_dict[secondDegreeInt])
+            # Getting the Gene name for Known Interactors
+            for Known_InteractorIndex in range(len(Known_Interactors)):
+                Known_Interactors[Known_InteractorIndex] = ENSG_Gene_dict[Known_Interactors[Known_InteractorIndex]]
 
-                # Getting the Gene name for Known Interactors
-                for Known_InteractorIndex in range(len(Known_Interactors)):
-                    Known_Interactors[Known_InteractorIndex] = ENSG_Gene_dict[Known_Interactors[Known_InteractorIndex]]
+            if Known_Interactors:
+                # Applying Fisher's exact test to calculate p-values
+                ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
+                (odds_ratio, p_value) = stats.fisher_exact(ComputePvalue_data)
 
-                if Known_Interactors:
-                    # Applying Fisher's exact test to calculate p-values
-                    ComputePvalue_data = [[len(Known_Interactors), len(Interactors)],[pathology_CandidateCount[i], Count_UniqueENSGs]]
-                    (odds_ratio, p_value) = stats.fisher_exact(ComputePvalue_data)
+            # If there are no Known Interactors, 
+            # there is no point is computing P-value,
+            # So we assign P-value as 1
+            else:
+                p_value = 1
 
-                # If there are no Known Interactors, 
-                # there is no point is computing P-value,
-                # So we assign P-value as 1
-                else:
-                    p_value = 1
+            if Known_Interactors:
+                # Storing Known Interactors as a single comma seperated string
+                Known_InteractorsStr = ','.join(Known_Interactor for Known_Interactor in Known_Interactors)
+                Output_eachPatho = [len(Known_Interactors), Known_InteractorsStr, p_value]
+            else:
+                Output_eachPatho = [len(Known_Interactors), '', p_value]
+            
+            # Adding Interactome clustering data
+            for cluster in IntCluster_dict:
+                # Checking if the current gene is present in any cluster
+                if All_Interactors_list[ENSG_index] in IntCluster_dict[cluster]:
+                    #  If the gene is present in the cluster, get the P-value
+                    #  for this cluster
+                    clusterPatho_data = IntCluster_dict[cluster].get(pathologies_list[i])
 
-                if Known_Interactors:
-                    # Storing Known Interactors as a single comma seperated string
-                    Known_InteractorsStr = ','.join(Known_Interactor for Known_Interactor in Known_Interactors)
-                    Output_eachPatho = [len(Known_Interactors), Known_InteractorsStr, p_value]
-                else:
-                    Output_eachPatho = [len(Known_Interactors), '', p_value]
-                
-                # Adding Interactome clustering data
-                for cluster in IntCluster_dict:
-                    # Checking if the current gene is present in any cluster
-                    if All_Interactors_list[ENSG_index] in IntCluster_dict[cluster]:
-                        #  If the gene is present in the cluster, get the P-value
-                        #  for this cluster
-                        clusterPatho_data = IntCluster_dict[cluster].get(pathologies_list[i])
+                    # The first item of the clusterPatho_data will always be a P-value
+                    clusterPatho_Pvalue = clusterPatho_data[0] 
 
-                        # The first item of the clusterPatho_data will always be a P-value
-                        clusterPatho_Pvalue = clusterPatho_data[0] 
+                    # Get the names of candidate genes present in the cluster and store
+                    # it as a single comma-seperated string
+                    clusterPatho_KnownInteractorsstr = ','.join(ENSG_Gene_dict[Known_Interactor] for Known_Interactor in clusterPatho_data[1:])
 
-                        # Get the names of candidate genes present in the cluster and store
-                        # it as a single comma-seperated string
-                        clusterPatho_KnownInteractorsstr = ','.join(ENSG_Gene_dict[Known_Interactor] for Known_Interactor in clusterPatho_data[1:])
+                    # If P-value is not equal to 1 means, the cluster is enriched
+                    # for the current pathology
+                    # So we say this gene is PRESENT in the enriched cluster
+                    # and add the P-value associated with this cluster for the current pathology
+                    if clusterPatho_Pvalue != 1:
+                        Output_eachPatho.append('PRESENT')
+                        Output_eachPatho.append(cluster)
+                        # We know that clusterID is the key and value is a dictionary
+                        # containing 2 types of key/value pair (including pathology-specific information)
+                        # So, size of the cluster will be excluding pathology information (i.e pathology key/value pair)
+                        Cluster_size = len(IntCluster_dict[cluster]) - len(pathologies_list)
+                        Output_eachPatho.append(Cluster_size)
+                        Output_eachPatho.append(clusterPatho_KnownInteractorsstr)
+                        Output_eachPatho.append(clusterPatho_Pvalue)
+                        break
 
-                        # If P-value is not equal to 1 means, the cluster is enriched
-                        # for the current pathology
-                        # So we say this gene is PRESENT in the enriched cluster
-                        # and add the P-value associated with this cluster for the current pathology
-                        if clusterPatho_Pvalue != 1:
-                            Output_eachPatho.append('PRESENT')
-                            Output_eachPatho.append(cluster)
-                            # We know that clusterID is the key and value is a dictionary
-                            # containing 2 types of key/value pair (including pathology-specific information)
-                            # So, size of the cluster will be excluding pathology information (i.e pathology key/value pair)
-                            Cluster_size = len(IntCluster_dict[cluster]) - len(pathologies_list)
-                            Output_eachPatho.append(Cluster_size)
-                            Output_eachPatho.append(clusterPatho_KnownInteractorsstr)
-                            Output_eachPatho.append(clusterPatho_Pvalue)
-                            break
+            # If the gene is not present in any cluster
+            # This can happen as we eliminate clusters with size < 2
+            # So we append empty values and assign P-value = 1
+            # similar to a gene that is present in a cluster but not 
+            # enriched for the current pathology
+            if len(Output_eachPatho) == 3:
+                no_cluster_data = ['', '', 0, '', 1]
+                for empty_data in no_cluster_data:
+                    Output_eachPatho.append(empty_data)
+            else: # len(Output_eachPatho) is 5
+                # The gene was present in one of the clusters that
+                # is enriched for the current pathology
+                pass
 
-                # If the gene is not present in any cluster
-                # This can happen as we eliminate clusters with size < 2
-                # So we append empty values and assign P-value = 1
-                # similar to a gene that is present in a cluster but not 
-                # enriched for the current pathology
-                if len(Output_eachPatho) == 3:
-                    no_cluster_data = ['', '', 0, '', 1]
-                    for empty_data in no_cluster_data:
-                        Output_eachPatho.append(empty_data)
-                else: # len(Output_eachPatho) is 5
-                    # The gene was present in one of the clusters that
-                    # is enriched for the current pathology
-                    pass
+            # Appending all known interactors in the 
+            # 2-hop neighborhood
+            for Known_Interactor in Known_Interactors:
+                AllsecondDegreeKnownInt.append(Known_Interactor)
 
-                # Appending all known interactors in the 
-                # 2-hop neighborhood
-                for Known_Interactor in Known_Interactors:
-                    AllsecondDegreeKnownInt.append(Known_Interactor)
+            # Adding second degree known interactors data
+            Output_eachPatho.append(len(AllsecondDegreeKnownInt))
+            AllsecondDegreeKnownIntstr = ','.join(Known_Interactor for Known_Interactor in AllsecondDegreeKnownInt)
+            Output_eachPatho.append(AllsecondDegreeKnownIntstr)
 
-                # Adding second degree known interactors data
-                Output_eachPatho.append(len(AllsecondDegreeKnownInt))
-                AllsecondDegreeKnownIntstr = ','.join(Known_Interactor for Known_Interactor in AllsecondDegreeKnownInt)
-                Output_eachPatho.append(AllsecondDegreeKnownIntstr)
+            for data in Output_eachPatho:
+                Gene_AllPatho_Pvalue.append(data)
 
-                for data in Output_eachPatho:
-                    Gene_AllPatho_Pvalue.append(data)
+        # Adding GTEX Data
+        if All_Interactors_list[ENSG_index] in GTEX_dict:
+            for GTEX_value in GTEX_dict[All_Interactors_list[ENSG_index]]:
+                Gene_AllPatho_Pvalue.append(GTEX_value)
+        else: 
+            pass 
 
-            # Adding GTEX Data
-            if All_Interactors_list[ENSG_index] in GTEX_dict:
-                for GTEX_value in GTEX_dict[All_Interactors_list[ENSG_index]]:
-                    Gene_AllPatho_Pvalue.append(GTEX_value)
-            else: 
-                pass 
+        # Getting the Gene name for the ENSG
+        Gene_AllPatho_Pvalue[0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[0]]
 
-            # Getting the Gene name for the ENSG
-            Gene_AllPatho_Pvalue[0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[0]]
-
-            print('\t'.join(str(data) for data in Gene_AllPatho_Pvalue))
+        print('\t'.join(str(data) for data in Gene_AllPatho_Pvalue))
 
     logging.info("All done, completed successfully!")
 
