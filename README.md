@@ -8,7 +8,7 @@ This is the main repository containing all the scripts for my Master's thesis pr
    * Clinical
    * Variant
    * Gene
-   * Interactome (Both Naive & Clustering)
+   * Interactome (Naive & Clustering)
    * Expression
 </br>
 
