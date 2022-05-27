@@ -343,11 +343,13 @@ def Interactome_dict(Uniprot_Interactome_list):
 # of all the proteins in the entire high-quality Interactome
 # before eliminating hub/sticky proteins
 #
-# Returns a list containing Hub/stickey proteins
+# Returns a dictionary:
+# - Key: UniProt Primary Accession of the Hub protein
+# - Value: 1
 def getHubProteins(ProtA_dict, ProtB_dict):
 
-    # List to store hub proteins
-    HubProteins = []
+    # Initializing dictionary to store hub proteins
+    HubProteins = {}
 
     # Checking the number of Interactors for a 
     # given protein
@@ -375,7 +377,15 @@ def getHubProteins(ProtA_dict, ProtB_dict):
         # it is considered a hub/sticky protein
         # append it to the HubProteins list
         if Total_InteractorsCount > 120:
-            HubProteins.append(protein)
+            HubProteins[protein] = 1
+
+    # Checking the interactor count of proteins
+    # present only in ProtB_dict
+    for protein in ProtB_dict:
+        if not protein in ProtA_dict:
+            # checking for Hub protein
+            if len(ProtB_dict[protein]) > 120:
+                HubProteins[protein] = 1
 
     return HubProteins 
 
@@ -405,14 +415,16 @@ def Interactome_Uniprot2ENSG(args):
     # lost_Interaction = 0
 
     for data in Uniprot_Interactome_list:
-
         # Eliminating hub/sticky proteins
-        if not (data[0] or data[1]) in HubProteins:
+        if (data[0] in HubProteins) or (data[1] in HubProteins):
+            pass 
+        else:
+            # Get the ENSG for the UniProt Primary Accessions
             if data[0] in Uniprot_ENSG_dict.keys() and data[1] in Uniprot_ENSG_dict.keys():
                 ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[0]), Uniprot_ENSG_dict.get(data[1]))
                 print('\t'.join(ENSG_Interactome_out))
             # else:
-            #     lost_Interaction += 1
+                # lost_Interaction += 1
 
     # logging.debug("Total no. of Interactions lost: %d " % lost_Interaction)
     logging.info("All done, completed succesfully!")
