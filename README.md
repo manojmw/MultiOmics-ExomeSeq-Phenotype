@@ -1,5 +1,5 @@
 ## Table of Contents
--[Introduction](#Introduction)
+- [Introduction](#Introduction)
 - [Example Usage](#example-usage)
    - [UniProt Parser](#uniprotparser)
    - [Protein-Protein Interaction Parser](#ppiparser)
