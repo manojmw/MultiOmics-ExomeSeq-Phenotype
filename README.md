@@ -54,6 +54,7 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 ```    
 
 </br>
+***
 
 <a name="ppiparser"></a>**Protein-Protein Interaction Parser**
 
@@ -144,6 +145,8 @@ python3 4_BuildInteractome_BinaryPPIonly.py --inExpFile Exp_Biogrid.tsv Exp_Inta
     2] Here, we consider both TRUE BINARY INTERACTIONS and PPIs derived from EXPANSION
 
     4] Each Interaction should be proven by ≥ 2 experiments
+
+- **Note**: The interactome containing expansion data should not be used for identifying disease-enriched modules as the clustering algorithms fail to cluster the network correctly leading to wrong results. I optionally included this script if someone wants to use it for other purposes.
 
 -> Build High-Quality Human Interactome with:      
 ```console
