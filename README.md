@@ -54,7 +54,6 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 ```    
 
 </br>
-<hr style="height:1px; color:black;">
 
 ***
 
@@ -98,7 +97,8 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 -> The above example is for the Protein-Protein Interaction data from BioGRID and IntAct. But, you can retrieve PPI data (in miTAB format) from any database and feed it to the script to produce output file.
 
 </br>
-<hr style="height:1px; color:black;">
+
+***
 
 <a name="ppiexpcount"></a>**PPI Experiment Count**
 
@@ -111,7 +111,8 @@ python3 3_Count_HumanPPIExp.py < miTAB File
 ```                   
 
 </br>
-<hr style="height:1px; color:black;">
+
+***
 
 <a name="interactomebinary"></a>**Build Interactome (True Binary Interactions only)**
 
@@ -138,7 +139,8 @@ python3 4_BuildInteractome_BinaryPPIonly.py --inExpFile Exp_Biogrid.tsv Exp_Inta
 
 
 </br>
-<hr style="height:1px; color:black;">
+
+***
 
 <a name="interactomebinarywithexpansion"></a>**Build Interactome (True Binary Interactions with Expansion)**
 
@@ -159,7 +161,8 @@ python3 5_BuildInteractome_BinaryPPIwithExpansion.py --inExpFile Exp_Biogrid.tsv
 ```                      
 
 </br>
-<hr style="height:1px; color:black;">
+
+***
 
 <a name="modulefile"></a>**Module Input File Generator**
 
@@ -184,7 +187,8 @@ python3 6_ModuleInputFile.py < Interactome_human_binaryonly.tsv
 python3 7_Uniprot2ENSG.py --inUniprot Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
 ```                      
 </br>
-<hr style="height:1px; color:black;">
+
+***
 
 <a name="NaïveApproach"></a>**Naïve Approach**
 - Parses the Sample metadata file (.xlsx), UniProt File, Canonical transcripts file, Candidate Gene file(s), Interactome file and GTEX File
@@ -205,7 +209,8 @@ python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_output
 -> You can use the GTEX file provided in this repository. (**Note**: The GTEX file provided in the repository might not be the latest. If you want to retrieve the latest GTEX file, please visit https://www.ebi.ac.uk/gxa/home).  
 
 </br>
-<hr style="height:1px; color:black;">
+
+***
 
 <a name="ProcessMonet"></a>**DREAM Challenge: Cluster File Processing**
 - This script should be run only if you are using the cluster file produced by the MONET TOOL (DREAM Challenge)
@@ -214,7 +219,8 @@ python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_output
 - **Note:** For producing Interactome Clustering File and using this script, please refer to the "Interactome Clustering Methods" section
 
 </br>
-<hr style="height:1px; color:black;">
+
+***
 
 <a name="NaïvewithClusteringApproach"></a>**Naïve with Clustering Approach**
 - This script is similar to `8_NaiveApproach.py`, but the output additionally contains the Interactome Clustering data
