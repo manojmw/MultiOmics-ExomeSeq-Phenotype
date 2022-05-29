@@ -56,6 +56,8 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 </br>
 <hr style="height:1px; color:black;">
 
+***
+
 <a name="ppiparser"></a>**Protein-Protein Interaction Parser**
 
 - Parses a Protein-Protein Interaction (PPI) File (miTAB 2.5 or 2.7)
