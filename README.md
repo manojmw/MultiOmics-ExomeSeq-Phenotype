@@ -54,7 +54,7 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 ```    
 
 </br>
----
+<hr style="border:1px black">
 
 <a name="ppiparser"></a>**Protein-Protein Interaction Parser**
 
