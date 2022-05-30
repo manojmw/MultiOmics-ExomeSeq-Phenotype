@@ -243,13 +243,13 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
 - If the cluster size exceeds 130, the methods are applied recursively (MONET tool automatically does this) to obtain clusters of desired size.
 - I have tested mainly 4 types of clustering methods:
 
-   1] Kernel clustering approach (top ranking method K1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
+   **1] Kernel clustering approach** (top ranking method K1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
    
    
-   2] Modularity Optimization method (top ranking method M1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
+   **2] Modularity Optimization method** (top ranking method M1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
 
 
-   3] Random-walk-based method (top ranking method R1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
+   **3] Random-walk-based method** (top ranking method R1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
 
    </br>
    
@@ -265,7 +265,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
 
 
 
-   4] Randomized optimization of modularity (Didier, Gilles et al. “Identifying communities from multiplex biological networks by randomized optimization of modularity.” F1000Research vol. 7 1042. 10 Jul. 2018, doi:10.12688/f1000research.15486.2)
+   **4] Randomized optimization of modularity** (Didier, Gilles et al. “Identifying communities from multiplex biological networks by randomized optimization of modularity.” F1000Research vol. 7 1042. 10 Jul. 2018, doi:10.12688/f1000research.15486.2)
       
    </br>
          
