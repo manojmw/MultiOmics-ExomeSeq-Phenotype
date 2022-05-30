@@ -332,7 +332,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
       - Sex: 'F' or 'M'
       
 2. candidateGenes.xlsx: </br>
-   * Lists known candidate genes. This eases the identification of a patient's likely causal variant: variants impacting a known candidate gene can be easily selected.  
+   * Lists known candidate genes/implicated seed genes  
    * Required columns: </br>
       - Gene: name of gene (should be the HGNC name, see www.genenames.org).
       - pathologyID: pathology/phenotype
