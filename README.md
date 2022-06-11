@@ -243,13 +243,13 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
 - If the cluster size exceeds 130, the methods are applied recursively (MONET tool automatically does this) to obtain clusters of desired size.
 - I have tested mainly 4 types of clustering methods:
 
-   **1] Kernel clustering approach** (top ranking method K1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
+   **1] Kernel clustering approach** (K1 method from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
    
    
-   **2] Modularity Optimization method** (top ranking method M1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
+   **2] Modularity Optimization method** (M1 method from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
 
 
-   **3] Random-walk-based method** (top ranking method R1 from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
+   **3] Random-walk-based method** (R1 method from DREAM Challenge) (Choobdar, Sarvenaz et al. “Assessment of network module identification across complex diseases.” Nature methods vol. 16,9 (2019): 843-852. doi:10.1038/s41592-019-0509-5)
 
    </br>
    
