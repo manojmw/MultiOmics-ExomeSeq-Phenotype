@@ -8,7 +8,7 @@
    - [Build Interactome (True Binary Interactions with Expansion)](#interactomebinarywithexpansion)
    - [Module Input File Generator](#modulefile)
    - [Uniprot2ENSG Mapper](#uniprotensgmapper)
-   - [Naïve Approach](#NaïveApproach)
+   - [Naïve Approach (1-hop Neighborhood Approach)](#NaïveApproach)
    - [DREAM Challenge: Cluster File Processing](#ProcessMonet)
    - [Naïve with Clustering Approach](#NaïvewithClusteringApproach)
 - [Output](#output)
@@ -190,7 +190,7 @@ python3 7_Uniprot2ENSG.py --inUniprot Uniprot_output.tsv --inCanonicalFile canon
 
 ***
 
-<a name="NaïveApproach"></a>**Naïve Approach**
+<a name="NaïveApproach"></a>**Naïve Approach (1-hop Neighborhood Approach)**
 - Parses the Sample metadata file (.xlsx), UniProt File, Canonical transcripts file, Candidate Gene file(s), Interactome file and GTEX File
 - For a given gene:
    * Checks if the gene is already a known candidate
