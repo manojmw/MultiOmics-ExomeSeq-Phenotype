@@ -30,7 +30,6 @@ This is the main repository containing all the scripts for my Master's thesis pr
    * Gene
    * Interactome
    * Expression
-</br>
 
 ## Example Usage
 
