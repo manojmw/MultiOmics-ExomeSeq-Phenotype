@@ -83,7 +83,8 @@ def uniprot_parser(UniProtinFile):
             ACs += re_AC.match(line).group(1)
         elif (re.match(r'^AC\s', line)):
             # If any AC line is missed, Exit the program with an error message
-            sys.exit("Error: Missed the AC line %s\n" + line)       
+            logging.error("Missed the AC line: \n" + line)
+            sys.exit()
         elif (re_GN.match(line)):
             GNLine = re_GN.match(line).group(1)
             # As per the UniProt documentation, the GN
@@ -181,27 +182,35 @@ def uniprot_parser(UniProtinFile):
                     if not GeneName in GeneNames:
                         GeneNames.append(GeneName)     
         elif (re.match(r'^GN\s+Name.*', line)):
-            sys.exit("Error: Missed the Gene Name \n" + ACs + line)  
+            logging.error("Error: Missed the Gene Name \n" + ACs + line)
+            sys.exit()
         elif (re.match(r'^GN\s+Synonyms.*', line)):
-            sys.exit("Error: Missed the Gene Name Synonym \n" + ACs + line)
+            logging.error("Error: Missed the Gene Name Synonym \n" + ACs + line)   
+            sys.exit()
         elif (re_TaxID.match(line)):
             if (TaxID != 0):
-                sys.exit("Error: Several OX lines for the protein: \t" + ACs)
+                logging.error("Several OX lines for the protein: \t" + ACs)
+                sys.exit()
             TaxID = re_TaxID.match(line).group(1)
         elif (re.match(r'^OX\s',line)):
-            sys.exit("Error: Missed the OX line %s\n" + line)
+            logging.error("Missed the OX line \n" + line)
+            sys.exit()
         elif (re_ENS.match(line)):
             ENS_match = re_ENS.match(line)
-            ENSTs.append(ENS_match.group(1))
+            ENST = ENS_match.group(1)
+            if ENST not in ENSTs:
+                ENSTs.append(ENST)
             ENSG = ENS_match.group(2)
             if ENSG not in ENSGs:
                 ENSGs.append(ENSG)
         elif (re.match(r'^DR\s+Ensembl;', line)):
-            sys.exit("Error: Failed to get all the Ensembl Identifiers\n" + ACs + line)
+            logging.error("Failed to get all the Ensembl Identifiers \n" + ACs + line)
+            sys.exit()
         elif (re_GID.match(line)):
             GeneIDs.append(re_GID.match(line).group(1))
         elif (re.match(r'^DR\s+GeneID.*', line)):
-            sys.exit("Error: Missed the GeneIDs \n" + ACs + line)
+            logging.error("Missed the GeneIDs \n" + ACs + line)
+            sys.exit()
 
         # '//' means End of the record
         # we Process the retreived data
@@ -215,23 +224,27 @@ def uniprot_parser(UniProtinFile):
                     # storing secondary_ACs as a single comma-seperated string
                     secondary_ACs = ','.join(secondary_AC_list) 
                 except:
-                    sys.exit('Error: Failed to store Accession IDs for the protein: \t' + ACs)
+                    logging.error("Failed to store store UniProt Accession IDs for the protein: \t" + ACs)
+                    sys.exit()
                 try:
                     # storing Gene names as a single comma-seperated string
                     GeneNames = ','.join(GeneNames)
                 except:
-                    sys.exit('Error: Failed to store Gene Name for the protein: \t' + ACs)    
+                    logging.error('Error: Failed to store Gene Name for the protein: \t' + ACs)    
+                    sys.exit()
                 try:
                     # storing ENSTs and ENSGs as a single comma-seperated string
                     ENSTs = ','.join(ENSTs)
                     ENSGs = ','.join(ENSGs)
                 except:
-                    sys.exit('Error: Failed to store Ensembl Identifiers for the protein: \t' + ACs)
+                    logging.error("Failed to store Ensembl Identifiers for the protein: \t" + ACs)
+                    sys.exit()
                 try:
                     # storing GeneIDs as a single comma-seperated string
                     GeneIDs = ','.join(GeneIDs)
                 except:
-                    sys.exit('Error: Failed to store Gene Identifiers for the protein: \t' + ACs)    
+                    logging.error('Error: Failed to store Gene Identifiers for the protein: \t' + ACs)   
+                    sys.exit()
 
                 # Printing to STDOUT
                 UniProt_outline = [primary_AC, TaxID, ENSTs, ENSGs, secondary_ACs, GeneIDs, GeneNames]
