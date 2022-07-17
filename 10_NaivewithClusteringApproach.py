@@ -699,7 +699,7 @@ def Interactors_PValue(args):
 
     # Printing header
     Patho_header_list = [[patho+'_INTERACTORS_COUNT', patho+'_INTERACTORS', patho+'_INTERACTORS_PVALUE', patho+'_ENRICHED_CLUSTER', patho+'_ENRICHED_CLUSTER_ID', patho+'_ENRICHED_CLUSTER_SIZE', patho+'_ENRICHED_CLUSTER_CANDIDATE_GENES', patho+'_ENRICHED_CLUSTER_PVALUE', patho+'_SECOND_DEGREE_INTERACTORS_COUNT', patho+'_SECOND_DEGREE_INTERACTORS'] for patho in pathologies_list]
-    print('GENE\t', 'KNOWN_CANDIDATE_GENE\t', 'TOTAL_INTERACTORS\t', '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]), '\t', '\t'.join(GTEXHeader for GTEXHeader in newGTEXHeader))
+    print('GENE' + '\t' + 'KNOWN_CANDIDATE_GENE' + '\t' + 'TOTAL_INTERACTORS' + '\t' + '\t'.join(header for Patho_headerIndex in range(len(Patho_header_list)) for header in Patho_header_list[Patho_headerIndex]) + '\t' + '\t'.join(GTEXHeader for GTEXHeader in newGTEXHeader))
 
 
     # Checking the number of interactors for each gene
