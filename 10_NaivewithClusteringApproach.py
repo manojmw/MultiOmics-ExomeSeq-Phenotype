@@ -740,7 +740,7 @@ def Interactors_PValue(args):
                 if not Interactor in Interactors:
                     Interactors.append(Interactor)
 
-        Gene_AllPatho_Pvalue.append(len(Interactors))     
+        Gene_AllPatho_Pvalue.append(str(len(Interactors)))
 
         for i in range(len(pathologies_list)):
 
@@ -867,19 +867,19 @@ def Interactors_PValue(args):
             Output_eachPatho.append(AllsecondDegreeKnownIntstr)
 
             for data in Output_eachPatho:
-                Gene_AllPatho_Pvalue.append(data)
+                Gene_AllPatho_Pvalue.append(str(data))
 
         # Adding GTEX Data
         if All_Interactors_list[ENSG_index] in GTEX_dict:
             for GTEX_value in GTEX_dict[All_Interactors_list[ENSG_index]]:
-                Gene_AllPatho_Pvalue.append(GTEX_value)
+                Gene_AllPatho_Pvalue.append(str(GTEX_value))
         else: 
             pass 
 
         # Getting the Gene name for the ENSG
         Gene_AllPatho_Pvalue[0] = ENSG_Gene_dict[Gene_AllPatho_Pvalue[0]]
 
-        print('\t'.join(str(data) for data in Gene_AllPatho_Pvalue))
+        print('\t'.join(data for data in Gene_AllPatho_Pvalue))
 
     logging.info("All done, completed successfully!")
 
