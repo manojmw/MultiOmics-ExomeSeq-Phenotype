@@ -173,13 +173,13 @@ def main():
     file_parser = argparse.ArgumentParser(description =
     """
 -----------------------------------------------------------------------------------------------------------------------------
-Program: Parses the filtered files containing candidates identified using 1-hop approach and 2 different clustering 
-         methods. Prints to STDOUT the same list of candidates classified according to their confidence levels.
+Program: Parses the filtered files containing candidates identified using three different methods (Ex: 1-hop approach, 
+         clustering, etc). Prints to STDOUT the same list of candidates classified according to their confidence levels.
 -----------------------------------------------------------------------------------------------------------------------------
 -> The criteria for confidence level is described below:
-    - Very high confidence candidates: Identified using all three methods (1-hop approach and both clustering methods)
-    - High confidence candidates: Identified using any two methods (1-hop or clustering)
-    - Low confidence candidates: Identified using only a single method (1-hop approach or clustering)
+    - Very high confidence candidates: Identified using all three methods 
+    - High confidence candidates: Identified using any two methods 
+    - Low confidence candidates: Identified using only a single method 
 
 !!! Note !!!: 
 - The file name should be in the format patho_method_*.tsv (Ex: MMAF_1-hop_220511.tsv, MMAF_R1DREAM_220511.tsv). This 
@@ -189,10 +189,10 @@ Program: Parses the filtered files containing candidates identified using 1-hop 
 - The first 2 columns ('GENE' and 'KNOWN_CANDIDATE_GENE') must exist and is used to get the intersection and also to check
   if any of the candidates are already known disease genes.
 
-- This script is written to identify the intersection of candidates identified using 3 different methods (1-hop approach 
-  and 2 different clustering methods). So, it is important to provide all 3 result files for the script to work.
+- This script is written to identify the intersection of candidates identified using 3 different methods So, it is important 
+  to provide all 3 result files for the script to work.
 
-- All input files should be associated with a single pathology, else the script will produce wrong results while marking
+- All input files should be associated with the same pathology, else the script will produce wrong results while marking
   positive candidates.
 -----------------------------------------------------------------------------------------------------------------------------
 
