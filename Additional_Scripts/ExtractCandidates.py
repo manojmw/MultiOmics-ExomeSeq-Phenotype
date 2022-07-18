@@ -70,7 +70,7 @@ def ExtractCandidates(args):
         for hI in range(len(filtcandidate_hFields)):
             if filtcandidate_hFields[hI] == 'GENE':
                 Gene_index = hI
-            elif filtcandidate_hFields[hI] == ' KNOWN_CANDIDATE_GENE':
+            elif filtcandidate_hFields[hI] == 'KNOWN_CANDIDATE_GENE':
                 KnownCandGene_index = hI
 
         # sanity check
@@ -90,6 +90,9 @@ def ExtractCandidates(args):
             # store the candidates 
             Candidates_Method_Data[i].append(line_fields[Gene_index])
 
+            # remove extra quotes
+            line_fields[KnownCandGene_index] = line_fields[KnownCandGene_index].strip('"')
+
             # A gene can be associated with multiple pathologies
             # this will be present in the 'KNOWN_CANDIDATE_GENE' if the gene
             # is a known candidate
@@ -98,7 +101,7 @@ def ExtractCandidates(args):
                 Gene_pathologies = line_fields[KnownCandGene_index].split(',')
             except:
                 Gene_pathologies = line_fields[KnownCandGene_index]
-
+                
             # if a gene is known candidate, store it in KnownCandidates_dict dictionary
             if current_patho in Gene_pathologies:
                 if not line_fields[Gene_index] in KnownCandidates_dict:
@@ -180,7 +183,8 @@ Program: Parses the filtered files containing candidates identified using 1-hop 
 
 !!! Note !!!: 
 - The file name should be in the format patho_method_*.tsv (Ex: MMAF_1-hop_220511.tsv, MMAF_R1DREAM_220511.tsv). This 
-  is very important to identify the pathology & method the file is associated with.
+  is very important to identify the pathology & method the file is associated with. The name of the method should also
+  be followed by an underscore ('_')
 
 - The first 2 columns ('GENE' and 'KNOWN_CANDIDATE_GENE') must exist and is used to get the intersection and also to check
   if any of the candidates are already known disease genes.
