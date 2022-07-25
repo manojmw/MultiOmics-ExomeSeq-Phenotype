@@ -284,9 +284,6 @@ def CausalVariantParser(cohort, insample, indir):
                                     else:
                                         causalVariant_dict[sampleF_ID] = variant_info
                 #else: sample doesn't have a causal gene
-            else:
-                logging.warning("inFile %s doesn't seem to correspond to any sample, skipping it\n" % sampleF)
-                continue
                 
     return causalVariant_dict
 
