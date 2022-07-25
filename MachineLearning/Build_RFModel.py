@@ -172,7 +172,7 @@ def CausalVariantParser(cohort, insample, indir):
     Required_cols = ['sampleID', 'pathologyID', 'Causal gene']
 
     # Reading the samples metadata file into a dataframe
-    sampleMetaData = pd.read_excel(sampleMetaFile, usecols = Required_cols)
+    sampleMetaData = pd.read_excel(sampleMetaFile, usecols = Required_cols, engine='openpyxl')
     
     # eliminating rows where sampleID = 0
     sampleMetaData = sampleMetaData[sampleMetaData['sampleID'] != 0]
