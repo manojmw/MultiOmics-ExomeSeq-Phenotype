@@ -15,6 +15,16 @@ from joblib import dump
 
 ###########################################################
 
+# Parses the canonical cohort file (produced by the grexome-TIMC-secondary 
+# pipeline) for which the model is to be built
+# Also parses the causalVariant_dict dictionary returned by CausalVariantParser
+# function
+#
+# Preprocessing of the data, selection of features, adjusting 
+# for imbalanced classes, training the model.
+#
+# The trained model will be saved to a file (RandomForest_Model.joblib) 
+# in the current working directory. 
 def BuildModel(args):
 
     logging.info("starting to run")
@@ -134,13 +144,20 @@ def BuildModel(args):
 
 ###########################################################
 
-# Parses the patient samples file in .xlsx format
-# Required columns are: 'Causal gene' & 'pathologyID' 
+# Parses the sample metadata file in .xlsx format
+# Required columns are: 'sampleID', 'Causal gene' & 'pathologyID' 
 # (can be in any order, but they MUST exist)
+# Also, takes an input - path to the directory containing sample
+# sample results file produced by the grexome-TIMC-secondary pipeline
+#
+# Extracts the causal variants for each sample (where gene is known)
 #
 # Returns a dictionary
-# - Key: pathologyID
-# - Value: list of causal genes assoicated with each pathology
+# - Key: sampleID
+# - Value: A list containing variant information such as:
+#         - Chromosome Position, REF and ALT allels seperated by an '_'
+#         - Gene Symbol
+#         - Variant Impact
 def CausalVariantParser(cohort, insample, indir):
 
     # Dictinary to store causal variants
@@ -280,10 +297,11 @@ def main():
     file_parser = argparse.ArgumentParser(description =
     """
 ---------------------------------------------------------------------------------------------------------------------
-Program: Parses the cohort result file (canonical) produced by the grexome-TIMC-Secondary pipeline. Also parses the 
-         sample metadata file and sample results file to extract causal variant for each sample. Finally, builds a
-         Random Forest Model using different features. The model will be saved to a file (RandomForest_Model.joblib) 
-         in the current working directory.
+Program: Parses the canonical cohort result file (produced by the grexome-TIMC-Secondary pipeline). Also parses the 
+         sample metadata file and sample results file to extract causal variant for each sample. Finally, builds a 
+         Random Forest Model using different features. 
+         
+         The trained model will be saved to a file (RandomForest_Model.joblib) in the current working directory.
 ---------------------------------------------------------------------------------------------------------------------
 
 Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
