@@ -77,6 +77,9 @@ def BuildModel(args):
     Features["gnomADe_AF"] = Features["gnomADe_AF"].fillna(0)
     Features["gnomADg_AF"] = Features["gnomADg_AF"].fillna(0)
 
+    # If INTERACTORS_PVALUE is missing: we assign p-value as 1
+    Features["INTERACTORS_PVALUE"] = Features["INTERACTORS_PVALUE"].fillna(1)
+
     # Drop rows with empty values
     Features = Features.dropna()
 
