@@ -51,7 +51,7 @@ def BuildModel(args):
     causalVariant_dict = CausalVariantParser(cohort, args.insample, args.indir)
 
     # columns of interest
-    Required_cols = ['POSITION', 'REF', 'ALT', 'SYMBOL', 'INTERACTORS_PVALUE', 'COUNT_HR', 'COUNT_'+cohort+'_HV', 'COUNT_'+cohort+'_HET', 'COUNT_'+cohort+'_OTHERCAUSE_HV', 'COUNT_'+cohort+'_OTHERCAUSE_HET', 'COUNT_COMPAT_HV', 'COUNT_COMPAT_HET', 'COUNT_NEGCTRL_HV', 'COUNT_NEGCTRL_HET', 'COUNT_OTHERGENO', 'IMPACT', 'gnomAD_AF', 'GTEX_testis_RATIO', 'GTEX_ovary_RATIO', 'GTEX_testis', 'GTEX_ovary', 'GTEX_blood', 'GTEX_cerebellar_hemisphere', 'GTEX_liver', 'GTEX_lung', 'CADD_PHRED']
+    Required_cols = ['POSITION', 'REF', 'ALT', 'SYMBOL', 'INTERACTORS_PVALUE', 'COUNT_HR', 'COUNT_'+cohort+'_HV', 'COUNT_'+cohort+'_HET', 'COUNT_'+cohort+'_OTHERCAUSE_HV', 'COUNT_'+cohort+'_OTHERCAUSE_HET', 'COUNT_COMPAT_HV', 'COUNT_COMPAT_HET', 'COUNT_NEGCTRL_HV', 'COUNT_NEGCTRL_HET', 'COUNT_OTHERGENO', 'IMPACT', 'gnomADe_AF', 'gnomADg_AF', 'GTEX_testis_RATIO', 'GTEX_ovary_RATIO', 'GTEX_testis', 'GTEX_ovary', 'GTEX_blood', 'GTEX_cerebellar_hemisphere', 'GTEX_liver', 'GTEX_lung', 'CADD_PHRED']
 
     # Reading the Cohort file
     Features = pd.read_csv(CohortFile, usecols = Required_cols, sep='\t', low_memory = False)
@@ -73,8 +73,9 @@ def BuildModel(args):
     # Also dropping 'SYMBOL' and 'IMPACT' columns: causal variants have been marked
     Features.drop(Features.columns[[1,2,3,4,16]], axis='columns', inplace = True)
 
-    # If a gnomAD_AF is missing, we assign the value as 0
-    Features["gnomAD_AF"] = Features["gnomAD_AF"].fillna(0)
+    # If gnomAD values missing: we assign the value as 0
+    Features["gnomADe_AF"] = Features["gnomADe_AF"].fillna(0)
+    Features["gnomADg_AF"] = Features["gnomADg_AF"].fillna(0)
 
     # Drop rows with empty values
     Features = Features.dropna()
