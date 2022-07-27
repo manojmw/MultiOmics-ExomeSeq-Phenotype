@@ -357,7 +357,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
 
 ## Funding
 
-We gratefully acknowledge funding from the French National Research Agency (ANR) project FLAGEL- OME (ANR-19-CE17-0014)
+We gratefully acknowledge funding from the French National Research Agency (ANR) project FLAGEL-OME (ANR-19-CE17-0014)
 
 ## License
 
