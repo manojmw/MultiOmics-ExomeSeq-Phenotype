@@ -80,29 +80,33 @@ def BuildModel(args):
     # If INTERACTORS_PVALUE is missing: we assign p-value as 1
     Features["INTERACTORS_PVALUE"] = Features["INTERACTORS_PVALUE"].fillna(1)
 
+    # If the variant is potentially causal in the patient, 
+    # but there is no pathogenecity prediction score, then we assign "CADD_PHRED" score as 20
+    Features.loc[Features['CADD_PHRED'] == " ", 'CADD_PHRED'] = 20
+
     # Drop rows with empty values
     Features = Features.dropna()
 
     # # print the dataset
-    # print(Features.to_csv(sys.stdout, index=False))
+    print(Features.to_csv(sys.stdout, index=False))
 
-    # Feature and target objects
-    y = Features['POTENTIALLY_CAUSAL']
-    X = Features.drop(['POTENTIALLY_CAUSAL', 'VARIANT_ID'], axis=1)
+    # # Feature and target objects
+    # y = Features['POTENTIALLY_CAUSAL']
+    # X = Features.drop(['POTENTIALLY_CAUSAL', 'VARIANT_ID'], axis=1)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 42, test_size=0.33)
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 42, test_size=0.33)
 
-    # In our data, the classes are imbalanced 
-    # Handling Imbalanced Data by oversampling using SMOTE (Synthetic Minority Oversampling Technique)
-    sm = SMOTE(random_state = 42)
-    X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
+    # # In our data, the classes are imbalanced 
+    # # Handling Imbalanced Data by oversampling using SMOTE (Synthetic Minority Oversampling Technique)
+    # sm = SMOTE(random_state = 42)
+    # X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
 
-    # Instantiate and fit the RandomForest Classifier
-    # Random forest classifier object
-    forest = RandomForestClassifier(n_estimators = 100, random_state = 42, bootstrap = True)
+    # # Instantiate and fit the RandomForest Classifier
+    # # Random forest classifier object
+    # forest = RandomForestClassifier(n_estimators = 100, random_state = 42, bootstrap = True)
     
-    # Train the model on resampled train datasets
-    forest.fit(X_train_res, y_train_res)
+    # # Train the model on resampled train datasets
+    # forest.fit(X_train_res, y_train_res)
 
     # # Saving feature names for later use
     # feature_list = list(X.columns)
@@ -139,8 +143,8 @@ def BuildModel(args):
     # print('--------------------------')
     # print(forest_cv_score.mean(),"\n")
 
-    # save the model
-    dump(forest, 'RandomForest_Model.joblib')
+    # # save the model
+    # dump(forest, 'RandomForest_Model.joblib')
 
     logging.info("All done, completed successfully!")
 
