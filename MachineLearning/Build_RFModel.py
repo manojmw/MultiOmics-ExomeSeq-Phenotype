@@ -82,7 +82,7 @@ def BuildModel(args):
 
     # If the variant is potentially causal in the patient, 
     # but there is no pathogenecity prediction score, then we assign "CADD_PHRED" score as 20
-    Features.loc[Features['CADD_PHRED'] == " ", 'CADD_PHRED'] = 20
+    Features.loc[(Features['POTENTIALLY_CAUSAL'] == 'YES') & ((Features['CADD_PHRED'] == ' ')), 'CADD_PHRED'] = 20.0
 
     # Drop rows with empty values
     Features = Features.dropna()
