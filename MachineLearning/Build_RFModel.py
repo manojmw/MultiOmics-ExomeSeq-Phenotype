@@ -51,7 +51,11 @@ def BuildModel(args):
     causalVariant_dict = CausalVariantParser(cohort, args.insample, args.indir)
 
     # columns of interest
-    Required_cols = ['POSITION', 'REF', 'ALT', 'SYMBOL', 'INTERACTORS_PVALUE', 'COUNT_HR', 'COUNT_'+cohort+'_HV', 'COUNT_'+cohort+'_HET', 'COUNT_'+cohort+'_OTHERCAUSE_HV', 'COUNT_'+cohort+'_OTHERCAUSE_HET', 'COUNT_COMPAT_HV', 'COUNT_COMPAT_HET', 'COUNT_NEGCTRL_HV', 'COUNT_NEGCTRL_HET', 'COUNT_OTHERGENO', 'IMPACT', 'gnomADe_AF', 'gnomADg_AF', 'GTEX_testis_RATIO', 'GTEX_ovary_RATIO', 'GTEX_testis', 'GTEX_ovary', 'GTEX_blood', 'GTEX_cerebellar_hemisphere', 'GTEX_liver', 'GTEX_lung', 'CADD_PHRED']
+    # Here we are using GTEx columns based on our pathology of interest (POI)
+    # i.e. Male infertility phenotype - MMAF (Multiple Morphological Anomalies of the Sperm Flagella)
+    # GTEx columns considered here are: 'GTEX_testis_RATIO', 'GTEX_testis', 'GTEX_lung'
+    # You might want to choose GTEx columns based on your POI
+    Required_cols = ['POSITION', 'REF', 'ALT', 'SYMBOL', 'INTERACTORS_PVALUE', 'COUNT_HR', 'COUNT_'+cohort+'_HV', 'COUNT_'+cohort+'_HET', 'COUNT_'+cohort+'_OTHERCAUSE_HV', 'COUNT_'+cohort+'_OTHERCAUSE_HET', 'COUNT_COMPAT_HV', 'COUNT_COMPAT_HET', 'COUNT_NEGCTRL_HV', 'COUNT_NEGCTRL_HET', 'COUNT_OTHERGENO', 'IMPACT', 'gnomADe_AF', 'gnomADg_AF', 'GTEX_testis_RATIO', 'GTEX_testis', 'GTEX_lung', 'CADD_PHRED']
 
     # Reading the Cohort file
     Features = pd.read_csv(CohortFile, usecols = Required_cols, sep='\t', low_memory = False)
@@ -82,7 +86,7 @@ def BuildModel(args):
 
     # If the variant is potentially causal in the patient, 
     # but there is no pathogenecity prediction score, then we assign "CADD_PHRED" score as 20
-    Features.loc[(Features['POTENTIALLY_CAUSAL'] == 'YES') & ((Features['CADD_PHRED'] == ' ')), 'CADD_PHRED'] = 20.0
+    Features.loc[(Features['POTENTIALLY_CAUSAL'] == 'YES') & (Features['CADD_PHRED'].isna()), 'CADD_PHRED'] = 20.0
 
     # Drop rows with empty values
     Features = Features.dropna()
