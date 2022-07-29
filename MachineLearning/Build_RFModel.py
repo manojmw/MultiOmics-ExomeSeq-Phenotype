@@ -98,7 +98,7 @@ def BuildModel(args):
     y = Features['POTENTIALLY_CAUSAL']
     X = Features.drop(['POTENTIALLY_CAUSAL', 'VARIANT_ID'], axis=1)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 42, test_size=0.33)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 42, test_size=0.2)
 
     # In our data, the classes are imbalanced 
     # Handling Imbalanced Data by oversampling using SMOTE (Synthetic Minority Oversampling Technique)
@@ -147,8 +147,8 @@ def BuildModel(args):
     # print('--------------------------')
     # print(forest_cv_score.mean(),"\n")
 
-    # # save the model
-    dump(forest, 'RandomForest_Model.joblib')
+    # save the model
+    dump(forest, 'RandomForest_Model_%s.joblib' % cohort)
 
     logging.info("All done, completed successfully!")
 
