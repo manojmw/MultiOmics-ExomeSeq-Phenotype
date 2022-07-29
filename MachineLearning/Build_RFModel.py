@@ -66,7 +66,7 @@ def BuildModel(args):
     for sampleID in causalVariant_dict:
         Features.loc[(causalVariant_dict[sampleID][0] == Features['VARIANT_ID']) & (causalVariant_dict[sampleID][1] == Features['SYMBOL']) & (causalVariant_dict[sampleID][2] == Features['IMPACT']), 'POTENTIALLY_CAUSAL'] = 'YES'
             
-    Features["POTENTIALLY_CAUSAL"] = Features["POTENTIALLY_CAUSAL"].fillna('NO')
+    Features.loc[Features['POTENTIALLY_CAUSAL'] == " ", 'POTENTIALLY_CAUSAL'] = 'NO'
 
     # Removing the variant info columns ('POSITION', 'REF', 'ALT') because the data
     # for these 3 columns is stored in the new "VARIANT_ID" column
@@ -82,7 +82,7 @@ def BuildModel(args):
 
     # If the variant is potentially causal in the patient, 
     # but there is no pathogenecity prediction score, then we assign "CADD_PHRED" score as 20
-    Features["CADD_PHRED"] = Features["CADD_PHRED"].fillna(20)
+    Features.loc[Features['CADD_PHRED'] == " ", 'CADD_PHRED'] = 20
 
     # Drop rows with empty values
     Features = Features.dropna()
