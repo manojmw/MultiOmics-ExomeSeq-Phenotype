@@ -310,7 +310,7 @@ Program: Parses the canonical cohort result file (produced by the grexome-TIMC-S
          sample metadata file and sample results file to extract causal variant for each sample. Finally, builds a 
          Random Forest Model using different features. 
          
-         The trained model will be saved to a file (RandomForest_Model.joblib) in the current working directory.
+         The trained model will be saved to a file (RandomForest_Model_cohort.joblib) in the current working directory.
 ---------------------------------------------------------------------------------------------------------------------
 
 Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
