@@ -8,12 +8,12 @@
 
 ## Dependencies
 
-    - Python >= 3
-    - OpenPyXl == 3.0.10
-    - Scikit-learn == 1.1.1
-    - Imbalanced-learn == 0.9.1
-    - Pandas == 1.4.3
-    - Joblib == 1.1.0
+- Python >= 3
+- OpenPyXl == 3.0.10
+- Scikit-learn == 1.1.1
+- Imbalanced-learn == 0.9.1
+- Pandas == 1.4.3
+- Joblib == 1.1.0
 
 
 ## EXAMPLE USAGE:
@@ -21,6 +21,7 @@
 # Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
 
 1] Training and saving the Machine learning model 
+
 - In this directory, I have also uploaded the trained model file (RandomForest_Model_MMAF.joblib) for our phenotype of interest (POI)
 - The below example is for our phenotype of interest (POI)
 
