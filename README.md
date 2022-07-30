@@ -54,13 +54,13 @@
 
 -> Grab the latest UniProt data with:
 
-"`console
+```console
 wget https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz
 ```
 
 -> Parse UniProt data to produce output with:
 
-"`console
+```console
 gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 ```    
 
@@ -74,11 +74,11 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 - Maps to UniProt using the output files produced by `1_Uniprot_parser.py` and prints to STDOUT in .tsv format
 
 1] Grab the latest **BioGRID data** with:
-   "`console
+   ```console
    wget https://downloads.thebiogrid.org/Download/BioGRID/Latest-Release/BIOGRID-ORGANISM-LATEST.mitab.zip
    ```  
    -> Unzip with:
-   "`console
+   ```console
    unzip BIOGRID-ORGANISM-LATEST.mitab.zip
    ```
    -> This will produce one miTAB File per Organism (Use BIOGRID-ORGANISM-Homo_sapiens*.mitab.txt for human data)
@@ -86,11 +86,11 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
    </br>
 
 2] Grab the latest **IntAct data** with:
-   "`console
+   ```console
    wget ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact.zip
    ```  
    -> Unzip with:
-   "`console
+   ```console
    unzip intact.zip
    ```
    -> This will produce 2 files (intact.txt & intact_negative.txt). Use intact.txt for further steps
@@ -98,10 +98,10 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 </br>
 
 3] Parse PPI data with:
-   "`console
+   ```console
    python3 Interaction_parser.py --inInteraction BIOGRID-ORGANISM-Homo_sapiens*.mitab.txt --inUniprot Uniprot_output.tsv > Exp_Biogrid.tsv
    ```
-   "`console
+   ```console
    python3 Interaction_parser.py --inInteraction intact.txt --inUniprot Uniprot_output.tsv > Exp_Intact.tsv
    ```
 
@@ -117,7 +117,7 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 - Prints the count of Human-Human Protein Interaction experiments to STDOUT
 
 -> Provide a STDIN miTAB 2.5 or 2.7 file with:
-"`console
+```console
 python3 3_Count_HumanPPIExp.py < miTAB File
 ```                   
 
@@ -142,7 +142,7 @@ python3 3_Count_HumanPPIExp.py < miTAB File
     5] Eliminating Hub/Sticky proteins (A protein is considered a hub if it has > 120 interactors. This number is based upon the degree distribution of the entire Interactome before eliminating hub/sticky proteins).
 
 -> Build High-Quality Human Interactome with:      
-"`console
+```console
 python3 4_BuildInteractome_BinaryPPIonly.py --inExpFile Exp_Biogrid.tsv Exp_Intact.tsv --inUniprot Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human_binaryonly.tsv
 ```                      
 -> For getting `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
@@ -167,7 +167,7 @@ python3 4_BuildInteractome_BinaryPPIonly.py --inExpFile Exp_Biogrid.tsv Exp_Inta
 - **Note**: The Interactome containing expansion data should not be used for identifying disease-enriched modules as the clustering algorithms fail to cluster the network correctly, leading to wrong results. I optionally included this script if someone wants to use it for other purposes.
 
 -> Build High-Quality Human Interactome with:      
-"`console
+```console
 python3 5_BuildInteractome_BinaryPPIwithExpansion.py --inExpFile Exp_Biogrid.tsv Exp_Intact.tsv --inUniprot Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human_binarywithexpansion.tsv
 ```                      
 
@@ -182,7 +182,7 @@ python3 5_BuildInteractome_BinaryPPIwithExpansion.py --inExpFile Exp_Biogrid.tsv
 - This can be used as INPUT for most of the module identification/clustering methods
 
 -> Generate Module Input File with:
-"`console
+```console
 python3 6_ModuleInputFile.py < Interactome_human_binaryonly.tsv
 ```                      
 </br>
@@ -194,7 +194,7 @@ python3 6_ModuleInputFile.py < Interactome_human_binaryonly.tsv
 - Maps UniProt accession to ENSG and prints to STDOUT
 
 -> Run UniProt2ENSG Mapper with:
-"`console
+```console
 python3 7_Uniprot2ENSG.py --inUniprot Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_220221.tsv
 ```                      
 </br>
@@ -214,7 +214,7 @@ python3 7_Uniprot2ENSG.py --inUniprot Uniprot_output.tsv --inCanonicalFile canon
 - This script provides one of the scoring components for the Machine Learning step
 
 -> Run 8_NaiveApproach.py script with:
-"`console
+```console
 python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_output.tsv --inCandidateFile candidateGenes.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human.tsv --inGTEXFile E-MTAB-5214-query-results.tpms.tsv
 ```      
 -> You can use the GTEX file provided in this repository. (**Note**: The GTEX file provided in the repository might not be the latest. If you want to retrieve the latest GTEX file, please visit https://www.ebi.ac.uk/gxa/home).  
@@ -237,7 +237,7 @@ python3 8_NaiveApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_output
 - This script is similar to `8_NaiveApproach.py`, but the output additionally contains the Interactome Clustering data
 
 -> Run 10_Naive_withClusteringApproach.py script with:
-"`console
+```console
 python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot Uniprot_out.tsv --inCandidateFile candidateGenes_*.xlsx --inCanonicalFile canonicalTranscripts_220221.tsv --inInteractome Interactome_human --inClusterFile K1Clustering_clusterFile.cls --inGTEXFile E-MTAB-5214-query-results.tpms.tsv
 ```
 - Clustering data provide an additional scoring component for the Machine Learning step
@@ -301,7 +301,7 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
 
 **Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes**
 
-"`shell
+```shell
 # UniProt Files
    --inUniprot                          A tab-separated Input File name (produced by 1_Uniprot_parser.py) containing UniProt Primary Accession, Taxonomy Identifier, ENST(s), ENSG(s), UniProt Secondary Accession(s), Gene ID(s) & Gene name(s)
 
