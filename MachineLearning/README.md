@@ -1,4 +1,4 @@
-- This directory contains scripts for the Machine learning aspects of the project 
+# This directory contains scripts for the Machine learning aspects of the project 
 - I have commented out some parts of the code (such as evaluating model performance, feature importance, etc) in Build_RFModel.py script.
 - You can uncomment them to train, evaluate and obtain a model for your pathology of interest!!!
 - In this directory, I have also uploaded the trained model file (RandomForest_Model_MMAF.joblib) for our phenotype of interest (POI)
