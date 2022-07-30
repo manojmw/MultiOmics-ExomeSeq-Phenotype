@@ -4,8 +4,7 @@
 # 18 July 2022
 
 
------| This directory contains scripts for the Machine learning aspects of the project |-----
-
+## This directory contains scripts for the Machine learning aspects of the project 
 
 ## Dependencies
 
