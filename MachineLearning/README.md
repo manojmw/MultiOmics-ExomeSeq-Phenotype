@@ -7,17 +7,8 @@
 - You can uncomment them to train, evaluate and obtain a model for your pathology of interest!!!
 - In this directory, I have also uploaded a trained model file (RandomForest_Model_MMAF.joblib) for our phenotype of interest (POI)
 
-# Dependencies
 
-- Python >= 3
-- OpenPyXl == 3.0.10
-- Scikit-learn == 1.1.1
-- Imbalanced-learn == 0.9.1
-- Pandas == 1.4.3
-- Joblib == 1.1.0
-
-
-## EXAMPLE USAGE:
+## Example Usage:
 
 1] Training and saving the Machine learning model 
 - The below example is for our phenotype of interest (POI)
@@ -48,3 +39,12 @@ python3 ScoreVariants.py --inmodel RandomForest_Model_MMAF.joblib --insample Sam
 
 --insampleresult      Sample result file .csv (the cohort should match the trained model cohort, else you might get incorrect predictions!!!) for which you want to score the variants
 ```
+
+# Dependencies
+
+- Python >= 3
+- OpenPyXl == 3.0.10
+- Scikit-learn == 1.1.1
+- Imbalanced-learn == 0.9.1
+- Pandas == 1.4.3
+- Joblib == 1.1.0
