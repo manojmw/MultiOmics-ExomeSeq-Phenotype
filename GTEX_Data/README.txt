@@ -1,3 +1,6 @@
+- This directory contains the GTEx data for the scripts.
+
+
 #######################################
 
 # manojmw
