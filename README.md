@@ -22,16 +22,13 @@
 ## Introduction
 
 - This is the main repository containing all the scripts for my Master's thesis project. 
-- My project was to develop a multi-Omics method for scoring genomic variants that might be causal for a particular phenotype in the patient. 
+- My project was to develop a multi-omics method for scoring genomic variants that might be potentially causal to a particular phenotype in the patient. 
 - The machine learning classifier takes `input features` (an aggregation of different omics data as scalar values) to produce a `score between 0 and 1`, indicating how likely the variant is potentially causal in the patient. 
    * Higher score: more likey that the variant is potentially causal
    * Lower score: less likey that the variant is potentially causal
-- The algorithm finally ranks the variants based on these scores to identify novel disease genes in each patient.
-
-</br>
-
+- The algorithm finally ranks the variants based on these scores to identify novel disease genes in each **patient**.
 - This repository contains individual scripts which work at the `Gene level` 
-- I have integrated these into the **Exome-Seq Secondary Analysis Pipeline** ([click here](https://github.com/manojmw/grexome-TIMC-Secondary)) which works at the `Clinical level` (Identify potential disease genes in each patient or cohort)
+- I have integrated these into the **Exome-Seq Secondary Analysis Pipeline** ([click here](https://github.com/manojmw/grexome-TIMC-Secondary)) which works at the `Clinical level` (Identify potential disease genes in each patient)
 - The result files produced by this pipeline now contains the following data:
    * Clinical
    * Variant
