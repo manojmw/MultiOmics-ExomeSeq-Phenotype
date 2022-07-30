@@ -5,13 +5,14 @@
   * Scoring genomic variants in the patient sample result file using the trained model
 - I have commented some lines of the code (such as evaluating model performance, feature importance, etc.) in the `Build_RFModel.py` script.
 - You can uncomment them to train, evaluate and obtain a model for your pathology of interest!!!
-- In this directory, I have also uploaded a trained model file (RandomForest_Model_MMAF.joblib) for our phenotype of interest (POI)
+- In this directory, I have also uploaded a trained model file (RandomForest_Model_MMAF.joblib) for our POI.
+- The scripts can be used to prioritize variants for any monogenic disease.
 
 
 ## Example Usage:
 
 1] Training and saving the Machine learning model 
-- The below example is for our phenotype of interest (POI)
+- The below example is for our POI
 
 ```console
 python3 Build_RFModel.py --insample Samples.xlsx --incohort MMAF.final.patientIDs.canon.GATK.csv --indir SecondaryAnalyses_220725_HighQuality_AllTranscripts_GATK_ModoptAnais/Samples/
