@@ -355,18 +355,18 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
 
 ## Dependencies
 
-* **Python version >= 3**
-* External dependencies are kept to minimum in all the scripts. The only required python modules are listed below: </br>
-  - OpenPyXl == 3.0.10
-  - SciPy == 1.5.2
-* You can install these with pip/conda
-* Most other standard core modules should already be available on your system
+- **Python version >= 3**
+- External dependencies are kept to minimum in all the scripts. The only required python modules are listed below: </br>
+  * OpenPyXl == 3.0.10
+  * SciPy == 1.5.2
+- You can install these with pip/conda
+- Most other standard core modules should already be available on your system
 
 - Additional dependencies for `Machine learning`:
-* Scikit-learn == 1.1.1
-* Imbalanced-learn == 0.9.1
-* Pandas == 1.4.3
-* Joblib == 1.1.0
+   * Scikit-learn == 1.1.1
+   * Imbalanced-learn == 0.9.1
+   * Pandas == 1.4.3
+   * Joblib == 1.1.0
 
 ## Funding
 
