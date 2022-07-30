@@ -361,7 +361,6 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
   * SciPy == 1.5.2
 - You can install these with pip/conda
 - Most other standard core modules should already be available on your system
-
 - Additional dependencies for `Machine learning`:
    * Scikit-learn == 1.1.1
    * Imbalanced-learn == 0.9.1
