@@ -48,7 +48,7 @@ def BuildModel(args):
     cohort = FName_fields[0]
 
     # calling the function
-    causalVariant_dict = CausalVariantParser(cohort, args.insample, args.indir)
+    causalVariant_dict = CausalVariantParser(cohort, args.insamplemeta, args.indir)
 
     # columns of interest
     # Here we are using GTEx columns based on our pathology of interest (POI)
@@ -170,7 +170,7 @@ def BuildModel(args):
 #         - Chromosome Position, REF and ALT allels seperated by an '_'
 #         - Gene Symbol
 #         - Variant Impact
-def CausalVariantParser(cohort, insample, indir):
+def CausalVariantParser(cohort, insamplemeta, indir):
 
     # Dictinary to store causal variants
     # key: POSITION, REF & ALT seperated by an Underscore
@@ -178,7 +178,7 @@ def CausalVariantParser(cohort, insample, indir):
     causalVariant_dict = {}
 
     # Input sample metdata file
-    sampleMetaFile = insample
+    sampleMetaFile = insamplemeta
 
      # columns of interest in sample metadata file
     Required_cols = ['sampleID', 'pathologyID', 'Causal gene']
@@ -320,7 +320,7 @@ Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     required = file_parser.add_argument_group('Required arguments')
     optional = file_parser.add_argument_group('Optional arguments')
 
-    required.add_argument('--insample', metavar = "Input File", dest = "insample", help = 'Sample metadata file', required=True)
+    required.add_argument('--insamplemeta', metavar = "Input File", dest = "insamplemeta", help = 'Sample metadata file', required=True)
     required.add_argument('--incohort', metavar = "Input File", dest = "incohort", help = 'Single Cohort result file CSV (The cohort for which you would want to build the Machine learning model)', required=True)
     required.add_argument('--indir', metavar = "Input Directory", dest = "indir", help='Path to the directory containing sample result files CSV produced by the grexome-TIMC-Secondary pipeline')
     
