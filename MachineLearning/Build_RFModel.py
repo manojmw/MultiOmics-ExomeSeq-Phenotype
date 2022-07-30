@@ -39,7 +39,7 @@ def BuildModel(args):
     except:
         Cohort_FName = CohortFile
 
-    # Getting the pathology name from the file name Ex: MMAF.grexT1297.HG35FT.GATK
+    # Getting the pathology name from the file name
     FName_fields = Cohort_FName.split('.')
     
     # "cohort" as global variable so that it can be accessed later and also in other 
@@ -323,7 +323,7 @@ Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     required.add_argument('--insample', metavar = "Input File", dest = "insample", help = 'Sample metadata file', required=True)
     required.add_argument('--incohort', metavar = "Input File", dest = "incohort", help = 'Single Cohort result file CSV (The cohort for which you would want to build the Machine learning model)', required=True)
     required.add_argument('--indir', metavar = "Input Directory", dest = "indir", help='Path to the directory containing sample result files CSV produced by the grexome-TIMC-Secondary pipeline')
- 
+    
     args = file_parser.parse_args()
     BuildModel(args)
 
