@@ -16,6 +16,3 @@
 
 5] Samples file (metadata file describing the samples .xlsx)
 
-
-# There is a separate directory in the repository for GTEX data. Unlike above sample files, the GTEX directory 
-# contains the entire GTEX data file which you can directly use as an input
