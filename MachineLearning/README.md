@@ -2,7 +2,7 @@
 
 - This directory contains scripts for:
   * Building a Random forest model
-  * Using the model to score genomic variants in the patients sample result file
+  * Using the model to score genomic variants in the patient sample result file
 - I have commented out some parts of the code (such as evaluating model performance, feature importance, etc) in `Build_RFModel.py` script.
 - You can uncomment them to train, evaluate and obtain a model for your pathology of interest!!!
 - In this directory, I have also uploaded a trained model file (RandomForest_Model_MMAF.joblib) for our phenotype of interest (POI)
