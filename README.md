@@ -23,7 +23,7 @@
 
 - This is the main repository containing all the scripts for my Master's thesis project. 
 - My project was to develop a multi-omics method for scoring genomic variants that might be potentially causal to a particular phenotype in the patient by supervised machine learning. 
-- The classifier takes `input features` (an aggregation of different omics data as scalar values) to produce a `score between 0 and 1`, indicating how likely the variant is potentially causal in the patient. 
+- The classifier takes `input features` (an aggregation of different omics data as scalar values) to produce a `score between 0 and 1`.
    * Higher score: more likely that the variant is potentially causal
    * Lower score: less likely that the variant is potentially causal
 - The algorithm finally ranks the variants based on these scores to identify novel disease genes in each **patient**.
