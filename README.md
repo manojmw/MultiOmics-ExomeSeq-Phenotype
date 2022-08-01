@@ -27,8 +27,8 @@
    * Higher score: more likely that the variant is potentially causal
    * Lower score: less likely that the variant is potentially causal
 - The algorithm finally ranks the variants based on these scores to identify novel disease genes in each **patient**.
-- This repository contains individual scripts which work at the `Gene level.` 
-- I have integrated these into the **Exome-Seq Secondary Analysis Pipeline** ([click here](https://github.com/manojmw/grexome-TIMC-Secondary)) which works at the `Clinical level` (Identify potential disease genes in each patient)
+- This repository contains individual scripts which work at the `Gene level`. 
+- I have integrated these into the **Exome-Seq Secondary Analysis Pipeline** ([click here](https://github.com/manojmw/grexome-TIMC-Secondary)) which works at the `Clinical level`.
 - The result files produced by this pipeline now contain the following data:
    * Clinical
    * Variant
