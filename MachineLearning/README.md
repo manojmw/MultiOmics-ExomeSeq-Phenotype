@@ -6,7 +6,7 @@
 - I have commented some lines of the code (such as evaluating model performance, feature importance, etc.) in the `Build_RFModel.py` script.
 - You can uncomment them to train, evaluate and obtain a model for your pathology of interest!!!
 - In this directory, I have also uploaded a trained model file (RandomForest_Model_MMAF.joblib) for our POI.
-- The scripts can be used to prioritize variants for any monogenic disease.
+- The method can be used to prioritize variants for any monogenic disease.
 
 
 ## Example Usage:
