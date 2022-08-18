@@ -3,6 +3,9 @@
 - This directory contains scripts for:
   * Building a Random forest model
   * Scoring genomic variants in the patient sample result file using the trained model
+- The classifier takes `input features` (an aggregation of different omics data as scalar values) to produce a `score between 0 and 1`.
+   * Higher score: more likely that the variant is potentially causal
+   * Lower score: less likely that the variant is potentially causal
 - I have commented some lines of the code (such as evaluating model performance, feature importance, etc.) in the `Build_RFModel.py` script.
 - You can uncomment them to train, evaluate and obtain a model for your pathology of interest!!!
 - In this directory, I have also uploaded a trained model file (RandomForest_Model_MMAF.joblib) for our POI.
