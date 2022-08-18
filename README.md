@@ -16,7 +16,6 @@
 - [Arguments](#Arguments)
 - [Metadata files](#metadata-files)
 - [Dependencies](#dependencies)
-- [Funding](#Funding)
 - [License](#license)
 
 ## Introduction
@@ -367,10 +366,6 @@ python 10_Naive_withClusteringApproach.py --inSampleFile sample.xlsx --inUniprot
    * Imbalanced-learn == 0.9.1
    * Pandas == 1.4.3
    * Joblib == 1.1.0
-
-## Funding
-
-We gratefully acknowledge funding from the French National Research Agency (ANR) project FLAGEL-OME (ANR-19-CE17-0014)
 
 ## License
 
