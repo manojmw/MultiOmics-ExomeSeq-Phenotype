@@ -60,7 +60,7 @@ wget https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase
 -> Parse UniProt data to produce output with:
 
 ```console
-gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
+gunzip -c uniprot_sprot.dat.gz | python3 1_Uniprot_parser.py > Uniprot_output.tsv
 ```    
 
 </br>
@@ -98,10 +98,10 @@ gunzip -c uniprot_sprot.dat.gz | python3 Uniprot_parser.py > Uniprot_output.tsv
 
 3] Parse PPI data with:
    ```console
-   python3 Interaction_parser.py --inInteraction BIOGRID-ORGANISM-Homo_sapiens*.mitab.txt --inUniprot Uniprot_output.tsv > Exp_Biogrid.tsv
+   python3 2_Interaction_parser.py --inInteraction BIOGRID-ORGANISM-Homo_sapiens*.mitab.txt --inUniprot Uniprot_output.tsv > Exp_Biogrid.tsv
    ```
    ```console
-   python3 Interaction_parser.py --inInteraction intact.txt --inUniprot Uniprot_output.tsv > Exp_Intact.tsv
+   python3 2_Interaction_parser.py --inInteraction intact.txt --inUniprot Uniprot_output.tsv > Exp_Intact.tsv
    ```
 
 -> The above example is for the Protein-Protein Interaction data from BioGRID and IntAct. However, you can retrieve PPI data (in miTAB format) from any database and feed it to the script to produce an output file.
