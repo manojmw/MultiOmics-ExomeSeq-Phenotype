@@ -142,7 +142,7 @@ python3 3_Count_HumanPPIExp.py < miTAB File
 
 -> Build High-Quality Human Interactome with:      
 ```console
-python3 4_BuildInteractome_BinaryPPIonly.py --inExpFile Exp_Biogrid.tsv Exp_Intact.tsv --inUniprot Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human_binaryonly.tsv
+python3 4_BuildInteractome_BinaryPPIonly.py --inExpFile Exp_Biogrid.tsv Exp_Intact.tsv --inUniprot Uniprot_output.tsv --inCanonicalFile canonicalTranscripts_*.tsv.gz > Interactome_human.tsv
 ```                      
 -> For getting `canonical transcripts file`, please refer to [grexome-TIMC-Secondary](https://github.com/ntm/grexome-TIMC-Secondary/tree/master/Transcripts_Data)
 -> Build Interactome scripts accepts multiple processed Protein-Protein Interaction experiment file (--inExpFile)
@@ -176,13 +176,13 @@ python3 5_BuildInteractome_BinaryPPIwithExpansion.py --inExpFile Exp_Biogrid.tsv
 
 <a name="modulefile"></a>**Module Input File Generator**
 
-- Parses the output produced by `4_BuildInteractome_BinaryPPIonly.py` or `5_BuildInteractome_BinaryPPIwithExpansion.py`
+- Parses the output produced by `4_BuildInteractome_BinaryPPIonly.py`
 - Assigns a default edge weight = 1 for each interaction and prints to STDOUT in .tsv format
 - This can be used as INPUT for most of the module identification/clustering methods
 
 -> Generate Module Input File with:
 ```console
-python3 6_ModuleInputFile.py < Interactome_human_binaryonly.tsv
+python3 6_ModuleInputFile.py < Interactome_human.tsv
 ```                      
 </br>
 <hr style="height:1px; color:black;">
