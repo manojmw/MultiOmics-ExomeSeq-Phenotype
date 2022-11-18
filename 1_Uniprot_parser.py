@@ -32,7 +32,7 @@ def uniprot_parser(UniProtinFile):
     UniProtinFile = sys.stdin
 
     # Header line
-    UniProt_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs', 'Secondary_ACs', 'GeneIDs', 'GeneNames']
+    UniProt_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs', 'Secondary_ACs', 'GeneIDs', 'GeneNames', 'HGNC_ID']
     print('\t'.join(UniProt_header))
 
     # Initializing variables/accumulators
@@ -42,6 +42,7 @@ def uniprot_parser(UniProtinFile):
     ENSGs = []
     GeneIDs = []
     GeneNames = []
+    HGNC_ID = ''
 
     # Compiling all the regular expressions
 
@@ -70,6 +71,9 @@ def uniprot_parser(UniProtinFile):
 
     # GeneIDs from the DR line
     re_GID = re.compile('^DR\s+GeneID;\s+(\d+);')
+
+    # HGNC ID from the DR line
+    re_HGNC_ID = re.compile('^DR\s+HGNC;\s(HGNC:\d+);')
 
     # Data lines
     for line in UniProtinFile:
@@ -211,6 +215,12 @@ def uniprot_parser(UniProtinFile):
         elif (re.match(r'^DR\s+GeneID.*', line)):
             logging.error("Missed the GeneIDs \n" + ACs + line)
             sys.exit()
+        elif (re_HGNC_ID.match(line)):
+            HGNC_ID = re_HGNC_ID.match(line).group(1)
+        elif (re.match(r'^DR\s+HGNC', line)):
+            logging.error("Found Additional HGNC lines \n" + ACs + line)
+            sys.exit()
+   
 
         # '//' means End of the record
         # we Process the retreived data
@@ -247,7 +257,7 @@ def uniprot_parser(UniProtinFile):
                     sys.exit()
 
                 # Printing to STDOUT
-                UniProt_outline = [primary_AC, TaxID, ENSTs, ENSGs, secondary_ACs, GeneIDs, GeneNames]
+                UniProt_outline = [primary_AC, TaxID, ENSTs, ENSGs, secondary_ACs, GeneIDs, GeneNames, HGNC_ID]
                 print('\t'.join(UniProt_outline))
 
             # Reset all accumulators and move on to the next record
@@ -257,6 +267,7 @@ def uniprot_parser(UniProtinFile):
             ENSGs = []
             GeneIDs = []
             GeneNames = []
+            HGNC_ID = ''
             continue
 
     logging.info("All Done, completed successfully!")
