@@ -66,7 +66,7 @@ def Build_UniProtDicts(inUniProt):
     # UniProt Primary Accession
     GeneName_dict = {}
 
-    (UniProtPrimAC_index, TaxID_index, UniprotSecAC_index, GeneID_index, GeneName_index) = (-1, -1, -1, -1, -1)
+    (UniProtPrimAC_index, TaxID_index, UniprotSecAC_index, NCBIGeneID_index, GeneName_index) = (-1, -1, -1, -1, -1)
 
     # Check the column header and grab indexes of our columns of interest
     for i in range(len(Uniprot_header_fields)):
@@ -76,9 +76,9 @@ def Build_UniProtDicts(inUniProt):
             TaxID_index = i
         elif Uniprot_header_fields[i] == 'Secondary_ACs':
             UniprotSecAC_index = i
-        elif Uniprot_header_fields[i] == 'GeneIDs':
-            GeneID_index = i
-        elif Uniprot_header_fields[i] == 'GeneNames':
+        elif Uniprot_header_fields[i] == 'NCBI_GeneID':
+            NCBIGeneID_index = i
+        elif Uniprot_header_fields[i] == 'GeneName':
             GeneName_index = i    
 
     # Sanity check
@@ -88,10 +88,10 @@ def Build_UniProtDicts(inUniProt):
         sys.exit("Error: Missing required column title 'TaxID' in the file: %s \n" % inUniProt)
     elif not UniprotSecAC_index >= 0:
         sys.exit("Error: Missing required column title 'Secondary_ACs' in the file: %s \n" % inUniProt)
-    elif not GeneID_index >= 0:
-        sys.exit("Error: Missing required column title 'GeneIDs' in the file: %s \n" % inUniProt)
+    elif not NCBIGeneID_index >= 0:
+        sys.exit("Error: Missing required column title 'NCBI_GeneID' in the file: %s \n" % inUniProt)
     elif not GeneName_index >= 0:
-        sys.exit("Error: Missing required column title 'GeneNames' in the file: %s \n" % inUniProt)
+        sys.exit("Error: Missing required column title 'GeneName' in the file: %s \n" % inUniProt)
     # else grabbed the required column indices -> PROCEED
 
     # Data lines
@@ -136,9 +136,9 @@ def Build_UniProtDicts(inUniProt):
         # a single GeneID or a comma-seperated
         # list of GeneIDs        
         try:
-            UniProt_GeneIDs = UniProt_fields[GeneID_index].split(',')
+            UniProt_GeneIDs = UniProt_fields[NCBIGeneID_index].split(',')
         except:
-            UniProt_GeneIDs = [UniProt_fields[GeneID_index]]
+            UniProt_GeneIDs = [UniProt_fields[NCBIGeneID_index]]
 
         for UniProt_GeneID in UniProt_GeneIDs:
             (GeneID,PrimAC) = (UniProt_GeneID, UniProt_fields[UniProtPrimAC_index])
