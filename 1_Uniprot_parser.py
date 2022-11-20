@@ -32,7 +32,7 @@ def uniprot_parser(UniProtinFile):
     UniProtinFile = sys.stdin
 
     # Header line
-    UniProt_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs', 'Secondary_ACs', 'NCBI_GeneIDs', 'GeneNames', 'Alt_GeneIDs', 'Function']
+    UniProt_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs', 'Secondary_ACs', 'NCBI_GeneID', 'GeneName', 'Alt_GeneID', 'Function']
     print('\t'.join(UniProt_header))
 
     # Initializing variables/accumulators
