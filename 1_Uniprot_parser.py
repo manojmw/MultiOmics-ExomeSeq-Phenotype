@@ -32,7 +32,7 @@ def uniprot_parser(UniProtinFile):
     UniProtinFile = sys.stdin
 
     # Header line
-    UniProt_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs', 'Secondary_ACs', 'GeneIDs', 'GeneNames', 'HGNC_ID']
+    UniProt_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs', 'Secondary_ACs', 'GeneIDs', 'GeneNames', 'HGNC_ID', 'Function']
     print('\t'.join(UniProt_header))
 
     # Initializing variables/accumulators
@@ -43,6 +43,7 @@ def uniprot_parser(UniProtinFile):
     GeneIDs = []
     GeneNames = []
     HGNC_ID = ''
+    Function = ''
 
     # Compiling all the regular expressions
 
@@ -75,9 +76,22 @@ def uniprot_parser(UniProtinFile):
     # HGNC ID from the DR line
     re_HGNC_ID = re.compile('^DR\s+HGNC;\s(HGNC:\d+);')
 
+    # Function from the CC line
+    re_Function = re.compile('^CC\s+-!- FUNCTION:\s+(.+)')
+
+    # inFunction == True; when we are in a CC-FUNCTION block, 
+    # False otherwise; inFunction == False
+    inFunction = False
+
     # Data lines
     for line in UniProtinFile:
+        
         line = line.rstrip('\r\n') # removing trailing new lines and carriage returns
+
+        if (inFunction) and ((re.match(r'^CC\s+-!-', line)) or (re.match(r'^CC\s+---', line)) or (re.match(r'^CC\s/', line))):
+            # we were in a CC-function block but we're not in it anymore, 
+            # update boolean flag and then still process the line
+            inFunction = False
 
         # Matching and retrieving the records
         if (re_AC.match(line)):
@@ -186,18 +200,18 @@ def uniprot_parser(UniProtinFile):
                     if not GeneName in GeneNames:
                         GeneNames.append(GeneName)     
         elif (re.match(r'^GN\s+Name.*', line)):
-            logging.error("Error: Missed the Gene Name \n" + ACs + line)
+            logging.error("Error: Missed the Gene Name \n" + "Protein: " + ACs + "\n" + line)
             sys.exit()
         elif (re.match(r'^GN\s+Synonyms.*', line)):
-            logging.error("Error: Missed the Gene Name Synonym \n" + ACs + line)   
+            logging.error("Error: Missed the Gene Name Synonym \n" + "Protein: " + ACs + "\n" + line)   
             sys.exit()
         elif (re_TaxID.match(line)):
             if (TaxID != 0):
-                logging.error("Several OX lines for the protein: \t" + ACs)
+                logging.error("Several OX lines for the protein: \t" + "Protein: " + ACs + "\n" + line)
                 sys.exit()
             TaxID = re_TaxID.match(line).group(1)
         elif (re.match(r'^OX\s',line)):
-            logging.error("Missed the OX line \n" + line)
+            logging.error("Missed the OX line \n" + "Protein: " + ACs + "\n" + line)
             sys.exit()
         elif (re_ENS.match(line)):
             ENS_match = re_ENS.match(line)
@@ -208,23 +222,31 @@ def uniprot_parser(UniProtinFile):
             if ENSG not in ENSGs:
                 ENSGs.append(ENSG)
         elif (re.match(r'^DR\s+Ensembl;', line)):
-            logging.error("Failed to get all the Ensembl Identifiers \n" + ACs + line)
+            logging.error("Failed to get all the Ensembl Identifiers \n" + "Protein: " + ACs + "\n" + line)
             sys.exit()
         elif (re_GID.match(line)):
             GeneIDs.append(re_GID.match(line).group(1))
         elif (re.match(r'^DR\s+GeneID.*', line)):
-            logging.error("Missed the GeneIDs \n" + ACs + line)
+            logging.error("Missed the GeneIDs \n" + "Protein: " + ACs + "\n" + line)
             sys.exit()
         elif (re_HGNC_ID.match(line)):
             HGNC_ID = re_HGNC_ID.match(line).group(1)
         elif (re.match(r'^DR\s+HGNC', line)):
-            logging.error("Found Additional HGNC lines \n" + ACs + line)
+            logging.error("Found Additional HGNC lines \n" + "Protein: " + ACs + "\n" + line)
             sys.exit()
-   
+        elif(re_Function.match(line)):
+            inFunction = True # We are in a function block
+            Function += re_Function.match(line).group(1)
+        elif (inFunction):
+            if not (re.match(r'^CC\s+(.+)', line)):
+                logging.error('We are in CC-function block but line does not start with CC, impossible!' + "Protein: " + ACs + "\n" + line)
+                sys.exit()
+            Function += ' ' + re.match(r'^CC\s+(.+)', line).group(1)
 
         # '//' means End of the record
         # we Process the retreived data
         elif (line == '//'):
+
             # ignore entry if bad species; TaxID Human = 9606
             if (TaxID == '9606'):
                 try:
@@ -234,30 +256,30 @@ def uniprot_parser(UniProtinFile):
                     # storing secondary_ACs as a single comma-seperated string
                     secondary_ACs = ','.join(secondary_AC_list) 
                 except:
-                    logging.error("Failed to store store UniProt Accession IDs for the protein: \t" + ACs)
+                    logging.error("Failed to store store UniProt Accession IDs for the protein: \t" + "Protein: " + ACs + "\n")
                     sys.exit()
                 try:
                     # storing Gene names as a single comma-seperated string
                     GeneNames = ','.join(GeneNames)
                 except:
-                    logging.error('Error: Failed to store Gene Name for the protein: \t' + ACs)    
+                    logging.error('Error: Failed to store Gene Name for the protein: \t' + "Protein: " + ACs + "\n")    
                     sys.exit()
                 try:
                     # storing ENSTs and ENSGs as a single comma-seperated string
                     ENSTs = ','.join(ENSTs)
                     ENSGs = ','.join(ENSGs)
                 except:
-                    logging.error("Failed to store Ensembl Identifiers for the protein: \t" + ACs)
+                    logging.error("Failed to store Ensembl Identifiers for the protein: \t" + "Protein: " + ACs + "\n")
                     sys.exit()
                 try:
                     # storing GeneIDs as a single comma-seperated string
                     GeneIDs = ','.join(GeneIDs)
                 except:
-                    logging.error('Error: Failed to store Gene Identifiers for the protein: \t' + ACs)   
+                    logging.error('Error: Failed to store Gene Identifiers for the protein: \t' + "Protein: " + ACs + "\n")   
                     sys.exit()
 
                 # Printing to STDOUT
-                UniProt_outline = [primary_AC, TaxID, ENSTs, ENSGs, secondary_ACs, GeneIDs, GeneNames, HGNC_ID]
+                UniProt_outline = [primary_AC, TaxID, ENSTs, ENSGs, secondary_ACs, GeneIDs, GeneNames, HGNC_ID, Function]
                 print('\t'.join(UniProt_outline))
 
             # Reset all accumulators and move on to the next record
@@ -268,6 +290,7 @@ def uniprot_parser(UniProtinFile):
             GeneIDs = []
             GeneNames = []
             HGNC_ID = ''
+            Function = ''
             continue
 
     logging.info("All Done, completed successfully!")
@@ -284,7 +307,7 @@ def main():
 --------------------------------------------------------------------------------------------------
 Program: Parses on STDIN a UniProt file, processes each record and prints to STDOUT in .tsv format
 --------------------------------------------------------------------------------------------------
-The output consists of 7 columns:
+The output consists of 9 columns (tsv):
  -> Uniprot Primary Accession
  -> Taxonomy Identifier
  -> ENST (or a comma seperated list of ENSTs)
@@ -292,6 +315,8 @@ The output consists of 7 columns:
  -> Uniprot Secondary Accession (or a comma seperated list of Uniprot Secondary Accessions)
  -> GeneID (or a comma seperated list of GeneIDs)
  -> Gene Name (or a comma seperated list of Gene Names)
+ -> HGNC ID
+ -> Function
 --------------------------------------------------------------------------------------------------
 
 Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
