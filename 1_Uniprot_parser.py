@@ -88,7 +88,7 @@ def uniprot_parser(UniProtinFile):
         
         line = line.rstrip('\r\n') # removing trailing new lines and carriage returns
 
-        if (inFunction) and ((re.match(r'^CC\s+-!-', line)) or (re.match(r'^CC\s+---', line)) or (re.match(r'^CC\s/', line))):
+        if (inFunction) and ((re.match(r'^CC\s+-!-', line)) or (re.match(r'^CC\s+---', line)) or (re.match(r'^(^CC\s/)', line))):
             # we were in a CC-function block but we're not in it anymore, 
             # update boolean flag and then still process the line
             inFunction = False
