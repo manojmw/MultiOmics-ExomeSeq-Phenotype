@@ -383,7 +383,7 @@ def Uniprot_ENSG(inUniProt, ENSG_Gene_dict):
         logging.error("At Step 5.2_addInteractome - Missing required column title 'Primary_AC' in the file: %s \n" % inUniProt)
         sys.exit()
     elif not ENSG_index >= 0:
-        logging.error("At Step 5.2_addInteractome - Missing required column title 'ENSG' in the file: %s \n" % inUniProt)
+        logging.error("At Step 5.2_addInteractome - Missing required column title 'ENSGs' in the file: %s \n" % inUniProt)
         sys.exit()
     # else grabbed the required column indexes -> PROCEED
 
