@@ -115,7 +115,7 @@ def ExtractCandidates(args):
     
     # Classifiying candidates
     VHighConfidence_Candidates = sorted(list(set(Candidates_Method_Data[0]) & set(Candidates_Method_Data[1]) & set(Candidates_Method_Data[2])))
-    print("Very High Confidence_Candidates - %s" % [item[0] for item in Candidates_Method_Data])
+    print("# Very High Confidence_Candidates - %s" % [item[0] for item in Candidates_Method_Data])
     for gene in VHighConfidence_Candidates:
         HConfidence_Candidates_dict[gene] = 1
         if gene in KnownCandidates_dict:
@@ -126,7 +126,7 @@ def ExtractCandidates(args):
     for m1 in range(len(Candidates_Method_Data) - 1):
         for m2 in range(m1+1, len(Candidates_Method_Data)): 
             HighConfidence_Candidates = sorted(list(set(Candidates_Method_Data[m1]) & set(Candidates_Method_Data[m2])))
-            print("\nHigh Confidence_Candidates - %s" % [Candidates_Method_Data[m1][0], Candidates_Method_Data[m2][0]])
+            print("\n# High Confidence_Candidates - %s" % [Candidates_Method_Data[m1][0], Candidates_Method_Data[m2][0]])
             for gene in HighConfidence_Candidates:
                 if not gene in VHighConfidence_Candidates:
                     HConfidence_Candidates_dict[gene] = 1
@@ -136,7 +136,7 @@ def ExtractCandidates(args):
                         print(gene)
     
     for CMData in Candidates_Method_Data:
-        print("\nLow Confidence_Candidates - [%s]" % CMData[0])
+        print("\n# Low Confidence_Candidates - [%s]" % CMData[0])
         for gene in CMData[1:]:
             if not gene in HConfidence_Candidates_dict:
                 if gene in KnownCandidates_dict:
