@@ -32,7 +32,7 @@ def uniprot_parser(UniProtinFile):
     UniProtinFile = sys.stdin
 
     # Header line
-    UniProt_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs', 'Secondary_ACs', 'GeneIDs', 'GeneNames', 'HGNC_ID', 'Function']
+    UniProt_header = ['Primary_AC', 'TaxID', 'ENSTs', 'ENSGs', 'Secondary_ACs', 'NCBI_GeneIDs', 'GeneNames', 'Alt_GeneIDs', 'Function']
     print('\t'.join(UniProt_header))
 
     # Initializing variables/accumulators
@@ -42,7 +42,7 @@ def uniprot_parser(UniProtinFile):
     ENSGs = []
     GeneIDs = []
     GeneNames = []
-    HGNC_ID = ''
+    Alt_GeneID = ''
     Function = ''
 
     # Compiling all the regular expressions
@@ -230,10 +230,25 @@ def uniprot_parser(UniProtinFile):
             logging.error("Missed the GeneIDs \n" + "Protein: " + ACs + "\n" + line)
             sys.exit()
         elif (re_HGNC_ID.match(line)):
-            HGNC_ID = re_HGNC_ID.match(line).group(1)
+            Alt_GeneID = re_HGNC_ID.match(line).group(1)
         elif (re.match(r'^DR\s+HGNC', line)):
-            logging.error("Found Additional HGNC lines \n" + "Protein: " + ACs + "\n" + line)
+            logging.error("Found Additional HGNC Gene ID lines \n" + "Protein: " + ACs + "\n" + line)
             sys.exit()
+        # The below elif code block is useful for finding orthologs at later stage
+        # The code written here is useful for finding an Yeast ortholog (TaxID = 559292)
+        # By default, it is commented out; You can modify code as per your needs
+        # Note: The model organism Gene ID should match with Gene ID used by 
+        # Alliance of Genome Resource Database (AGR)
+        # Also you should note below, an example Identifier used by AGR for yeast is SGD:S000004208
+        # In Uniprot the DR line is: DR   SGD; S000005540; RTS1.
+        # For human proteins however, DR   HGNC; HGNC:12279; XXX.
+        # Uniprot records are broken some times and do not follow the same pattern
+        # So, I am adding 'SGD:', You need to cross check yours
+        # elif (re.match(r'^DR\s+SGD;\s(\w+);',line)):
+        #     Alt_GeneID = 'SGD:' + re.match(r'^DR\s+SGD;\s(\w+);',line).group(1)
+        # elif (re.match(r'^DR\s+SGD', line)):
+        #     logging.error("Found Additional SGD Gene ID lines \n" + "Protein: " + ACs + "\n" + line)
+        #     sys.exit()
         elif(re_Function.match(line)):
             inFunction = True # We are in a function block
             Function += re_Function.match(line).group(1)
@@ -249,6 +264,15 @@ def uniprot_parser(UniProtinFile):
 
             # ignore entry if bad species; TaxID Human = 9606
             if (TaxID == '9606'):
+
+            # Again, the below if block is useful only for fincding orthologs
+            # So, commented out by default; Here TaxID = '559292' is for Yeast
+            # You should replace it with the TaxID of the model organism for which 
+            # you want an ortholog
+            # In case you intend on using this, then uncomment the below if block
+            # and comment the above (if (TaxID == '9606'): block
+            # if (TaxID == '9606') or (TaxID == '559292'):    
+
                 try:
                     ACs_split = ACs.split('; ')
                     primary_AC = ACs_split[0] # Grab only the first AC
@@ -279,7 +303,7 @@ def uniprot_parser(UniProtinFile):
                     sys.exit()
 
                 # Printing to STDOUT
-                UniProt_outline = [primary_AC, TaxID, ENSTs, ENSGs, secondary_ACs, GeneIDs, GeneNames, HGNC_ID, Function]
+                UniProt_outline = [primary_AC, TaxID, ENSTs, ENSGs, secondary_ACs, GeneIDs, GeneNames, Alt_GeneID, Function]
                 print('\t'.join(UniProt_outline))
 
             # Reset all accumulators and move on to the next record
@@ -289,7 +313,7 @@ def uniprot_parser(UniProtinFile):
             ENSGs = []
             GeneIDs = []
             GeneNames = []
-            HGNC_ID = ''
+            Alt_GeneID = ''
             Function = ''
             continue
 
