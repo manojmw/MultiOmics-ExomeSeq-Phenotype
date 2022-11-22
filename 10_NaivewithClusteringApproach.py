@@ -892,7 +892,7 @@ def main():
     file_parser = argparse.ArgumentParser(description =
     """
 --------------------------------------------------------------------------------------------------------------
-Program: Parses the input files. For a each gene, adds the Interactome data (both Naive & Clustering approach) 
+Program: Parses the input files. For each gene, adds the Interactome data (both Naive & Clustering approach) 
          assoicated with each pathology. Next adds the GTEX data and prints to STDOUT in .tsv format
 --------------------------------------------------------------------------------------------------------------
 
