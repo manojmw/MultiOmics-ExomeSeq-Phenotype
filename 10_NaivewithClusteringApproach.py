@@ -893,7 +893,7 @@ def main():
     """
 --------------------------------------------------------------------------------------------------------------
 Program: Parses the input files. For each gene, adds the Interactome data (both Naive & Clustering approach) 
-         assoicated with each pathology. Next adds the GTEX data and prints to STDOUT in .tsv format
+         associated with each pathology. Next adds the GTEX data and prints to STDOUT in .tsv format
 --------------------------------------------------------------------------------------------------------------
 
 The output contains following data for each gene (one gene per line):
