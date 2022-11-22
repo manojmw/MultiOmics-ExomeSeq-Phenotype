@@ -10,7 +10,7 @@ import re
 
 ###########################################################
 
-# Parses tab-seperated canonical transcripts file
+# Parses tab-seperated canonical transcripts file (.gz or non .gz)
 # Required columns are: 'ENSG' and 'GENE' (can be in any order,
 # but they MUST exist)
 #
@@ -72,7 +72,7 @@ def Gene_ENSG(incanonical):
 ###########################################################
 
 # Parses the tab-seperated UniProt Primary Accession file
-# produced by Uniprot_parser.py
+# produced by 1_Uniprot_parser.py
 #
 # Required columns are: 'Alt_GeneID','ENSGs', 'GeneName'
 # and 'Function' (can be in any order,
@@ -164,7 +164,15 @@ def Uniprot_parse(inuniprot):
 
 ###########################################################
 
-# XXX
+# Parses Candidate Results file produced by ExtractCandidates.py
+# Also parses dictionaries (Gene_ENSG_dict, ENSG_AltGID_dict)
+# returned by Uniprot_parse function
+#
+# Returns a dictionary:
+# - Key: Name of the Confidence level
+# - Value: A containing:
+#        - Key: Gene
+#        - Value
 
 def Parse_CandidateResults(incandidateresult, Gene_ENSG_dict, ENSG_AltGID_dict):
 
@@ -172,7 +180,10 @@ def Parse_CandidateResults(incandidateresult, Gene_ENSG_dict, ENSG_AltGID_dict):
 
     # Dictionary to store Candidate results
     # - key: Confidence level name
-    # - value: Dictionary containing Key: Gene; Value: 1
+    # - value: Dictionary containing:
+    #          - Key: Gene; 
+    #          - value: 1 or "(Known Candidate Gene)" if
+    #                   the gene is a known candidate
     CandResult_dict = {}
 
     # In candidate results file, the data is of the format:
@@ -208,12 +219,18 @@ def Parse_CandidateResults(incandidateresult, Gene_ENSG_dict, ENSG_AltGID_dict):
                     # Get HGNC ID for the ENSG
                     if ENSG in ENSG_AltGID_dict:
                         HGNC_ID = ENSG_AltGID_dict[ENSG]
-                        CandResult_dict[ConfidenceL_key][HGNC_ID] = 1
+                        # If the gene is a known candidate, then store the value
+                        # as "(Known Candidate Gene)"
+                        if "(Known Candidate Gene)" in line:
+                             CandResult_dict[ConfidenceL_key][HGNC_ID] = "(Known Candidate Gene)"
+                        else: # If the gene is not a known candidate
+                            CandResult_dict[ConfidenceL_key][HGNC_ID] = 1
                     else:
                         logging.info("Could not get HGNC ID for the candidate Gene: " + line + 'with ENSG ID: ' + ENSG)
                 else:
                     logging.info("Could not get ENSG ID for the candidate Gene: " + line)
-        elif (line == " "):
+                
+        elif (line == " "): # we have reached the end of the current confidence level
             inConfidence = False
             continue
     
@@ -221,7 +238,24 @@ def Parse_CandidateResults(incandidateresult, Gene_ENSG_dict, ENSG_AltGID_dict):
 
 ###########################################################
 
-# XXX
+# Parse the tab-separated Orthology file (.gz or non .gz)
+# retrieved from Alliance of Genome Resources
+#
+# Returns 2 dictionaries:
+# First Dictionary (Gene1_dict) contains:
+# - Key: Gene1ID
+# - Value: List contining following data for both Gene 1 and Gene 2:
+    #          - Symbol
+    #          - TaxID
+    #          - Algorithm Match count
+    #          - Total number of algorithms
+    #          - Best Score
+    #          - Best Rev Score
+    #          - Additionally contains Gene2ID
+# Second dictionary (Gene2_dict) contains:
+# - Key: Gene2ID
+# - Value: same data as Gene1_dict, but additionally
+#          contains Gene1ID istead of Gene2ID
 def Parse_OrthologFile(inortholog):
 
     # Opening orthology file (gzip or non-gzip)
@@ -233,23 +267,8 @@ def Parse_OrthologFile(inortholog):
     except IOError:
         sys.exit("Error: Failed to read the Orthology file: %s" % inortholog)
 
-    # Dictionary to store orthology data
-    # Gene1_dict
-    # - Key: Gene1ID
-    # - Value: List contining following data for both Gene 1 and Gene 2:
-    #          - Symbol
-    #          - TaxID
-    #          - Algorithm Match count
-    #          - Total number of algorithms
-    #          - Best Score
-    #          - Best Rev Score
-    #          - Additionally contains Gene2ID
+    # Dictionaries to store orthology data
     Gene1_dict = {}
-
-    # Gene2ID_dict
-    # - Key: Gene2ID
-    # - Value: same data as Gene1_dict, but additionally
-    #          contains Gene1ID istead of Gene2ID
     Gene2_dict = {}
 
     # Column indices
@@ -326,25 +345,48 @@ def Parse_OrthologFile(inortholog):
             IsBestScore = orthodata_fields[BestScore_index]
             IsBestRevScore = orthodata_fields[BestRevScore_index]
 
-            if not Gene1ID in Gene1_dict:
-                Gene1_dict[Gene1ID] = [[Gene1Symbol, Gene1SpeciesTaxonID, Gene2Symbol, Gene2SpeciesTaxonID, 
-                                      (AlgorithmsMatch, OutOfAlgorithms, IsBestScore, IsBestRevScore), Gene2ID]]
-            else:    
-                Gene1_dict[Gene1ID].append([Gene1Symbol, Gene1SpeciesTaxonID, Gene2Symbol, Gene2SpeciesTaxonID, 
-                                          (AlgorithmsMatch, OutOfAlgorithms, IsBestScore, IsBestRevScore), Gene2ID])
+            # Here, the list of candidates in the candidate result file are human genes (NCBITaxon:9606) 
+            # and we are interested in finding the ortholog for Yeast Gene (NCByoITaxon:559292)
+            # So, you will need to modify the script based on the model organism you are interested in
+            # NOTE: you will also need to modify the 1_Uniprot_parser.py script as well for this to work
+            # You can find the instructions for that in the 1_Uniprot_parser.py script
 
-            if not Gene2ID in Gene2_dict:
-                Gene2_dict[Gene2ID] = [[Gene1Symbol, Gene1SpeciesTaxonID, Gene2Symbol, Gene2SpeciesTaxonID, 
-                                      (AlgorithmsMatch, OutOfAlgorithms, IsBestScore, IsBestRevScore), Gene1ID]]
-            else:    
-                Gene2_dict[Gene2ID].append([Gene1Symbol, Gene1SpeciesTaxonID, Gene2Symbol, Gene2SpeciesTaxonID, 
+            if (Gene1SpeciesTaxonID == 'NCBITaxon:9606') and (Gene2SpeciesTaxonID == 'NCBITaxon:559292'):
+                if not Gene1ID in Gene1_dict:
+                    Gene1_dict[Gene1ID] = [[Gene1Symbol, Gene1SpeciesTaxonID, Gene2Symbol, Gene2SpeciesTaxonID, 
+                                        (AlgorithmsMatch, OutOfAlgorithms, IsBestScore, IsBestRevScore), Gene2ID]]
+                else:    
+                    Gene1_dict[Gene1ID].append([Gene1Symbol, Gene1SpeciesTaxonID, Gene2Symbol, Gene2SpeciesTaxonID, 
+                                            (AlgorithmsMatch, OutOfAlgorithms, IsBestScore, IsBestRevScore), Gene2ID])
+            
+            if (Gene1SpeciesTaxonID == 'NCBITaxon:559292') and (Gene2SpeciesTaxonID == 'NCBITaxon:9606'):
+                if not Gene2ID in Gene2_dict:
+                    Gene2_dict[Gene2ID] = [[Gene1Symbol, Gene1SpeciesTaxonID, Gene2Symbol, Gene2SpeciesTaxonID, 
+                                        (AlgorithmsMatch, OutOfAlgorithms, IsBestScore, IsBestRevScore), Gene1ID]]
+                else:    
+                    Gene2_dict[Gene2ID].append([Gene1Symbol, Gene1SpeciesTaxonID, Gene2Symbol, Gene2SpeciesTaxonID, 
                                           (AlgorithmsMatch, OutOfAlgorithms, IsBestScore, IsBestRevScore), Gene1ID])       
                                 
     return Gene1_dict, Gene2_dict
 
 ###########################################################
 
-# XXX
+# Parses the dictionaries returned by above functions
+# and searches for model organism orthologs for the Human candidate genes
+# 
+# Prints to STDOUT in .tsv format
+# The line with name of the confidence level starts with an '#'
+# The following lines include the Human candidate gene along
+# with the following information:
+# - Name of the Human candidate gene (including Synonyms)
+# - HGNC ID
+# - Whether the candidate gene is already a known candidate
+#   for the phenotype interested in
+# - Human candidate gene function
+# - Model organism ortholog (if available)
+# - Model organism Gene ID
+# - Orthology match scores
+# - Model organsim Gene function
 def FindOrthologs(args):
 
     # Calling the functions
@@ -353,8 +395,10 @@ def FindOrthologs(args):
     CandResult_dict = Parse_CandidateResults(args.incandidateresult, Gene_ENSG_dict, ENSG_AltGID_dict)
     (Gene1_dict, Gene2_dict) = Parse_OrthologFile(args.inortholog)  
 
-    header = ["HumanGene", "HumanGene_Function", "OrthologGene", "OrthologGene_MatchScores", "OrthologGene_Function"]
+    header = ["HumanGene", "HGNC_ID", "Known_Candidate", "HumanGene_Function", "YeastOrtholog", "SGD_ID", "Orthology_MatchScores", "YeastGene_Function"]
     print('\t'.join(header))
+
+    # NOTE: Again, the below code needs to modified based on the model organism you are interested in (particularly TaxIDs)
 
     # Finding the orthologs for our candidate genes
     for ConfidenceL_key in CandResult_dict:
@@ -362,25 +406,41 @@ def FindOrthologs(args):
         for Candidate_Gene in CandResult_dict[ConfidenceL_key]:
             if Candidate_Gene in Gene1_dict:
                 for data in Gene1_dict[Candidate_Gene]:
+                    
                     if data[1] != 'NCBITaxon:9606':
                         logging.error("Candidate gene is a human gene in both candidateresult file and orthology file, but the tax ID is not '9606', Impossible!!!")
                         sys.exit()
+
                     if data[3] == 'NCBITaxon:559292':
                         output = []
                         if Candidate_Gene in AltGID_GeneNFunc_dict:
                             for CandGene_data in AltGID_GeneNFunc_dict[Candidate_Gene]:
                                 output.append(CandGene_data[0]) # append gene name from uniprot
+                                output.append(Candidate_Gene) # append HGNC ID
+                                # Check if the candidate gene is a known candidate
+                                if CandResult_dict[ConfidenceL_key][Candidate_Gene] == "(Known Candidate Gene)":
+                                    output.append("YES")
+                                else:
+                                    output.append(" ")   
                                 output.append(CandGene_data[1]) # append function (if available)
                         else:
                             output.append(data[0]) # append gene name from orthology file
+                            output.append(Candidate_Gene) # append HGNC ID
+                            # Check if the candidate gene is a known candidate
+                            if CandResult_dict[ConfidenceL_key][Candidate_Gene] == "(Known Candidate Gene)":
+                                    output.append("YES")
+                            else:
+                                output.append(" ") 
                             output.append(" ") # no function
                         if data[-1] in AltGID_GeneNFunc_dict:
                             for OrthoGene_data in AltGID_GeneNFunc_dict[data[-1]]:
                                 output.append(OrthoGene_data[0]) # append gene name from uniprot
+                                output.append(data[-1] ) # append SGD ID
                                 output.append(str(data[4])) # append ortholog match details
                                 output.append(OrthoGene_data[1]) # append function (if available)
                         else:
                             output.append(data[2]) # append gene name from orthology file
+                            output.append(data[-1] ) # append SGD ID
                             output.append(str(data[4])) # append ortholog match details
                             output.append(" ") # no function
 
@@ -388,37 +448,74 @@ def FindOrthologs(args):
                 
             if Candidate_Gene in Gene2_dict:
                 for data in Gene2_dict[Candidate_Gene]:
+
                     if data[3] != 'NCBITaxon:9606':
                         logging.error("Candidate gene is a human gene in both candidateresult file and orthology file, but the tax ID is not '9606', Impossible!!!")
                         sys.exit()
+
                     if data[1] == 'NCBITaxon:559292':
                         output = []
-                        if Candidate_Gene in AltGID_GeneNFunc_dict:
-                            for CandGene_data in AltGID_GeneNFunc_dict[Candidate_Gene]:
-                                output.append(CandGene_data[0]) # append gene name from uniprot
-                                output.append(CandGene_data[1]) # append function (if available)
+                        if Candidate_Gene in Gene1_dict:
+                            for Gene1_dict_data in Gene1_dict[Candidate_Gene]:
+                                if Gene1_dict_data[4] == data[4]: # same match scores data           
+                                    continue  # avoid adding redundant data
                         else:
-                            output.append(data[0]) # append gene name from orthology file
-                            output.append(" ") # no function
-                        if data[-1] in AltGID_GeneNFunc_dict:
-                            for OrthoGene_data in AltGID_GeneNFunc_dict[data[-1]]:
-                                output.append(OrthoGene_data[0]) # append gene name from uniprot
+                            if Candidate_Gene in AltGID_GeneNFunc_dict:
+                                for CandGene_data in AltGID_GeneNFunc_dict[Candidate_Gene]:
+                                    output.append(CandGene_data[0]) # append gene name from uniprot
+                                    output.append(Candidate_Gene) # append HGNC ID
+                                    # Check if the candidate gene is a known candidate
+                                    if CandResult_dict[ConfidenceL_key][Candidate_Gene] == "(Known Candidate Gene)":
+                                        output.append("YES")
+                                    else:
+                                        output.append(" ") 
+                                    output.append(CandGene_data[1]) # append function (if available)
+                            else:
+                                output.append(data[2]) # append gene name from orthology file
+                                output.append(Candidate_Gene) # append HGNC ID
+                                # Check if the candidate gene is a known candidate
+                                if CandResult_dict[ConfidenceL_key][Candidate_Gene] == "(Known Candidate Gene)":
+                                    output.append("YES")
+                                else:
+                                    output.append(" ") 
+                                output.append(" ") # no function
+                            if data[-1] in AltGID_GeneNFunc_dict:
+                                for OrthoGene_data in AltGID_GeneNFunc_dict[data[-1]]:
+                                    output.append(OrthoGene_data[0]) # append gene name from uniprot
+                                    output.append(data[-1] ) # append SGD ID
+                                    output.append(str(data[4])) # append ortholog match details
+                                    output.append(OrthoGene_data[1]) # append function (if available)
+                            else:
+                                output.append(data[0]) # append gene name from orthology file
+                                output.append(data[-1] ) # append SGD ID
                                 output.append(str(data[4])) # append ortholog match details
-                                output.append(OrthoGene_data[1]) # append function (if available)
+                                output.append(" ") # no function
+
+                            print("\t".join(output))
+
+            if (Candidate_Gene not in Gene1_dict) and (Candidate_Gene not in Gene2_dict):
+                output = []
+                if Candidate_Gene in AltGID_GeneNFunc_dict:
+                    for CandGene_data in AltGID_GeneNFunc_dict[Candidate_Gene]:
+                        output.append(CandGene_data[0]) # append gene name from uniprot
+                        output.append(Candidate_Gene) # append HGNC ID
+                        # Check if the candidate gene is a known candidate
+                        if CandResult_dict[ConfidenceL_key][Candidate_Gene] == "(Known Candidate Gene)":
+                            output.append("YES")
                         else:
-                            output.append(data[2]) # append gene name from orthology file
-                            output.append(str(data[4])) # append ortholog match details
-                            output.append(" ") # no function
-
+                            output.append(" ") 
+                        output.append(CandGene_data[1]) # append function (if available)
+                        output = output + [" ", " ", " ", " "]
                         print("\t".join(output))
-
+                else: # HGNC ID not found in uniprot file
+                    output = [" ", Candidate_Gene, " ", " ", " ", " ", " ", " "]
+                    print("\t".join(output))
+        
+        print(" ")
 
     logging.info("All done, completed succesfully!")
 
     return
-
-
-
 
 ###########################################################
 
@@ -426,11 +523,29 @@ def FindOrthologs(args):
 def main():
     file_parser = argparse.ArgumentParser(description =
     """
---------------------------------------------------------------------------------------------------
-Program: XXX
---------------------------------------------------------------------------------------------------
-The output consists of 
---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+Program: Parses the Candidate Results File produced by `ExtractCandidates.py` script. Also parses
+         the Uniprot Primary Accession File, Canonical Transcripts file and the Orthology data file 
+         (retireved from Alliance of Genome Resources, AGR). For each candidate human gene, the 
+         script finds a model organism ortholog(s), if available, with additional annotations.
+
+!!!NOTE!!!: This script is written to find Yeast orthologs (TaxID:559292) for human genes.
+            If you are interested in finding an ortholog for a different model organism, then you
+            will have modify this script (including `1_Uniprot_parses.py` script). These are very 
+            minor modifications (particularly TaxID and GeneID lines).
+---------------------------------------------------------------------------------------------------
+- The output consists of a header followed by data in tab-delimited (.tsv) format. The lines starting
+with '#' indicate the name of the confidence level. 
+- Following information is provided for each candidate gene:
+    # - Name of the Human candidate gene (including Synonyms)
+    # - HGNC ID
+    # - Whether the candidate gene is already a known candidate for the phenotype interested in
+    # - Human candidate gene function
+    # - Model organism ortholog (if available)
+    # - Model organism Gene ID (as per AGR)
+    # - Orthology match scores
+    # - Model organsim Gene function
+---------------------------------------------------------------------------------------------------
 
 Arguments [defaults] -> Can be abbreviated to shortest unambiguous prefixes
     """,
