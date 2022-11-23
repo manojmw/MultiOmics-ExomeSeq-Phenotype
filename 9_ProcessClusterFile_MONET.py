@@ -30,8 +30,7 @@ def ExtrClusters_sizeGT2(DREAM_clusterFile):
     cluster_count = 0
 
     for line in DREAM_clusterFile:
-        line = line.rstrip('\n') # Remove carriage returns
-        line = line.replace(" ", "")
+        line = line.rstrip('\n')
         line_fields = line.split('\t')
 
         # Eliminating clusters with size < 2
