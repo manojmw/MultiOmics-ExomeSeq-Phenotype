@@ -23,10 +23,11 @@ def ModuleInputFile(highqualityPPI):
 
     # Parsing the file
     for line in highqualityPPI:
-        line = line.rstrip('\n') # remove carriage returns
+        line = line.rstrip('\n')
+    
         Interactome_fields = line.split('\t')
 
-        print(Interactome_fields[0], "\t", Interactome_fields[1], "\t", 1)
+        print(Interactome_fields[0] + "\t" + Interactome_fields[1] + "\t" + str(1))
 
     logging.info("All Done, completed successfully!")
 
@@ -43,9 +44,9 @@ Program: Parses the output file produced by Interactome.py, processes it  and pr
 -----------------------------------------------------------------------------------------------------------
 Usage:
 
-    % python 5_ModuleInputFile.py < Input file
+    % python 6_ModuleInputFile.py < Input file
                         OR
-    % cat Input file | python 5_ModuleInputFile.py
+    % cat Input file | python 6_ModuleInputFile.py
 
 The output consists of three columns in .tsv format:
   -> ENSG of Protein A
