@@ -324,7 +324,7 @@ Program: Parses the output file(s) produced by the interaction_parser.py to prod
          Interactome (containing both true binary PPIs and expansion), maps the UniProt Primary Accession
          of interacting proteins to ENSG using the Canonical transcripts file and prints to STDOUT
 ---------------------------------------------------------------------------------------------------------
-The output (High-quality Human Interactome) consists of five columns in .tsv format:
+The output (High-quality Human Interactome) consists of two columns in .tsv format:
   -> ENSG of Protein A
   -> ENSG of Protein B
 ---------------------------------------------------------------------------------------------------------
