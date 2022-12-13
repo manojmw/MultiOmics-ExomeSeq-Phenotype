@@ -428,15 +428,30 @@ def Interactome_Uniprot2ENSG(args):
                     # Sort
                     if Uniprot_ENSG_dict.get(data[0]) < Uniprot_ENSG_dict.get(data[1]):
                         ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[0]), Uniprot_ENSG_dict.get(data[1]))
-                        print('\t'.join(ENSG_Interactome_out))
+                        # print('\t'.join(ENSG_Interactome_out))
                     else:
                         ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[1]), Uniprot_ENSG_dict.get(data[0]))
-                        print('\t'.join(ENSG_Interactome_out))
+                        # print('\t'.join(ENSG_Interactome_out))
             #   else: self-interaction -> NOOP
-        #   else:
-                # lost_Interaction += 1
+            # else:
+            #     lost_Interaction += 1
+    
+    # logging.info("Total number of hub proteins excluded: %d" % len(HubProteins))
+    
+    # List of Hubs Excluded
+    HubProteinsL = []
+    for hub in HubProteins:
+        # Get ENSG
+        if hub in Uniprot_ENSG_dict.keys():
+            if not Uniprot_ENSG_dict.get(hub) in HubProteinsL:
+                HubProteinsL.append(Uniprot_ENSG_dict.get(hub))
+        else: # No ENSG, append the UniProt Accession
+            HubProteinsL.append(hub)
+    
+    # logging.info("Here is the list of hub proteins excluded: %s" % str(HubProteinsL))
 
     # logging.debug("Total no. of Interactions lost: %d " % lost_Interaction)
+
     logging.info("All done, completed succesfully!")
 
     return
