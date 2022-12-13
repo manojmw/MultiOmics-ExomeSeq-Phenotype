@@ -421,9 +421,19 @@ def Interactome_Uniprot2ENSG(args):
         else:
             # Get the ENSG for the UniProt Primary Accessions
             if data[0] in Uniprot_ENSG_dict.keys() and data[1] in Uniprot_ENSG_dict.keys():
-                ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[0]), Uniprot_ENSG_dict.get(data[1]))
-                print('\t'.join(ENSG_Interactome_out))
-            # else:
+                # We have eliminated self-interactions using UniProt Accessions
+                # But 2 different UniProt Accessions can still have same ENSG ID
+                # Eliminate such self-interactions
+                if not (Uniprot_ENSG_dict.get(data[0]) == Uniprot_ENSG_dict.get(data[1])):
+                    # Sort
+                    if Uniprot_ENSG_dict.get(data[0]) < Uniprot_ENSG_dict.get(data[1]):
+                        ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[0]), Uniprot_ENSG_dict.get(data[1]))
+                        print('\t'.join(ENSG_Interactome_out))
+                    else:
+                        ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[1]), Uniprot_ENSG_dict.get(data[0]))
+                        print('\t'.join(ENSG_Interactome_out))
+            #   else: self-interaction -> NOOP
+        #   else:
                 # lost_Interaction += 1
 
     # logging.debug("Total no. of Interactions lost: %d " % lost_Interaction)
