@@ -428,10 +428,10 @@ def Interactome_Uniprot2ENSG(args):
                     # Sort
                     if Uniprot_ENSG_dict.get(data[0]) < Uniprot_ENSG_dict.get(data[1]):
                         ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[0]), Uniprot_ENSG_dict.get(data[1]))
-                        # print('\t'.join(ENSG_Interactome_out))
+                        print('\t'.join(ENSG_Interactome_out))
                     else:
                         ENSG_Interactome_out = (Uniprot_ENSG_dict.get(data[1]), Uniprot_ENSG_dict.get(data[0]))
-                        # print('\t'.join(ENSG_Interactome_out))
+                        print('\t'.join(ENSG_Interactome_out))
             #   else: self-interaction -> NOOP
             # else:
             #     lost_Interaction += 1
